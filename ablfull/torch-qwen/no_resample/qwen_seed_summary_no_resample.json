@@ -1,0 +1,1319 @@
+{
+  "torch.QInt32Storage": {
+    "raw_tried": 30,
+    "valid": 8,
+    "unique_seeds": 8,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 15,
+      "recursive": 0,
+      "qwen-fix": 5,
+      "dropped": 10
+    },
+    "resumed": false
+  },
+  "torch.QUInt8Storage": {
+    "raw_tried": 30,
+    "valid": 9,
+    "unique_seeds": 9,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 13,
+      "recursive": 0,
+      "qwen-fix": 1,
+      "dropped": 16
+    },
+    "resumed": false
+  },
+  "torch.Tensor.add_": {
+    "raw_tried": 30,
+    "valid": 19,
+    "unique_seeds": 19,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.addmm": {
+    "raw_tried": 30,
+    "valid": 0,
+    "unique_seeds": 0,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 30
+    },
+    "resumed": false
+  },
+  "torch.Tensor.arcsin_": {
+    "raw_tried": 30,
+    "valid": 11,
+    "unique_seeds": 11,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 29,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 1
+    },
+    "resumed": false
+  },
+  "torch.Tensor.argsort": {
+    "raw_tried": 30,
+    "valid": 19,
+    "unique_seeds": 19,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.asin_": {
+    "raw_tried": 30,
+    "valid": 7,
+    "unique_seeds": 7,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.baddbmm_": {
+    "raw_tried": 30,
+    "valid": 10,
+    "unique_seeds": 10,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 18,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 12
+    },
+    "resumed": false
+  },
+  "torch.Tensor.bernoulli_": {
+    "raw_tried": 30,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.copysign_": {
+    "raw_tried": 30,
+    "valid": 20,
+    "unique_seeds": 20,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.cross": {
+    "raw_tried": 30,
+    "valid": 6,
+    "unique_seeds": 6,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.cummin": {
+    "raw_tried": 30,
+    "valid": 16,
+    "unique_seeds": 16,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.double": {
+    "raw_tried": 30,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.float": {
+    "raw_tried": 30,
+    "valid": 13,
+    "unique_seeds": 13,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 24,
+      "recursive": 0,
+      "qwen-fix": 6,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.is_conj": {
+    "raw_tried": 30,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.lerp_": {
+    "raw_tried": 30,
+    "valid": 22,
+    "unique_seeds": 22,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.lgamma": {
+    "raw_tried": 30,
+    "valid": 20,
+    "unique_seeds": 20,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.mm": {
+    "raw_tried": 30,
+    "valid": 4,
+    "unique_seeds": 4,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.nanmean": {
+    "raw_tried": 30,
+    "valid": 9,
+    "unique_seeds": 9,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.ne": {
+    "raw_tried": 30,
+    "valid": 18,
+    "unique_seeds": 18,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.negative": {
+    "raw_tried": 30,
+    "valid": 4,
+    "unique_seeds": 4,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.new_full": {
+    "raw_tried": 30,
+    "valid": 3,
+    "unique_seeds": 3,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 3,
+      "dropped": 27
+    },
+    "resumed": false
+  },
+  "torch.Tensor.nextafter_": {
+    "raw_tried": 30,
+    "valid": 10,
+    "unique_seeds": 10,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 18,
+      "recursive": 0,
+      "qwen-fix": 2,
+      "dropped": 10
+    },
+    "resumed": false
+  },
+  "torch.Tensor.nonzero": {
+    "raw_tried": 30,
+    "valid": 5,
+    "unique_seeds": 5,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.permute": {
+    "raw_tried": 30,
+    "valid": 4,
+    "unique_seeds": 4,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.put_": {
+    "raw_tried": 30,
+    "valid": 12,
+    "unique_seeds": 12,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 2,
+      "recursive": 0,
+      "qwen-fix": 28,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.q_per_channel_axis": {
+    "raw_tried": 30,
+    "valid": 0,
+    "unique_seeds": 0,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 30
+    },
+    "resumed": false
+  },
+  "torch.Tensor.random_": {
+    "raw_tried": 30,
+    "valid": 4,
+    "unique_seeds": 4,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 2,
+      "recursive": 0,
+      "qwen-fix": 2,
+      "dropped": 26
+    },
+    "resumed": false
+  },
+  "torch.Tensor.ravel": {
+    "raw_tried": 30,
+    "valid": 7,
+    "unique_seeds": 7,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.sin": {
+    "raw_tried": 30,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.split": {
+    "raw_tried": 30,
+    "valid": 17,
+    "unique_seeds": 17,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.squeeze_": {
+    "raw_tried": 30,
+    "valid": 20,
+    "unique_seeds": 20,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.stride": {
+    "raw_tried": 30,
+    "valid": 8,
+    "unique_seeds": 8,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 16,
+      "recursive": 0,
+      "qwen-fix": 14,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.values": {
+    "raw_tried": 30,
+    "valid": 21,
+    "unique_seeds": 21,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 27,
+      "recursive": 0,
+      "qwen-fix": 1,
+      "dropped": 2
+    },
+    "resumed": false
+  },
+  "torch.add": {
+    "raw_tried": 30,
+    "valid": 8,
+    "unique_seeds": 8,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 29,
+      "recursive": 0,
+      "qwen-fix": 1,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.any": {
+    "raw_tried": 30,
+    "valid": 18,
+    "unique_seeds": 18,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.arange": {
+    "raw_tried": 30,
+    "valid": 8,
+    "unique_seeds": 8,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.arccosh": {
+    "raw_tried": 30,
+    "valid": 7,
+    "unique_seeds": 7,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.atan2": {
+    "raw_tried": 30,
+    "valid": 13,
+    "unique_seeds": 13,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.atleast_1d": {
+    "raw_tried": 30,
+    "valid": 4,
+    "unique_seeds": 4,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.bitwise_or": {
+    "raw_tried": 30,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.bmm": {
+    "raw_tried": 30,
+    "valid": 3,
+    "unique_seeds": 3,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.cartesian_prod": {
+    "raw_tried": 30,
+    "valid": 11,
+    "unique_seeds": 11,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 20,
+      "recursive": 0,
+      "qwen-fix": 10,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.cat": {
+    "raw_tried": 30,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.ceil": {
+    "raw_tried": 30,
+    "valid": 19,
+    "unique_seeds": 19,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.cumulative_trapezoid": {
+    "raw_tried": 30,
+    "valid": 14,
+    "unique_seeds": 14,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 7,
+      "recursive": 0,
+      "qwen-fix": 11,
+      "dropped": 12
+    },
+    "resumed": false
+  },
+  "torch.distributed.ReduceOp": {
+    "raw_tried": 30,
+    "valid": 4,
+    "unique_seeds": 4,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 0,
+      "recursive": 24,
+      "qwen-fix": 0,
+      "dropped": 6
+    },
+    "resumed": false
+  },
+  "torch.distributed.elastic.timer.LocalTimerServer": {
+    "raw_tried": 30,
+    "valid": 3,
+    "unique_seeds": 3,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.distributions.chi2.Chi2": {
+    "raw_tried": 30,
+    "valid": 3,
+    "unique_seeds": 3,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.distributions.geometric.Geometric": {
+    "raw_tried": 30,
+    "valid": 5,
+    "unique_seeds": 5,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.distributions.negative_binomial.NegativeBinomial": {
+    "raw_tried": 30,
+    "valid": 6,
+    "unique_seeds": 6,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.distributions.transforms.ComposeTransform": {
+    "raw_tried": 30,
+    "valid": 1,
+    "unique_seeds": 1,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 29,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 1
+    },
+    "resumed": false
+  },
+  "torch.distributions.transforms.SoftmaxTransform": {
+    "raw_tried": 30,
+    "valid": 4,
+    "unique_seeds": 4,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.distributions.von_mises.VonMises": {
+    "raw_tried": 30,
+    "valid": 7,
+    "unique_seeds": 7,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.divide": {
+    "raw_tried": 30,
+    "valid": 9,
+    "unique_seeds": 9,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.fft.fft": {
+    "raw_tried": 30,
+    "valid": 12,
+    "unique_seeds": 12,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.fft.rfftfreq": {
+    "raw_tried": 30,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.fix": {
+    "raw_tried": 30,
+    "valid": 17,
+    "unique_seeds": 17,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.flatten": {
+    "raw_tried": 30,
+    "valid": 12,
+    "unique_seeds": 12,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.is_grad_enabled": {
+    "raw_tried": 30,
+    "valid": 2,
+    "unique_seeds": 2,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.isfinite": {
+    "raw_tried": 30,
+    "valid": 9,
+    "unique_seeds": 9,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.isneginf": {
+    "raw_tried": 30,
+    "valid": 9,
+    "unique_seeds": 9,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.jit.save": {
+    "raw_tried": 30,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 9,
+      "recursive": 0,
+      "qwen-fix": 20,
+      "dropped": 1
+    },
+    "resumed": false
+  },
+  "torch.linalg.det": {
+    "raw_tried": 30,
+    "valid": 7,
+    "unique_seeds": 7,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.linalg.inv": {
+    "raw_tried": 30,
+    "valid": 6,
+    "unique_seeds": 6,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.linalg.inv_ex": {
+    "raw_tried": 30,
+    "valid": 12,
+    "unique_seeds": 12,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.load": {
+    "raw_tried": 30,
+    "valid": 8,
+    "unique_seeds": 8,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 17,
+      "dropped": 13
+    },
+    "resumed": false
+  },
+  "torch.nn.AdaptiveMaxPool1d": {
+    "raw_tried": 30,
+    "valid": 26,
+    "unique_seeds": 26,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.nn.Dropout2d": {
+    "raw_tried": 30,
+    "valid": 9,
+    "unique_seeds": 9,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.nn.HingeEmbeddingLoss": {
+    "raw_tried": 30,
+    "valid": 20,
+    "unique_seeds": 20,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 16,
+      "recursive": 12,
+      "qwen-fix": 0,
+      "dropped": 2
+    },
+    "resumed": false
+  },
+  "torch.nn.LayerNorm": {
+    "raw_tried": 30,
+    "valid": 16,
+    "unique_seeds": 16,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 25,
+      "recursive": 4,
+      "qwen-fix": 1,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.nn.ParameterList": {
+    "raw_tried": 30,
+    "valid": 12,
+    "unique_seeds": 12,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.nn.ReflectionPad3d": {
+    "raw_tried": 30,
+    "valid": 3,
+    "unique_seeds": 3,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.nn.functional.adaptive_max_pool1d": {
+    "raw_tried": 30,
+    "valid": 20,
+    "unique_seeds": 20,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.nn.functional.avg_pool3d": {
+    "raw_tried": 30,
+    "valid": 11,
+    "unique_seeds": 11,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.nn.functional.batch_norm": {
+    "raw_tried": 30,
+    "valid": 25,
+    "unique_seeds": 25,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.nn.functional.bilinear": {
+    "raw_tried": 30,
+    "valid": 13,
+    "unique_seeds": 13,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 28,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 2
+    },
+    "resumed": false
+  },
+  "torch.nn.functional.hardsigmoid": {
+    "raw_tried": 30,
+    "valid": 10,
+    "unique_seeds": 10,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.nn.functional.max_unpool1d": {
+    "raw_tried": 30,
+    "valid": 4,
+    "unique_seeds": 4,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 4,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 26
+    },
+    "resumed": false
+  },
+  "torch.nn.init.sparse_": {
+    "raw_tried": 30,
+    "valid": 16,
+    "unique_seeds": 16,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.nn.utils.prune.random_structured": {
+    "raw_tried": 30,
+    "valid": 6,
+    "unique_seeds": 6,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 6,
+      "recursive": 0,
+      "qwen-fix": 1,
+      "dropped": 23
+    },
+    "resumed": false
+  },
+  "torch.nn.utils.prune.random_unstructured": {
+    "raw_tried": 30,
+    "valid": 6,
+    "unique_seeds": 6,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 12,
+      "recursive": 0,
+      "qwen-fix": 1,
+      "dropped": 17
+    },
+    "resumed": false
+  },
+  "torch.normal": {
+    "raw_tried": 30,
+    "valid": 6,
+    "unique_seeds": 6,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.optim.SGD": {
+    "raw_tried": 30,
+    "valid": 0,
+    "unique_seeds": 0,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 30
+    },
+    "resumed": false
+  },
+  "torch.polar": {
+    "raw_tried": 30,
+    "valid": 12,
+    "unique_seeds": 12,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.renorm": {
+    "raw_tried": 30,
+    "valid": 16,
+    "unique_seeds": 16,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.repeat_interleave": {
+    "raw_tried": 30,
+    "valid": 14,
+    "unique_seeds": 14,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 29,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 1
+    },
+    "resumed": false
+  },
+  "torch.set_printoptions": {
+    "raw_tried": 30,
+    "valid": 21,
+    "unique_seeds": 21,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.sin": {
+    "raw_tried": 30,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.slogdet": {
+    "raw_tried": 30,
+    "valid": 16,
+    "unique_seeds": 16,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.special.i1e": {
+    "raw_tried": 30,
+    "valid": 10,
+    "unique_seeds": 10,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.special.logit": {
+    "raw_tried": 30,
+    "valid": 14,
+    "unique_seeds": 14,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.special.psi": {
+    "raw_tried": 30,
+    "valid": 4,
+    "unique_seeds": 4,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.special.round": {
+    "raw_tried": 30,
+    "valid": 20,
+    "unique_seeds": 20,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.std_mean": {
+    "raw_tried": 30,
+    "valid": 14,
+    "unique_seeds": 14,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.transpose": {
+    "raw_tried": 30,
+    "valid": 7,
+    "unique_seeds": 7,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.utils.checkpoint.checkpoint_sequential": {
+    "raw_tried": 30,
+    "valid": 1,
+    "unique_seeds": 1,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 1,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 29
+    },
+    "resumed": false
+  },
+  "torch.utils.data.DataLoader": {
+    "raw_tried": 30,
+    "valid": 25,
+    "unique_seeds": 25,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 18,
+      "recursive": 3,
+      "qwen-fix": 9,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.utils.data.Dataset": {
+    "raw_tried": 30,
+    "valid": 14,
+    "unique_seeds": 14,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 16,
+      "recursive": 0,
+      "qwen-fix": 14,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.view_as_real": {
+    "raw_tried": 30,
+    "valid": 6,
+    "unique_seeds": 6,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 30,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "_aggregate": {
+    "n_apis": 100,
+    "min_valid_threshold": 15,
+    "sum_first_pass_tried": 3000,
+    "sum_first_pass_direct": 0,
+    "sum_raw_tried": 3000,
+    "sum_valid": 1099,
+    "first_pass_rate_micro": 0.0,
+    "first_pass_rate_macro": 0.0,
+    "final_validity_rate_micro": 0.3663,
+    "final_validity_rate_macro": 0.3663,
+    "avg_unique_seeds_per_api": 10.99,
+    "api_coverage_rate_strict": 0.33,
+    "api_coverage_rate_loose": 0.97,
+    "n_covered_strict": 33,
+    "n_covered_loose": 97
+  }
+}

@@ -1,0 +1,8 @@
+import torch
+
+# Prepare input data
+input_tensor = torch.randn(3, 32, 32)
+
+# Call the API
+dropout_layer = torch.nn.Dropout2d(p=0.3)
+output_tensor = dropout_layer(input_tensor)

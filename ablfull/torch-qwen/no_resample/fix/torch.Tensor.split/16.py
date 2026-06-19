@@ -1,0 +1,3 @@
+import torch
+tensor = torch.randn(10)
+split_result = tensor.split(split_size=5, dim=0)

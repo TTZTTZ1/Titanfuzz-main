@@ -1,0 +1,16 @@
+import torch
+from torch.nn import Sequential, Linear
+
+# Prepare input data
+input_tensor = torch.randn(1, 10)
+
+# Define functions
+functions = Sequential(
+    Linear(10, 5),
+    Linear(5, 1)
+)
+
+segments = 2
+
+# Call the API
+result = torch.utils.checkpoint.checkpoint_sequential(functions, segments, input_tensor)

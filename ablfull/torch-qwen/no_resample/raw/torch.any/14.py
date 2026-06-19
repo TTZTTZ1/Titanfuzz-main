@@ -1,0 +1,9 @@
+import torch
+
+# Prepare valid input data
+input_tensor = torch.tensor([[0, 1], [2, 0]])
+
+# Call the API
+result = torch.any(input_tensor, dim=1)
+
+print(result)

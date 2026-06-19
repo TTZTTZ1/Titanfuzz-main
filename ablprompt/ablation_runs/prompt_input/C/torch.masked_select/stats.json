@@ -1,0 +1,18 @@
+{
+  "api": "torch.masked_select",
+  "variant": "C",
+  "n_samples_requested": 30,
+  "n_samples_received": 30,
+  "n_filtered": 30,
+  "n_valid": 25,
+  "n_unique_valid": 13,
+  "validity_rate": 0.8333333333333334,
+  "filter_rate": 1.0,
+  "status_breakdown": {
+    "success": 25,
+    "exception": 5,
+    "crash": 0,
+    "timeout": 0
+  },
+  "gen_time_sec": 8.94
+}

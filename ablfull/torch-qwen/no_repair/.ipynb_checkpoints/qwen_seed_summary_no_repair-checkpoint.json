@@ -1,0 +1,483 @@
+{
+  "torch.QInt32Storage": {
+    "raw_tried": 82,
+    "valid": 2,
+    "unique_seeds": 2,
+    "stats": {
+      "direct": 24,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 58
+    },
+    "resumed": false
+  },
+  "torch.QUInt8Storage": {
+    "raw_tried": 50,
+    "valid": 17,
+    "unique_seeds": 17,
+    "stats": {
+      "direct": 23,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 27
+    },
+    "resumed": false
+  },
+  "torch.Tensor.add_": {
+    "raw_tried": 30,
+    "valid": 20,
+    "unique_seeds": 20,
+    "stats": {
+      "direct": 30,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.addmm": {
+    "raw_tried": 90,
+    "valid": 0,
+    "unique_seeds": 0,
+    "stats": {
+      "direct": 0,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 90
+    },
+    "resumed": false
+  },
+  "torch.Tensor.arcsin_": {
+    "raw_tried": 52,
+    "valid": 20,
+    "unique_seeds": 20,
+    "stats": {
+      "direct": 49,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 3
+    },
+    "resumed": false
+  },
+  "torch.Tensor.argsort": {
+    "raw_tried": 30,
+    "valid": 23,
+    "unique_seeds": 23,
+    "stats": {
+      "direct": 30,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.asin_": {
+    "raw_tried": 58,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 57,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 1
+    },
+    "resumed": false
+  },
+  "torch.Tensor.baddbmm_": {
+    "raw_tried": 56,
+    "valid": 16,
+    "unique_seeds": 16,
+    "stats": {
+      "direct": 25,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 31
+    },
+    "resumed": false
+  },
+  "torch.Tensor.bernoulli_": {
+    "raw_tried": 40,
+    "valid": 19,
+    "unique_seeds": 19,
+    "stats": {
+      "direct": 40,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.copysign_": {
+    "raw_tried": 30,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 30,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.cross": {
+    "raw_tried": 46,
+    "valid": 17,
+    "unique_seeds": 17,
+    "stats": {
+      "direct": 45,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 1
+    },
+    "resumed": false
+  },
+  "torch.Tensor.cummin": {
+    "raw_tried": 40,
+    "valid": 22,
+    "unique_seeds": 22,
+    "stats": {
+      "direct": 40,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.double": {
+    "raw_tried": 40,
+    "valid": 17,
+    "unique_seeds": 17,
+    "stats": {
+      "direct": 40,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.float": {
+    "raw_tried": 50,
+    "valid": 19,
+    "unique_seeds": 19,
+    "stats": {
+      "direct": 41,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 9
+    },
+    "resumed": false
+  },
+  "torch.Tensor.is_conj": {
+    "raw_tried": 40,
+    "valid": 20,
+    "unique_seeds": 20,
+    "stats": {
+      "direct": 40,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.lerp_": {
+    "raw_tried": 30,
+    "valid": 21,
+    "unique_seeds": 21,
+    "stats": {
+      "direct": 30,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.lgamma": {
+    "raw_tried": 30,
+    "valid": 18,
+    "unique_seeds": 18,
+    "stats": {
+      "direct": 30,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.mm": {
+    "raw_tried": 68,
+    "valid": 20,
+    "unique_seeds": 20,
+    "stats": {
+      "direct": 68,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.nanmean": {
+    "raw_tried": 40,
+    "valid": 18,
+    "unique_seeds": 18,
+    "stats": {
+      "direct": 40,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.ne": {
+    "raw_tried": 40,
+    "valid": 18,
+    "unique_seeds": 18,
+    "stats": {
+      "direct": 40,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.negative": {
+    "raw_tried": 66,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 66,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.new_full": {
+    "raw_tried": 90,
+    "valid": 2,
+    "unique_seeds": 2,
+    "stats": {
+      "direct": 2,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 88
+    },
+    "resumed": false
+  },
+  "torch.Tensor.nextafter_": {
+    "raw_tried": 56,
+    "valid": 13,
+    "unique_seeds": 13,
+    "stats": {
+      "direct": 25,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 31
+    },
+    "resumed": false
+  },
+  "torch.Tensor.nonzero": {
+    "raw_tried": 58,
+    "valid": 17,
+    "unique_seeds": 17,
+    "stats": {
+      "direct": 58,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.permute": {
+    "raw_tried": 60,
+    "valid": 20,
+    "unique_seeds": 20,
+    "stats": {
+      "direct": 60,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.put_": {
+    "raw_tried": 80,
+    "valid": 8,
+    "unique_seeds": 8,
+    "stats": {
+      "direct": 11,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 69
+    },
+    "resumed": false
+  },
+  "torch.Tensor.q_per_channel_axis": {
+    "raw_tried": 88,
+    "valid": 1,
+    "unique_seeds": 1,
+    "stats": {
+      "direct": 1,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 87
+    },
+    "resumed": false
+  },
+  "torch.Tensor.random_": {
+    "raw_tried": 64,
+    "valid": 9,
+    "unique_seeds": 9,
+    "stats": {
+      "direct": 9,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 55
+    },
+    "resumed": false
+  },
+  "torch.Tensor.ravel": {
+    "raw_tried": 48,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 48,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.sin": {
+    "raw_tried": 30,
+    "valid": 18,
+    "unique_seeds": 18,
+    "stats": {
+      "direct": 30,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.split": {
+    "raw_tried": 40,
+    "valid": 22,
+    "unique_seeds": 22,
+    "stats": {
+      "direct": 40,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.squeeze_": {
+    "raw_tried": 30,
+    "valid": 23,
+    "unique_seeds": 23,
+    "stats": {
+      "direct": 30,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.Tensor.stride": {
+    "raw_tried": 50,
+    "valid": 20,
+    "unique_seeds": 20,
+    "stats": {
+      "direct": 36,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 14
+    },
+    "resumed": false
+  },
+  "torch.Tensor.values": {
+    "raw_tried": 30,
+    "valid": 17,
+    "unique_seeds": 17,
+    "stats": {
+      "direct": 29,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 1
+    },
+    "resumed": false
+  },
+  "torch.add": {
+    "raw_tried": 56,
+    "valid": 17,
+    "unique_seeds": 17,
+    "stats": {
+      "direct": 56,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.any": {
+    "raw_tried": 30,
+    "valid": 17,
+    "unique_seeds": 17,
+    "stats": {
+      "direct": 30,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  },
+  "torch.arange": {
+    "raw_tried": 58,
+    "valid": 15,
+    "unique_seeds": 15,
+    "stats": {
+      "direct": 58,
+      "syntax-fix": 0,
+      "recursive": 0,
+      "qwen-fix": 0,
+      "dropped": 0
+    },
+    "resumed": false
+  }
+}

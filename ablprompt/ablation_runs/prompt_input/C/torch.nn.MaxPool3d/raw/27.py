@@ -1,0 +1,14 @@
+import torch
+import torch.nn as nn
+
+# Create a random input tensor of shape (1, 1, 5, 5, 5)
+input_tensor = torch.randn(1, 1, 5, 5, 5)
+
+# Define MaxPool3d layer with specific parameters
+max_pool_3d = nn.MaxPool3d(kernel_size=(2, 2, 2), stride=(1, 1, 1), padding=(1, 1, 1))
+
+# Apply the MaxPool3d layer to the input tensor
+output_tensor = max_pool_3d(input_tensor)
+
+print("Input Tensor Shape:", input_tensor.shape)
+print("Output Tensor Shape:", output_tensor.shape)

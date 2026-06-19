@@ -1,0 +1,7 @@
+import torch
+
+# Prepare valid input data
+df_value = torch.tensor(2.0)  # Ensure df > 0.0
+
+# Call the target API
+chi2_dist = torch.distributions.chi2.Chi2(df=df_value)

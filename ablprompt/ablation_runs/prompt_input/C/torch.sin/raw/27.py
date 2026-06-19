@@ -1,0 +1,9 @@
+import torch
+
+# Create a complex tensor
+input_tensor = torch.tensor([[-0.5461 + 0.1j, 0.1347 + 0.2j], [-2.7266 + 0.3j, -0.2746 + 0.4j]])
+
+# Compute the sine of the complex tensor
+result = torch.sin(input_tensor)
+
+print(result)

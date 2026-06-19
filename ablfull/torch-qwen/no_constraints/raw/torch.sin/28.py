@@ -1,0 +1,8 @@
+import torch
+
+# Task 2: Generate input data
+input_data = torch.tensor([0.5, 1.0, 1.5])
+
+# Task 3: Call the API torch.sin
+result = torch.sin(input_data)
+print(result)

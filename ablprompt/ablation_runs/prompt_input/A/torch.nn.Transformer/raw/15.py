@@ -1,0 +1,14 @@
+import torch
+from torch.nn import Transformer
+
+# Initialize the transformer model
+model = Transformer(d_model=512, nhead=8, num_encoder_layers=6, num_decoder_layers=6)
+
+# Create some dummy input data
+src = torch.rand(10, 32, 512)  # (sequence length, batch size, feature size)
+tgt = torch.rand(20, 32, 512)  # (sequence length, batch size, feature size)
+
+# Forward pass through the transformer
+output = model(src, tgt)
+
+print(output.shape)  # Should be (20, 32, 512)

@@ -1,0 +1,18 @@
+{
+  "api": "torch.nn.GELU",
+  "variant": "A",
+  "n_samples_requested": 30,
+  "n_samples_received": 30,
+  "n_filtered": 22,
+  "n_valid": 22,
+  "n_unique_valid": 6,
+  "validity_rate": 0.7333333333333333,
+  "filter_rate": 0.7333333333333333,
+  "status_breakdown": {
+    "success": 22,
+    "exception": 0,
+    "crash": 0,
+    "timeout": 0
+  },
+  "gen_time_sec": 3.31
+}

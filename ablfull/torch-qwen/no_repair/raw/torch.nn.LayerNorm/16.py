@@ -1,0 +1,10 @@
+import torch
+
+# Prepare valid input data
+normalized_shape = [4]
+eps = 1e-05
+elementwise_affine = False
+bias = False
+
+# Call the API
+layer_norm = torch.nn.LayerNorm(normalized_shape, eps=eps, elementwise_affine=elementwise_affine, bias=bias)

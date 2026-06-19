@@ -1,0 +1,17 @@
+import torch
+from torch.nn import GRUCell
+
+# Initialize input and hidden state
+input_size = 10
+hidden_size = 20
+batch_size = 5
+input_data = torch.randn(batch_size, input_size)
+hidden_state = torch.randn(batch_size, hidden_size)
+
+# Create an instance of GRUCell
+gru_cell = GRUCell(input_size, hidden_size)
+
+# Forward pass through the GRUCell
+new_hidden_state = gru_cell(input_data, hidden_state)
+
+print(new_hidden_state)

@@ -1,0 +1,18 @@
+{
+  "api": "torch.nn.functional.binary_cross_entropy",
+  "variant": "C",
+  "n_samples_requested": 30,
+  "n_samples_received": 30,
+  "n_filtered": 30,
+  "n_valid": 18,
+  "n_unique_valid": 18,
+  "validity_rate": 0.6,
+  "filter_rate": 1.0,
+  "status_breakdown": {
+    "success": 18,
+    "exception": 12,
+    "crash": 0,
+    "timeout": 0
+  },
+  "gen_time_sec": 12.47
+}

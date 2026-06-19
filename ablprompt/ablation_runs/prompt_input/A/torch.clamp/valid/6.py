@@ -1,0 +1,6 @@
+import torch
+
+# Example usage of torch.clamp
+tensor = torch.tensor([-1.0, 2.0, 3.0, -4.0])
+clamped_tensor = torch.clamp(tensor, min=-2.0, max=2.0)
+print(clamped_tensor)

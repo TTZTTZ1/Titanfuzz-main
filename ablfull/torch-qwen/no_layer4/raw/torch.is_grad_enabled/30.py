@@ -1,0 +1,7 @@
+import torch
+
+# Generate input data
+input_data = None  # No input required for this function
+
+# Call the API
+result = torch.is_grad_enabled()

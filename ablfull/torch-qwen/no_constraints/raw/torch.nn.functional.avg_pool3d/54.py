@@ -1,0 +1,8 @@
+import torch
+
+# Task 2: Generate valid input data
+input_tensor = torch.randn(1, 3, 4, 4, 4)
+
+# Task 3: Call the API torch.nn.functional.avg_pool3d
+output = torch.nn.functional.avg_pool3d(input_tensor, kernel_size=(2, 2, 2))
+print(output)

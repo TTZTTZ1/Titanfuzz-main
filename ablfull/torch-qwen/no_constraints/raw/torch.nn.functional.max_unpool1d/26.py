@@ -1,0 +1,9 @@
+import torch
+
+input_tensor = torch.randn(1, 4, 5)
+indices = torch.tensor([[[0, 2, 0, 3, 0]]])
+kernel_size = 2
+stride = 2
+padding = 0
+
+output = torch.nn.functional.max_unpool1d(input_tensor, indices, kernel_size, stride, padding)

@@ -1,0 +1,7 @@
+import torch
+
+# Prepare input data
+data = [10, 20, 30]
+
+# Call the API
+storage = torch.QUInt8Storage(data)

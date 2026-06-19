@@ -1,0 +1,8 @@
+import torch
+
+# Prepare valid input data
+input_tensor = torch.randn(2, 3, 5)
+mat2_tensor = torch.randn(2, 5, 7)
+
+# Call the API
+result = torch.bmm(input_tensor, mat2_tensor)

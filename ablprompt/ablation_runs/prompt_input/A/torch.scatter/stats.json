@@ -1,0 +1,18 @@
+{
+  "api": "torch.scatter",
+  "variant": "A",
+  "n_samples_requested": 30,
+  "n_samples_received": 30,
+  "n_filtered": 27,
+  "n_valid": 9,
+  "n_unique_valid": 4,
+  "validity_rate": 0.3,
+  "filter_rate": 0.9,
+  "status_breakdown": {
+    "success": 9,
+    "exception": 18,
+    "crash": 0,
+    "timeout": 0
+  },
+  "gen_time_sec": 4.77
+}

@@ -1,0 +1,10 @@
+import torch
+
+# Create a random tensor
+tensor = torch.randn(10, 5)
+
+# Call torch.topk to get the top 3 values and their indices
+values, indices = torch.topk(tensor, k=3)
+
+print("Top values:", values)
+print("Indices of top values:", indices)

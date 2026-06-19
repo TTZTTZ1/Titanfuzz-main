@@ -1,0 +1,4 @@
+import torch
+padding = (1, 2, 3, 1, 2, 3)
+input_tensor = torch.randn(1, 3, 4, 5, 6)
+output_tensor = torch.nn.ReflectionPad3d(padding)(input_tensor)

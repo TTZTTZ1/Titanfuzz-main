@@ -1,0 +1,14 @@
+import torch
+
+margin = 1.0
+size_average = True
+reduce = True
+reduction = 'mean'
+
+criterion = torch.nn.HingeEmbeddingLoss(margin=margin, size_average=size_average, reduce=reduce, reduction=reduction)
+input1 = torch.randn(5)
+input2 = torch.randn(5)
+target = torch.randint(0, 2, (5,)).float()
+
+loss = criterion(input1, input2, target)
+print(loss.item())

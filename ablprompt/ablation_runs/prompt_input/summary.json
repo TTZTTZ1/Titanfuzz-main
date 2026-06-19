@@ -1,0 +1,5747 @@
+{
+  "A": {
+    "per_api": [
+      {
+        "api": "torch.nn.Conv1d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 20,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.43,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Conv2d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 24,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.36,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Conv3d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 24,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.3,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.ConvTranspose1d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 24,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.77,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.ConvTranspose2d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 22,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.09,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.ConvTranspose3d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 22,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.21,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.MaxPool2d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 19,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.76,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.MaxPool3d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 25,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.29,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.AvgPool2d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 18,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.87,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.AdaptiveAvgPool2d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 24,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.59,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.AdaptiveMaxPool2d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.4,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Unfold",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.18,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Fold",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 26,
+        "n_valid": 0,
+        "n_unique_valid": 0,
+        "validity_rate": 0.0,
+        "filter_rate": 0.8666666666666667,
+        "status_breakdown": {
+          "success": 0,
+          "exception": 26,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.91,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.LSTM",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 20,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 12.02,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.GRU",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 21,
+        "n_unique_valid": 16,
+        "validity_rate": 0.7,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 21,
+          "exception": 9,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.93,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.RNN",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 19,
+        "n_unique_valid": 14,
+        "validity_rate": 0.6333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 19,
+          "exception": 11,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.17,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.LSTMCell",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 23,
+        "n_unique_valid": 19,
+        "validity_rate": 0.7666666666666667,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 23,
+          "exception": 7,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.16,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.GRUCell",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 27,
+        "n_unique_valid": 20,
+        "validity_rate": 0.9,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 27,
+          "exception": 3,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.85,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.MultiheadAttention",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 26,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.03,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Transformer",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 29,
+        "n_unique_valid": 9,
+        "validity_rate": 0.9666666666666667,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 29,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 1
+        },
+        "gen_time_sec": 5.97,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.TransformerEncoderLayer",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 25,
+        "n_unique_valid": 14,
+        "validity_rate": 0.8333333333333334,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 25,
+          "exception": 5,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.23,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.TransformerDecoderLayer",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 27,
+        "n_unique_valid": 16,
+        "validity_rate": 0.9,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 27,
+          "exception": 3,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.37,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.BatchNorm2d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 15,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.36,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.GroupNorm",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 28,
+        "n_unique_valid": 17,
+        "validity_rate": 0.9333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 28,
+          "exception": 2,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.44,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.LayerNorm",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 19,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.09,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Embedding",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.4,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.EmbeddingBag",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 20,
+        "n_unique_valid": 5,
+        "validity_rate": 0.6666666666666666,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 20,
+          "exception": 10,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.51,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.conv2d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 28,
+        "n_unique_valid": 21,
+        "validity_rate": 0.9333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 28,
+          "exception": 2,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.86,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.conv_transpose2d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 29,
+        "n_unique_valid": 15,
+        "validity_rate": 0.9666666666666667,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 29,
+          "exception": 1,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.78,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.grid_sample",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 21,
+        "n_unique_valid": 17,
+        "validity_rate": 0.7,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 21,
+          "exception": 9,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.87,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.interpolate",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 11,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.12,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.pad",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 29,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.28,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.affine_grid",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 18,
+        "n_unique_valid": 17,
+        "validity_rate": 0.6,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 18,
+          "exception": 12,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.88,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.ctc_loss",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 9,
+        "n_unique_valid": 9,
+        "validity_rate": 0.3,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 9,
+          "exception": 21,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.24,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.FractionalMaxPool2d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 15,
+        "n_unique_valid": 13,
+        "validity_rate": 0.5,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 15,
+          "exception": 15,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.56,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.matmul",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 7,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.85,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.bmm",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 29,
+        "n_unique_valid": 6,
+        "validity_rate": 0.9666666666666667,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 29,
+          "exception": 1,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.67,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.mm",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 3,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.96,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.einsum",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 2,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.38,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.cat",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 1,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.51,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.stack",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 4,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.53,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.split",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 10,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.29,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.chunk",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 7,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.56,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.gather",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 7,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.78,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.scatter",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 27,
+        "n_valid": 9,
+        "n_unique_valid": 4,
+        "validity_rate": 0.3,
+        "filter_rate": 0.9,
+        "status_breakdown": {
+          "success": 9,
+          "exception": 18,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.77,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.index_select",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 10,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.96,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.masked_select",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 4,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.96,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.where",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 6,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.34,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nonzero",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 7,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.69,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.topk",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.42,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.sort",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 11,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.79,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.argmax",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 8,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.5,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.argmin",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 17,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.7,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.Linear",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.73,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.softmax",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.63,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.log_softmax",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 7,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.83,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.cross_entropy",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.77,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.mse_loss",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 23,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.98,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.binary_cross_entropy",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 8,
+        "n_unique_valid": 5,
+        "validity_rate": 0.26666666666666666,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 8,
+          "exception": 22,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.67,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.Dropout",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 25,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.8,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.normalize",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 16,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.23,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.one_hot",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.21,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.solve",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 10,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.15,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.svd",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 12,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.68,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.eig",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 12,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.05,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.qr",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.98,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.norm",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 18,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.48,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.det",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 18,
+        "n_unique_valid": 3,
+        "validity_rate": 0.6,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 18,
+          "exception": 12,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.46,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.fft.fft",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 15,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.67,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.fft.fftn",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 13,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.47,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.add",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 2,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.69,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sub",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.88,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.mul",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 3,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.7,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.div",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 7,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.86,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.abs",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.8,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sin",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 7,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.4,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.cos",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 8,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.36,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.tan",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 14,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.84,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.exp",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.46,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.log",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.35,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sqrt",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 4,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.28,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.pow",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 5,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.47,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.tanh",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 8,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.6,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sigmoid",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 3,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.03,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sign",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 7,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.45,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.floor",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 18,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.77,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.ceil",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 23,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.0,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.round",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 12,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.89,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.clamp",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 20,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.09,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.ReLU",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 3,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.03,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.LeakyReLU",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 8,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.65,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.GELU",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 22,
+        "n_valid": 22,
+        "n_unique_valid": 6,
+        "validity_rate": 0.7333333333333333,
+        "filter_rate": 0.7333333333333333,
+        "status_breakdown": {
+          "success": 22,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.31,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.SiLU",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 11,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.28,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.Tanh",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 29,
+        "n_valid": 29,
+        "n_unique_valid": 15,
+        "validity_rate": 0.9666666666666667,
+        "filter_rate": 0.9666666666666667,
+        "status_breakdown": {
+          "success": 29,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.27,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.Sigmoid",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 10,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.08,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.Softplus",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 13,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.12,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.reshape",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 6,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.33,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.flatten",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 3,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.06,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.squeeze",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.78,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.unsqueeze",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 10,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 2.66,
+        "difficulty": "low"
+      }
+    ],
+    "aggregate": {
+      "avg": 93.13333333333334,
+      "high_avg": 86.57142857142857,
+      "mid_avg": 94.66666666666667,
+      "low_avg": 99.0,
+      "unique_total": 1249,
+      "n_apis": 100,
+      "n_high": 35,
+      "n_mid": 35,
+      "n_low": 30
+    }
+  },
+  "B": {
+    "per_api": [
+      {
+        "api": "torch.nn.Conv1d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 27,
+        "n_unique_valid": 23,
+        "validity_rate": 0.9,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 27,
+          "exception": 3,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 15.04,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Conv2d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 15.13,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Conv3d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 24,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 13.89,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.ConvTranspose1d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 28,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 12.48,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.ConvTranspose2d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 16,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 12.34,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.ConvTranspose3d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 27,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 13.01,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.MaxPool2d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 18,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.45,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.MaxPool3d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 29,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.69,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.AvgPool2d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 19,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.75,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.AdaptiveAvgPool2d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.68,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.AdaptiveMaxPool2d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 20,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.01,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Unfold",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 29,
+        "n_valid": 28,
+        "n_unique_valid": 20,
+        "validity_rate": 0.9333333333333333,
+        "filter_rate": 0.9666666666666667,
+        "status_breakdown": {
+          "success": 28,
+          "exception": 1,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.04,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Fold",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 1,
+        "n_unique_valid": 1,
+        "validity_rate": 0.03333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 1,
+          "exception": 29,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 15.98,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.LSTM",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 12,
+        "n_unique_valid": 11,
+        "validity_rate": 0.4,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 12,
+          "exception": 18,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 19.4,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.GRU",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 13,
+        "n_unique_valid": 13,
+        "validity_rate": 0.43333333333333335,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 13,
+          "exception": 17,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 17.14,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.RNN",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 25,
+        "n_unique_valid": 25,
+        "validity_rate": 0.8333333333333334,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 25,
+          "exception": 5,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 17.05,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.LSTMCell",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 15,
+        "n_unique_valid": 15,
+        "validity_rate": 0.5,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 15,
+          "exception": 15,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 10.81,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.GRUCell",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 21,
+        "n_unique_valid": 17,
+        "validity_rate": 0.7,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 21,
+          "exception": 9,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.67,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.MultiheadAttention",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 18,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.84,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Transformer",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 28,
+        "n_valid": 10,
+        "n_unique_valid": 9,
+        "validity_rate": 0.3333333333333333,
+        "filter_rate": 0.9333333333333333,
+        "status_breakdown": {
+          "success": 10,
+          "exception": 18,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 48.06,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.TransformerEncoderLayer",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 19,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 15.62,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.TransformerDecoderLayer",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 20,
+        "n_unique_valid": 18,
+        "validity_rate": 0.6666666666666666,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 20,
+          "exception": 10,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 13.74,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.BatchNorm2d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 25,
+        "n_unique_valid": 20,
+        "validity_rate": 0.8333333333333334,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 25,
+          "exception": 5,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 15.84,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.GroupNorm",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 22,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.51,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.LayerNorm",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 27,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.56,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Embedding",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 29,
+        "n_unique_valid": 23,
+        "validity_rate": 0.9666666666666667,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 29,
+          "exception": 1,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 12.23,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.EmbeddingBag",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 9,
+        "n_unique_valid": 5,
+        "validity_rate": 0.3,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 9,
+          "exception": 21,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 12.32,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.conv2d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 27,
+        "n_unique_valid": 22,
+        "validity_rate": 0.9,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 27,
+          "exception": 3,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.65,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.conv_transpose2d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 18,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.11,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.grid_sample",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 19,
+        "n_unique_valid": 13,
+        "validity_rate": 0.6333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 19,
+          "exception": 11,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.76,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.interpolate",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 28,
+        "n_unique_valid": 14,
+        "validity_rate": 0.9333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 28,
+          "exception": 2,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.56,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.pad",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 10,
+        "n_unique_valid": 10,
+        "validity_rate": 0.3333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 10,
+          "exception": 20,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.91,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.affine_grid",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 20,
+        "n_unique_valid": 14,
+        "validity_rate": 0.6666666666666666,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 20,
+          "exception": 10,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.9,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.ctc_loss",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 4,
+        "n_unique_valid": 4,
+        "validity_rate": 0.13333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 4,
+          "exception": 26,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 21.44,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.FractionalMaxPool2d",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 23,
+        "n_valid": 23,
+        "n_unique_valid": 20,
+        "validity_rate": 0.7666666666666667,
+        "filter_rate": 0.7666666666666667,
+        "status_breakdown": {
+          "success": 23,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.4,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.matmul",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 28,
+        "n_unique_valid": 11,
+        "validity_rate": 0.9333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 28,
+          "exception": 2,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.67,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.bmm",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 11,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.52,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.mm",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 13,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.03,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.einsum",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 16,
+        "n_unique_valid": 8,
+        "validity_rate": 0.5333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 16,
+          "exception": 14,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.14,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.cat",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 27,
+        "n_unique_valid": 7,
+        "validity_rate": 0.9,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 27,
+          "exception": 3,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.3,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.stack",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 5,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.75,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.split",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 27,
+        "n_unique_valid": 15,
+        "validity_rate": 0.9,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 27,
+          "exception": 3,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.17,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.chunk",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 18,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.14,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.gather",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 15,
+        "n_unique_valid": 6,
+        "validity_rate": 0.5,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 15,
+          "exception": 15,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.82,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.scatter",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 27,
+        "n_unique_valid": 26,
+        "validity_rate": 0.9,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 27,
+          "exception": 3,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.76,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.index_select",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 16,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.65,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.masked_select",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 29,
+        "n_unique_valid": 8,
+        "validity_rate": 0.9666666666666667,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 29,
+          "exception": 1,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.36,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.where",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 18,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.06,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nonzero",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 23,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.36,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.topk",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.13,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.sort",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.55,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.argmax",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.46,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.argmin",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.42,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.Linear",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 10.67,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.softmax",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 7,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.95,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.log_softmax",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 4,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.65,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.cross_entropy",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 29,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 10.12,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.mse_loss",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 27,
+        "n_unique_valid": 21,
+        "validity_rate": 0.9,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 27,
+          "exception": 3,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.53,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.binary_cross_entropy",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 29,
+        "n_valid": 24,
+        "n_unique_valid": 22,
+        "validity_rate": 0.8,
+        "filter_rate": 0.9666666666666667,
+        "status_breakdown": {
+          "success": 24,
+          "exception": 5,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 10.22,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.Dropout",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 28,
+        "n_unique_valid": 24,
+        "validity_rate": 0.9333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 28,
+          "exception": 2,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 17.64,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.normalize",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 14,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.24,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.one_hot",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 27,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.04,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.solve",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 20,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.16,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.svd",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 19,
+        "n_unique_valid": 9,
+        "validity_rate": 0.6333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 19,
+          "exception": 11,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.99,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.eig",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 6,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.88,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.qr",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 24,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.55,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.norm",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 22,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 10.35,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.det",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 4,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.58,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.fft.fft",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 28,
+        "n_unique_valid": 22,
+        "validity_rate": 0.9333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 28,
+          "exception": 2,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.28,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.fft.fftn",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 29,
+        "n_unique_valid": 14,
+        "validity_rate": 0.9666666666666667,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 29,
+          "exception": 1,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.08,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.add",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 20,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.54,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sub",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 14,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.34,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.mul",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 14,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.8,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.div",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 28,
+        "n_unique_valid": 21,
+        "validity_rate": 0.9333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 28,
+          "exception": 2,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.48,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.abs",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 23,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.58,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sin",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 16,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.57,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.cos",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 13,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.35,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.tan",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 15,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.21,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.exp",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 8,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.75,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.log",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 23,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.75,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sqrt",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 16,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.26,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.pow",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 19,
+        "n_unique_valid": 15,
+        "validity_rate": 0.6333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 19,
+          "exception": 11,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.46,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.tanh",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.64,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sigmoid",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 4,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 3.75,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sign",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 13,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.32,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.floor",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 25,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.69,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.ceil",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 27,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.21,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.round",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 24,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.59,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.clamp",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 16,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.4,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.ReLU",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 17,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.99,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.LeakyReLU",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 16,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 10.58,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.GELU",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 14,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.14,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.SiLU",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 16,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.0,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.Tanh",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 15,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.33,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.Sigmoid",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 10,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.61,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.Softplus",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 25,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.44,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.reshape",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 10,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.49,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.flatten",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 7,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.24,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.squeeze",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.52,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.unsqueeze",
+        "variant": "B",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 14,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.28,
+        "difficulty": "low"
+      }
+    ],
+    "aggregate": {
+      "avg": 89.56666666666665,
+      "high_avg": 77.71428571428571,
+      "mid_avg": 93.71428571428571,
+      "low_avg": 98.55555555555556,
+      "unique_total": 1628,
+      "n_apis": 100,
+      "n_high": 35,
+      "n_mid": 35,
+      "n_low": 30
+    }
+  },
+  "C": {
+    "per_api": [
+      {
+        "api": "torch.nn.Conv1d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 23,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 29.51,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Conv2d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 26,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 30.94,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Conv3d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 26,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 28.93,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.ConvTranspose1d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 23,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 24.95,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.ConvTranspose2d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 20,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 24.05,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.ConvTranspose3d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 26,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 26.17,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.MaxPool2d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 15,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 10.61,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.MaxPool3d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.64,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.AvgPool2d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 20,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.38,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.AdaptiveAvgPool2d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.61,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.AdaptiveMaxPool2d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 23,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.13,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Unfold",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 27,
+        "n_valid": 27,
+        "n_unique_valid": 19,
+        "validity_rate": 0.9,
+        "filter_rate": 0.9,
+        "status_breakdown": {
+          "success": 27,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.44,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Fold",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 1,
+        "n_unique_valid": 1,
+        "validity_rate": 0.03333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 1,
+          "exception": 29,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 14.48,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.LSTM",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 3,
+        "n_unique_valid": 3,
+        "validity_rate": 0.1,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 3,
+          "exception": 27,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 32.67,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.GRU",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 1,
+        "n_unique_valid": 1,
+        "validity_rate": 0.03333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 1,
+          "exception": 29,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 16.98,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.RNN",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 21,
+        "n_unique_valid": 21,
+        "validity_rate": 0.7,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 21,
+          "exception": 9,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 34.51,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.LSTMCell",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 29,
+        "n_valid": 20,
+        "n_unique_valid": 17,
+        "validity_rate": 0.6666666666666666,
+        "filter_rate": 0.9666666666666667,
+        "status_breakdown": {
+          "success": 20,
+          "exception": 9,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 12.11,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.GRUCell",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 24,
+        "n_unique_valid": 15,
+        "validity_rate": 0.8,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 24,
+          "exception": 6,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 10.93,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.MultiheadAttention",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 18,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 16.84,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Transformer",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 9,
+        "n_unique_valid": 7,
+        "validity_rate": 0.3,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 9,
+          "exception": 21,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 81.89,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.TransformerEncoderLayer",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 18,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 26.42,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.TransformerDecoderLayer",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 24,
+        "n_unique_valid": 13,
+        "validity_rate": 0.8,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 24,
+          "exception": 6,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 17.78,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.BatchNorm2d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 15.26,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.GroupNorm",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 29,
+        "n_unique_valid": 21,
+        "validity_rate": 0.9666666666666667,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 29,
+          "exception": 1,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.6,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.LayerNorm",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 27,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 13.25,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Embedding",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 29,
+        "n_unique_valid": 19,
+        "validity_rate": 0.9666666666666667,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 29,
+          "exception": 1,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.68,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.EmbeddingBag",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 13,
+        "n_unique_valid": 12,
+        "validity_rate": 0.43333333333333335,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 13,
+          "exception": 17,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 23.13,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.conv2d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 28,
+        "n_unique_valid": 27,
+        "validity_rate": 0.9333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 28,
+          "exception": 2,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 12.38,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.conv_transpose2d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 10,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.01,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.grid_sample",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 25,
+        "n_unique_valid": 20,
+        "validity_rate": 0.8333333333333334,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 25,
+          "exception": 5,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 15.2,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.interpolate",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 19,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 14.6,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.pad",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 20,
+        "n_unique_valid": 19,
+        "validity_rate": 0.6666666666666666,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 20,
+          "exception": 10,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 12.32,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.affine_grid",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 9,
+        "n_unique_valid": 9,
+        "validity_rate": 0.3,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 9,
+          "exception": 21,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.72,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.functional.ctc_loss",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 2,
+        "n_unique_valid": 2,
+        "validity_rate": 0.06666666666666667,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 2,
+          "exception": 28,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 13.36,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.FractionalMaxPool2d",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 26,
+        "n_valid": 26,
+        "n_unique_valid": 20,
+        "validity_rate": 0.8666666666666667,
+        "filter_rate": 0.8666666666666667,
+        "status_breakdown": {
+          "success": 26,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 12.14,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.matmul",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 8,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.71,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.bmm",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 4,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 10.35,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.mm",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.34,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.einsum",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 13,
+        "n_unique_valid": 3,
+        "validity_rate": 0.43333333333333335,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 13,
+          "exception": 17,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 10.08,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.cat",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 28,
+        "n_unique_valid": 11,
+        "validity_rate": 0.9333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 28,
+          "exception": 2,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.2,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.stack",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 6,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.42,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.split",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 13,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.78,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.chunk",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 10,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.33,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.gather",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 28,
+        "n_unique_valid": 11,
+        "validity_rate": 0.9333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 28,
+          "exception": 2,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.18,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.scatter",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 25,
+        "n_unique_valid": 24,
+        "validity_rate": 0.8333333333333334,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 25,
+          "exception": 5,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 12.01,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.index_select",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 13,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.6,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.masked_select",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 25,
+        "n_unique_valid": 13,
+        "validity_rate": 0.8333333333333334,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 25,
+          "exception": 5,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.94,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.where",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 11,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 10.61,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nonzero",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 23,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.12,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.topk",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 22,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.63,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.sort",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 7,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.16,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.argmax",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 11,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.72,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.argmin",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 20,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 10.69,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.Linear",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 18,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 11.17,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.softmax",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 5,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.29,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.log_softmax",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 3,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.76,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.cross_entropy",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 28,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 13.17,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.mse_loss",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 28,
+        "n_unique_valid": 16,
+        "validity_rate": 0.9333333333333333,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 28,
+          "exception": 2,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 12.37,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.binary_cross_entropy",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 18,
+        "n_unique_valid": 18,
+        "validity_rate": 0.6,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 18,
+          "exception": 12,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 12.47,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.Dropout",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 20,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 10.68,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.normalize",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 17,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.74,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.nn.functional.one_hot",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 25,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.49,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.solve",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 12,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 13.72,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.svd",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 20,
+        "n_unique_valid": 9,
+        "validity_rate": 0.6666666666666666,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 20,
+          "exception": 10,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.69,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.eig",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 6,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.89,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.qr",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 22,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.3,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.norm",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 17,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 14.04,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.linalg.det",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.14,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.fft.fft",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 24,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.41,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.fft.fftn",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 15,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.9,
+        "difficulty": "mid"
+      },
+      {
+        "api": "torch.add",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 16,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.2,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sub",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.85,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.mul",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 5,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.78,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.div",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 26,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.76,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.abs",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 26,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.65,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sin",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 19,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.61,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.cos",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 9,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.81,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.tan",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 7,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.39,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.exp",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 16,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.37,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.log",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 25,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.74,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sqrt",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 23,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.83,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.pow",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 21,
+        "n_unique_valid": 18,
+        "validity_rate": 0.7,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 21,
+          "exception": 9,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.93,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.tanh",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 17,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.86,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sigmoid",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 4,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.91,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.sign",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 21,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.5,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.floor",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 25,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.98,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.ceil",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 27,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.64,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.round",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 22,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.02,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.clamp",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 24,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.08,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.ReLU",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 16,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.43,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.LeakyReLU",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 18,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.84,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.GELU",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 11,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.52,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.SiLU",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 17,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.16,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.Tanh",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 17,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.86,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.Sigmoid",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 15,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.69,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.nn.Softplus",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 29,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 7.89,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.reshape",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 11,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.94,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.flatten",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 7,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 8.38,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.squeeze",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 15,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.55,
+        "difficulty": "low"
+      },
+      {
+        "api": "torch.unsqueeze",
+        "variant": "C",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 12,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.89,
+        "difficulty": "low"
+      }
+    ],
+    "aggregate": {
+      "avg": 90.23333333333333,
+      "high_avg": 78.19047619047618,
+      "mid_avg": 94.76190476190479,
+      "low_avg": 99.0,
+      "unique_total": 1593,
+      "n_apis": 100,
+      "n_high": 35,
+      "n_mid": 35,
+      "n_low": 30
+    }
+  }
+}

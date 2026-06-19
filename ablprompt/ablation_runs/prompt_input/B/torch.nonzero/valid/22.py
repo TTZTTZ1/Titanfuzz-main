@@ -1,0 +1,10 @@
+import torch
+
+# Create a random tensor with some zero values
+tensor = torch.randint(0, 5, (3, 4))
+
+# Use torch.nonzero to find indices of non-zero elements
+indices = torch.nonzero(tensor, as_tuple=True)
+
+# Print the indices
+print(indices)

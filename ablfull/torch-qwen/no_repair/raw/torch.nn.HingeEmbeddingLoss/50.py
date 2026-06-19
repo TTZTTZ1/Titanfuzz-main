@@ -1,0 +1,11 @@
+import torch
+
+# Generate input data
+input1 = torch.randn(3)
+input2 = torch.randn(3)
+target = torch.tensor([-1.0, 1.0, -1.0], dtype=torch.float32)
+
+# Call the API
+loss_fn = torch.nn.HingeEmbeddingLoss(margin=1.0, size_average=True, reduce=True, reduction='mean')
+loss = loss_fn(input1, input2, target)
+print(loss)

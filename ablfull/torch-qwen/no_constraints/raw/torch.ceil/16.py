@@ -1,0 +1,8 @@
+import torch
+
+# Task 2: Generate input data
+input_data = torch.tensor([-1.5, -0.2, 0.0, 0.7, 1.3])
+
+# Task 3: Call the API torch.ceil
+result = torch.ceil(input_data)
+print(result)

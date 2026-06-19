@@ -1,0 +1,15 @@
+import torch
+from torch.nn import Fold
+
+# Example usage of torch.nn.Fold
+input_tensor = torch.randn(1, 16, 8, 8)
+output_size = (16, 16)
+kernel_size = 4
+stride = 2
+padding = 1
+dilation = 1
+
+fold_layer = Fold(output_size=output_size, kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation)
+output_tensor = fold_layer(input_tensor)
+
+print(output_tensor.shape)  # Expected shape: torch.Size([1, 1, 16, 16])

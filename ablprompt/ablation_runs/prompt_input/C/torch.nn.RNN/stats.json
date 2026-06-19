@@ -1,0 +1,18 @@
+{
+  "api": "torch.nn.RNN",
+  "variant": "C",
+  "n_samples_requested": 30,
+  "n_samples_received": 30,
+  "n_filtered": 30,
+  "n_valid": 21,
+  "n_unique_valid": 21,
+  "validity_rate": 0.7,
+  "filter_rate": 1.0,
+  "status_breakdown": {
+    "success": 21,
+    "exception": 9,
+    "crash": 0,
+    "timeout": 0
+  },
+  "gen_time_sec": 34.51
+}

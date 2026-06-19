@@ -1,0 +1,24 @@
+import torch
+import torch.nn as nn
+
+# Define the LSTM model
+input_size = 10
+hidden_size = 20
+num_layers = 2
+lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
+
+# Create dummy input tensor
+batch_size = 3
+sequence_length = 5
+input_tensor = torch.randn(sequence_length, batch_size, input_size)
+
+# Initialize hidden and cell states
+h0 = torch.zeros(num_layers, batch_size, hidden_size)
+c0 = torch.zeros(num_layers, batch_size, hidden_size)
+
+# Forward pass through LSTM
+output, (hn, cn) = lstm(input_tensor, (h0, c0))
+
+print("Output:", output.shape)
+print("Final Hidden State:", hn.shape)
+print("Final Cell State:", cn.shape)

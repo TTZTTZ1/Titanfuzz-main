@@ -1,0 +1,12 @@
+import torch
+
+# Create a random tensor
+x = torch.randn(5, 3, 4)
+
+# Define indices to select
+indices = torch.tensor([0, 2])
+
+# Use torch.index_select to select rows 0 and 2 along dimension 0
+selected_rows = torch.index_select(x, 0, indices)
+
+print(selected_rows.shape)  # Expected output: torch.Size([2, 3, 4])

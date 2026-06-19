@@ -1,0 +1,18 @@
+{
+  "api": "torch.nn.functional.ctc_loss",
+  "variant": "C",
+  "n_samples_requested": 30,
+  "n_samples_received": 30,
+  "n_filtered": 30,
+  "n_valid": 2,
+  "n_unique_valid": 2,
+  "validity_rate": 0.06666666666666667,
+  "filter_rate": 1.0,
+  "status_breakdown": {
+    "success": 2,
+    "exception": 28,
+    "crash": 0,
+    "timeout": 0
+  },
+  "gen_time_sec": 13.36
+}

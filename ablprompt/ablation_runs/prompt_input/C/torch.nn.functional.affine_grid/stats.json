@@ -1,0 +1,18 @@
+{
+  "api": "torch.nn.functional.affine_grid",
+  "variant": "C",
+  "n_samples_requested": 30,
+  "n_samples_received": 30,
+  "n_filtered": 30,
+  "n_valid": 9,
+  "n_unique_valid": 9,
+  "validity_rate": 0.3,
+  "filter_rate": 1.0,
+  "status_breakdown": {
+    "success": 9,
+    "exception": 21,
+    "crash": 0,
+    "timeout": 0
+  },
+  "gen_time_sec": 11.72
+}

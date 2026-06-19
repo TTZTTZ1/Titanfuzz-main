@@ -1,0 +1,11 @@
+import torch
+
+# Prepare input data
+y = torch.tensor([1, 2, 4, 7], dtype=torch.float)
+x = None  # Using None to satisfy the first constraint
+dx = 1.0
+dim = -1
+
+# Call the API
+result = torch.cumulative_trapezoid(y=y, x=x, dx=dx, dim=dim)
+print(result)

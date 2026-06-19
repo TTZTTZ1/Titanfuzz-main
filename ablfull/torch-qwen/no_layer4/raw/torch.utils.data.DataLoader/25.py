@@ -1,0 +1,28 @@
+import torch
+
+# Create a dummy dataset
+class DummyDataset(torch.utils.data.Dataset):
+    def __len__(self):
+        return 10
+
+    def __getitem__(self, idx):
+        return torch.tensor([idx])
+
+dataset = DummyDataset()
+
+# Prepare valid input data
+batch_size = 1
+shuffle = False
+num_workers = 0
+pin_memory = False
+drop_last = False
+
+# Call the API
+dataloader = torch.utils.data.DataLoader(
+    dataset=dataset,
+    batch_size=batch_size,
+    shuffle=shuffle,
+    num_workers=num_workers,
+    pin_memory=pin_memory,
+    drop_last=drop_last
+)

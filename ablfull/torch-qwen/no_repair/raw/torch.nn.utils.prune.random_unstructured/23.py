@@ -1,0 +1,10 @@
+import torch
+import torch.nn as nn
+
+# Step 2: Generate input data
+module = nn.Linear(10, 5)
+name = 'weight'
+amount = 0.5
+
+# Step 3: Call the API
+pruned_module = nn.utils.prune.random_unstructured(module, name, amount)

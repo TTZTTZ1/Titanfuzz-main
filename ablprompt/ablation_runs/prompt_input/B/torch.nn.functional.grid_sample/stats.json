@@ -1,0 +1,18 @@
+{
+  "api": "torch.nn.functional.grid_sample",
+  "variant": "B",
+  "n_samples_requested": 30,
+  "n_samples_received": 30,
+  "n_filtered": 30,
+  "n_valid": 19,
+  "n_unique_valid": 13,
+  "validity_rate": 0.6333333333333333,
+  "filter_rate": 1.0,
+  "status_breakdown": {
+    "success": 19,
+    "exception": 11,
+    "crash": 0,
+    "timeout": 0
+  },
+  "gen_time_sec": 11.76
+}

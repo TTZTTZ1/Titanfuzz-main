@@ -1,0 +1,10 @@
+import torch
+
+# Prepare valid input data
+tensor = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float32)
+reduce_op = torch.distributed.ReduceOp.SUM
+
+# Call the API
+result = reduce_op.apply(tensor)
+
+print(result)

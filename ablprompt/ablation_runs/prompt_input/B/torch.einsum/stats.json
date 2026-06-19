@@ -1,0 +1,18 @@
+{
+  "api": "torch.einsum",
+  "variant": "B",
+  "n_samples_requested": 30,
+  "n_samples_received": 30,
+  "n_filtered": 30,
+  "n_valid": 16,
+  "n_unique_valid": 8,
+  "validity_rate": 0.5333333333333333,
+  "filter_rate": 1.0,
+  "status_breakdown": {
+    "success": 16,
+    "exception": 14,
+    "crash": 0,
+    "timeout": 0
+  },
+  "gen_time_sec": 8.14
+}

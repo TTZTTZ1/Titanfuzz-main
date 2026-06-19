@@ -1,0 +1,5 @@
+import torch
+input_tensor = torch.tensor([(- 1.0), 2.0, (- 3.0)], dtype=torch.float32)
+sign_tensor = torch.tensor([1.0, (- 1.0), 1.0], dtype=torch.float32)
+result = input_tensor.copysign_(sign_tensor)
+print(result)

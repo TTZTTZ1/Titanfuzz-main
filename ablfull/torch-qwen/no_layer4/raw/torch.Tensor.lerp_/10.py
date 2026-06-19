@@ -1,0 +1,11 @@
+import torch
+
+# Prepare input data
+start = torch.tensor([0.0, 1.0], dtype=torch.float32)
+end = torch.tensor([1.0, 0.0], dtype=torch.float32)
+weight = 0.5
+
+# Call the API
+result = start.lerp_(end, weight)
+
+print(result)

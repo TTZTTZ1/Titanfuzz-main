@@ -1,0 +1,10 @@
+import torch
+
+# Prepare input data
+size = (3,)
+fill_value = 5
+dtype = torch.int32
+requires_grad = True
+
+# Call the API
+result = torch.Tensor.new_full(size, fill_value, dtype=dtype, requires_grad=requires_grad)

@@ -1,0 +1,18 @@
+{
+  "api": "torch.nn.functional.pad",
+  "variant": "B",
+  "n_samples_requested": 30,
+  "n_samples_received": 30,
+  "n_filtered": 30,
+  "n_valid": 10,
+  "n_unique_valid": 10,
+  "validity_rate": 0.3333333333333333,
+  "filter_rate": 1.0,
+  "status_breakdown": {
+    "success": 10,
+    "exception": 20,
+    "crash": 0,
+    "timeout": 0
+  },
+  "gen_time_sec": 9.91
+}

@@ -1,0 +1,3 @@
+import torch
+input_tensor = torch.randn(3, requires_grad=True)
+output_tensor = input_tensor.double(memory_format=torch.preserve_format)

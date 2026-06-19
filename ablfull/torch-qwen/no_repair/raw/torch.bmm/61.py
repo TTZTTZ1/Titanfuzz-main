@@ -1,0 +1,8 @@
+import torch
+
+# Generate input data
+a = torch.randn(5, 3, 4)
+b = torch.randn(5, 4, 6)
+
+# Call the API
+result = torch.bmm(a, b)

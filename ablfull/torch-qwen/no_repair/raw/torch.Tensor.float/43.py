@@ -1,0 +1,7 @@
+import torch
+
+# Task 2: Generate input data
+input_tensor = torch.randn(4, 4)
+
+# Task 3: Call the API
+output_tensor = input_tensor.float(memory_format=torch.preserve_format)

@@ -1,0 +1,5 @@
+import torch
+input1 = torch.tensor([1.0, (- 1.0)], dtype=torch.float32)
+input2 = torch.tensor([(- 1.0), 1.0], dtype=torch.float32)
+target = torch.tensor([1, (- 1)], dtype=torch.int64)
+loss_fn = torch.nn.HingeEmbeddingLoss()

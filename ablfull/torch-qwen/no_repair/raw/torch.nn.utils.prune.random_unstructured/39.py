@@ -1,0 +1,17 @@
+import torch
+import torch.nn as nn
+
+# Define a simple model for demonstration purposes
+class SimpleModel(nn.Module):
+    def __init__(self):
+        super(SimpleModel, self).__init__()
+        self.linear = nn.Linear(10, 5)
+
+model = SimpleModel()
+
+# Prepare valid input data
+name = 'linear'
+amount = 0.5
+
+# Call the API
+pruned_model = torch.nn.utils.prune.random_unstructured(model, name, amount)

@@ -1,0 +1,10 @@
+import torch
+
+# Create some sample tensors
+a = torch.tensor([[1, 2], [3, 4]])
+b = torch.tensor([[5, 6], [7, 8]])
+
+# Concatenate them along the first dimension (rows)
+result = torch.cat((a, b), dim=0)
+
+print(result)

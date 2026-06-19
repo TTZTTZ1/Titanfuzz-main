@@ -1,0 +1,13 @@
+import torch
+import torch.nn as nn
+
+# Create an AdaptiveAvgPool2d layer with output size (1, 1)
+pool = nn.AdaptiveAvgPool2d((1, 1))
+
+# Create a random input tensor of shape (1, 3, 4, 4)
+input_tensor = torch.randn(1, 3, 4, 4)
+
+# Apply the adaptive average pooling
+output_tensor = pool(input_tensor)
+
+print(output_tensor)

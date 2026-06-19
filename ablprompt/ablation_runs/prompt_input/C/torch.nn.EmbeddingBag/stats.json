@@ -1,0 +1,18 @@
+{
+  "api": "torch.nn.EmbeddingBag",
+  "variant": "C",
+  "n_samples_requested": 30,
+  "n_samples_received": 30,
+  "n_filtered": 30,
+  "n_valid": 13,
+  "n_unique_valid": 12,
+  "validity_rate": 0.43333333333333335,
+  "filter_rate": 1.0,
+  "status_breakdown": {
+    "success": 13,
+    "exception": 17,
+    "crash": 0,
+    "timeout": 0
+  },
+  "gen_time_sec": 23.13
+}

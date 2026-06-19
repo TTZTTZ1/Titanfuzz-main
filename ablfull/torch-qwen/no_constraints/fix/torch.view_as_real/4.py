@@ -1,0 +1,4 @@
+import torch
+input_data = torch.tensor([[[[(1 + 2j), (3 + 4j)], [(5 + 6j), (7 + 8j)]]]])
+output_data = torch.view_as_real(input_data)
+print(output_data)

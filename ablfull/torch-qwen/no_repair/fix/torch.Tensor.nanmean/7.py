@@ -1,0 +1,7 @@
+
+import torch
+tensor = torch.tensor([[1.0, 2.0], [float('nan'), 4.0]])
+dim = 0
+keepdim = True
+result = torch.Tensor.nanmean(tensor, dim=dim, keepdim=keepdim)
+print(result)

@@ -1,0 +1,9 @@
+import torch
+
+# Prepare input data
+input1 = torch.randn(2, 5)
+input2 = torch.randn(2, 7)
+weight = torch.randn(3, 5, 7)
+
+# Call the API
+output = torch.nn.functional.bilinear(input1, input2, weight)

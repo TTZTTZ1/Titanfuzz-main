@@ -1,0 +1,12 @@
+import torch
+
+# Define a simple function to be checkpointed
+def my_function(x):
+    return x * x + 2 * x + 1
+
+# Generate input data
+input_data = torch.randn(5)
+
+# Call the API
+result = torch.utils.checkpoint.checkpoint_sequential([my_function], 1, input_data)
+print(result)

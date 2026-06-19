@@ -1,0 +1,10 @@
+import torch
+
+# Create a sample tensor
+x = torch.tensor([1.0, 2.0, 3.0, 4.0])
+
+# Compute the FFT of the tensor
+fft_result = torch.fft.fft(x)
+
+print("Input Tensor:", x)
+print("FFT Result:", fft_result)

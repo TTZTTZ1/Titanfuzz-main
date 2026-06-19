@@ -1,0 +1,7 @@
+import torch
+
+n = 8
+d = 1.0
+dtype = torch.float64
+
+result = torch.fft.rfftfreq(n=n, d=d, dtype=dtype)

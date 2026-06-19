@@ -1,0 +1,5 @@
+
+import torch
+data = torch.tensor([[1.0, 2.0, float('nan')], [4.0, float('nan'), 6.0]])
+result = torch.Tensor.nanmean(data, dim=1, keepdim=True)
+print(result)

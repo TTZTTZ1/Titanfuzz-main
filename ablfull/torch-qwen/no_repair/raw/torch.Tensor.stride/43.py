@@ -1,0 +1,9 @@
+import torch
+
+# Step 2: Generate input data
+input_tensor = torch.randn(4, 5, 6)
+
+# Step 3: Call the API
+stride_result = input_tensor.stride()
+
+print(stride_result)

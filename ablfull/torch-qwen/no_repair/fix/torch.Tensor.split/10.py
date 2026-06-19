@@ -1,0 +1,6 @@
+
+import torch
+tensor = torch.randn(10)
+split_size_or_sections = [2, 3, 5]
+result = tensor.split(split_size_or_sections)
+print(result)

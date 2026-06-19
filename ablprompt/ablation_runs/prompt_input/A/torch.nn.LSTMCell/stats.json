@@ -1,0 +1,18 @@
+{
+  "api": "torch.nn.LSTMCell",
+  "variant": "A",
+  "n_samples_requested": 30,
+  "n_samples_received": 30,
+  "n_filtered": 30,
+  "n_valid": 23,
+  "n_unique_valid": 19,
+  "validity_rate": 0.7666666666666667,
+  "filter_rate": 1.0,
+  "status_breakdown": {
+    "success": 23,
+    "exception": 7,
+    "crash": 0,
+    "timeout": 0
+  },
+  "gen_time_sec": 5.16
+}

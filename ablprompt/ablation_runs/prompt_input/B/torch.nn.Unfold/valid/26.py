@@ -1,0 +1,17 @@
+import torch
+from torch.nn import Unfold
+
+# Create a random input tensor
+input_tensor = torch.randn(1, 1, 5, 5)
+
+# Define the unfold parameters
+kernel_size = (2, 2)
+stride = (1, 1)
+padding = (0, 0)
+dilation = (1, 1)
+
+# Apply the Unfold operation
+unfold = Unfold(kernel_size=kernel_size, stride=stride, padding=padding, dilation=dilation)
+output_tensor = unfold(input_tensor)
+
+print(output_tensor.shape)  # Should print torch.Size([1, 4, 9])

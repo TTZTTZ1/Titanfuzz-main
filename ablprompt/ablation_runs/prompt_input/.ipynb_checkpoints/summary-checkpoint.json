@@ -1,0 +1,150 @@
+{
+  "A": {
+    "per_api": [
+      {
+        "api": "torch.nn.Conv1d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 20,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.43,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Conv2d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 24,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 9.36,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.Conv3d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 24,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.3,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.ConvTranspose1d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 24,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 5.77,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.ConvTranspose2d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 22,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.09,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.ConvTranspose3d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 22,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 6.21,
+        "difficulty": "high"
+      },
+      {
+        "api": "torch.nn.MaxPool2d",
+        "variant": "A",
+        "n_samples_requested": 30,
+        "n_samples_received": 30,
+        "n_filtered": 30,
+        "n_valid": 30,
+        "n_unique_valid": 19,
+        "validity_rate": 1.0,
+        "filter_rate": 1.0,
+        "status_breakdown": {
+          "success": 30,
+          "exception": 0,
+          "crash": 0,
+          "timeout": 0
+        },
+        "gen_time_sec": 4.76,
+        "difficulty": "high"
+      }
+    ],
+    "aggregate": {
+      "avg": 100.0,
+      "high_avg": 100.0,
+      "mid_avg": 0.0,
+      "low_avg": 0.0,
+      "unique_total": 155,
+      "n_apis": 7,
+      "n_high": 7,
+      "n_mid": 0,
+      "n_low": 0
+    }
+  }
+}

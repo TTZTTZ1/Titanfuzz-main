@@ -1,0 +1,7 @@
+import torch
+
+# Prepare valid input data
+input_data = (torch.tensor([1, 2, 3]),)
+
+# Call the API
+result = torch.QInt32Storage(*input_data)

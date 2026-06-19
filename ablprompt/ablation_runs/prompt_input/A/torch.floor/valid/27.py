@@ -1,0 +1,9 @@
+import torch
+
+# Create a tensor with floating-point numbers
+tensor = torch.tensor([1.2, 3.7, -0.5, 4.8])
+
+# Apply the floor function to the tensor
+result = torch.floor(tensor)
+
+print(result)

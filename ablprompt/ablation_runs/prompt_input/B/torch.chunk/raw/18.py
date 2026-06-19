@@ -1,0 +1,12 @@
+import torch
+
+# Create a large tensor
+large_tensor = torch.randn(100, 50)
+
+# Split the tensor into 5 chunks along the first dimension
+chunks = torch.chunk(large_tensor, 5, dim=0)
+
+# Verify the number of chunks and their shapes
+print(f"Number of chunks: {len(chunks)}")
+for i, chunk in enumerate(chunks):
+    print(f"Chunk {i+1} shape: {chunk.shape}")

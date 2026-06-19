@@ -1,0 +1,9 @@
+import torch
+
+# Task 2: Generate input data
+tensor1 = torch.tensor([1.0, 2.0, 3.0])
+tensor2 = torch.tensor([1.0, 2.5, 3.0])
+
+# Task 3: Call the API torch.Tensor.ne
+result = tensor1.ne(tensor2)
+print(result)

@@ -1,0 +1,18 @@
+{
+  "api": "torch.nn.Unfold",
+  "variant": "B",
+  "n_samples_requested": 30,
+  "n_samples_received": 30,
+  "n_filtered": 29,
+  "n_valid": 28,
+  "n_unique_valid": 20,
+  "validity_rate": 0.9333333333333333,
+  "filter_rate": 0.9666666666666667,
+  "status_breakdown": {
+    "success": 28,
+    "exception": 1,
+    "crash": 0,
+    "timeout": 0
+  },
+  "gen_time_sec": 9.04
+}
