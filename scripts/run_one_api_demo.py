@@ -24,6 +24,7 @@ from typing import Dict, List, Optional
 
 
 STAGE_ORDER = ["prompt_check", "qwen_seed", "ev_generation", "driver", "summary"]
+RESULT_SUBDIRS = ("seed", "valid", "exception", "crash", "notarget", "hangs", "flaky")
 TRACE_PATTERNS = (
     "Catch",
     "Fail",
@@ -100,9 +101,9 @@ def mode_defaults(mode: str) -> dict:
         "qwen_max_rounds": 2,
         "qwen_per_api_budget": 600,
         "qwen_validate_timeout": 30,
-        "ev_max_valid": 20,
-        "ev_batch_size": 2,
-        "ev_timeout": 600,
+        "ev_max_valid": 200,
+        "ev_batch_size": 100,
+        "ev_timeout": 1000,
     }
 
 
@@ -119,6 +120,7 @@ class DemoRun:
         self.summary_md_path = self.out / "summary.md"
         self.qwen_out = self.out / "qwen_seed"
         self.results_root = self.out / "Results" / args.lib
+        self.canonical_results_root = repo_root / "Results" / args.lib
         self.status = {
             "job_id": args.job_id,
             "lib": args.lib,
@@ -272,11 +274,38 @@ class DemoRun:
             cmd.append("--tf")
         return self.run_command("driver", cmd, "03_driver.log")
 
+    def belongs_to_api(self, path: Path) -> bool:
+        if path.suffix != ".py":
+            return False
+        return path.stem.rsplit("_", 1)[0] == self.args.api
+
+    def publish_results_to_canonical(self) -> None:
+        for name in RESULT_SUBDIRS:
+            src_dir = self.results_root / name
+            dst_dir = self.canonical_results_root / name
+            dst_dir.mkdir(parents=True, exist_ok=True)
+
+            for old_file in dst_dir.glob("*.py"):
+                if self.belongs_to_api(old_file):
+                    old_file.unlink()
+
+            if not src_dir.is_dir():
+                continue
+            for src_file in sorted(src_dir.glob("*.py")):
+                if self.belongs_to_api(src_file):
+                    shutil.copy2(src_file, dst_dir / src_file.name)
+
+        trace_path = self.results_root / "trace.txt"
+        if trace_path.is_file():
+            trace_dir = self.canonical_results_root / "single_api_traces"
+            trace_dir.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(trace_path, trace_dir / f"{safe_name(self.args.api)}.txt")
+
     def collect_counts(self) -> dict:
         qwen_fix_dir = self.qwen_out / "fix" / self.args.api
         result_counts = {
             name: count_py(self.results_root / name)
-            for name in ("seed", "valid", "exception", "crash", "notarget", "hangs", "flaky")
+            for name in RESULT_SUBDIRS
         }
         trace_path = self.results_root / "trace.txt"
         return {
@@ -300,6 +329,7 @@ class DemoRun:
             "mutation_model": self.args.mut_model,
             "status": status,
             "error": error,
+            "canonical_results_path": rel(self.canonical_results_root, self.repo_root),
             **counts,
             "logs": self.status.get("logs", {}),
             "updated_at": now(),
@@ -389,6 +419,9 @@ class DemoRun:
             self.finish("failed", error=error)
             return 1
         self.update_stage("driver", "success")
+
+        if not self.args.dry_run:
+            self.publish_results_to_canonical()
 
         self.write_summary("success")
         self.finish("success")

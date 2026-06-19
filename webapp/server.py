@@ -159,22 +159,27 @@ def result_counts(results_dir: Path) -> dict:
     return {name: count_py(results_dir / name) for name in RESULT_SUBDIRS}
 
 
-def api_result_counts(lib: str, api: str) -> dict:
+def empty_result_counts() -> dict:
+    return {name: 0 for name in RESULT_SUBDIRS}
+
+
+def result_counts_by_api(lib: str) -> dict[str, dict]:
     root = RESULTS_PATHS[lib]
-    counts = {}
+    counts_by_api: dict[str, dict] = {}
     for name in RESULT_SUBDIRS:
         folder = root / name
         if not folder.is_dir():
-            counts[name] = 0
             continue
-        total = 0
         for path in folder.iterdir():
             if not path.is_file() or path.suffix != ".py":
                 continue
-            if path.stem.rsplit("_", 1)[0] == api:
-                total += 1
-        counts[name] = total
-    return counts
+            api_name = path.stem.rsplit("_", 1)[0]
+            counts_by_api.setdefault(api_name, empty_result_counts())[name] += 1
+    return counts_by_api
+
+
+def api_result_counts(lib: str, api: str) -> dict:
+    return result_counts_by_api(lib).get(api, empty_result_counts())
 
 
 def results_api_set(lib: str) -> set[str]:
@@ -229,6 +234,29 @@ def latest_summaries(root: Path, limit: int = 6) -> list[dict]:
     return out
 
 
+def latest_api_job(lib: str, api: str) -> Optional[dict]:
+    if not API_JOB_ROOT.is_dir():
+        return None
+    candidates = []
+    for status_path in API_JOB_ROOT.glob("*/status.json"):
+        status = read_json(status_path, {})
+        if status.get("lib") == lib and status.get("api") == api:
+            candidates.append((status_path.stat().st_mtime, status_path.parent, status))
+    if not candidates:
+        return None
+    _, job_dir, status = sorted(candidates, key=lambda item: item[0], reverse=True)[0]
+    summary = read_json(job_dir / "summary.json", {})
+    return {
+        "job_id": status.get("job_id") or job_dir.name,
+        "out": rel(job_dir),
+        "status": status.get("status", "pending"),
+        "stage": status.get("stage", "init"),
+        "updated_at": status.get("updated_at"),
+        "summary_status": summary.get("status"),
+        "error": status.get("error") or summary.get("error"),
+    }
+
+
 def overview_payload() -> dict:
     manifest = load_manifest()
     manifest_libs = manifest.get("libraries", {})
@@ -281,6 +309,7 @@ def overview_payload() -> dict:
 def api_list_payload(lib: str, query: str = "", limit: int = 200) -> list[dict]:
     query_l = query.lower().strip()
     manifest_lib = load_manifest().get("libraries", {}).get(lib, {})
+    counts_by_api = result_counts_by_api(lib)
     apis = load_api_list(lib)
     if query_l:
         apis = [api for api in apis if query_l in api.lower()]
@@ -288,14 +317,15 @@ def api_list_payload(lib: str, query: str = "", limit: int = 200) -> list[dict]:
     for api in apis[:limit]:
         entry = manifest_lib.get(api, {})
         ppath = prompt_path(lib, api)
+        counts = counts_by_api.get(api, empty_result_counts())
         out.append(
             {
                 "api": api,
                 "lib": lib,
                 "has_prompt": api in manifest_lib or ppath.is_file(),
                 "prompt_path": rel(ppath),
-                "result_counts": api_result_counts(lib, api),
-                "has_results": any(api_result_counts(lib, api).values()),
+                "result_counts": counts,
+                "has_results": any(counts.values()),
                 "manifest_entry": entry,
             }
         )
@@ -321,6 +351,7 @@ def api_detail_payload(lib: str, api: str) -> tuple[int, dict]:
         "result_counts": counts,
         "has_results": any(counts.values()),
         "manifest_entry": entry,
+        "latest_job": latest_api_job(lib, api),
     }
 
 
@@ -878,7 +909,7 @@ class Handler(BaseHTTPRequestHandler):
         q = query.get("q", [""])[0]
         limit_raw = query.get("limit", ["200"])[0]
         try:
-            limit = max(1, min(int(limit_raw), 1000))
+            limit = max(1, min(int(limit_raw), 5000))
         except ValueError:
             limit = 200
         if lib not in ("torch", "tf"):

@@ -6,6 +6,7 @@ const state = {
   apiPollTimer: null,
   reproPollTimer: null,
   confirmedBugs: [],
+  apiMatches: [],
 };
 
 const $ = (id) => document.getElementById(id);
@@ -77,6 +78,10 @@ function sumCounts(counts = {}) {
   return Object.values(counts).reduce((acc, n) => acc + Number(n || 0), 0);
 }
 
+function modeLabel(value) {
+  return value === "normal" ? "完整模式" : "演示模式";
+}
+
 async function loadOverview() {
   const data = await api("/api/overview");
   $("overviewMetrics").innerHTML = [
@@ -107,6 +112,7 @@ async function loadOverview() {
 }
 
 function renderApiMatches(items) {
+  state.apiMatches = items;
   if (!items.length) {
     $("apiMatches").innerHTML = `<div class="empty">没有匹配的 API。</div>`;
     return;
@@ -114,8 +120,9 @@ function renderApiMatches(items) {
   $("apiMatches").innerHTML = items.map((item) => {
     const counts = item.result_counts || {};
     const countText = sumCounts(counts) ? `已有结果 ${sumCounts(counts)}` : "暂无结果";
+    const active = state.selectedApi?.api === item.api && state.selectedApi?.lib === item.lib;
     return `
-      <button class="match-item" data-api="${escapeHtml(item.api)}">
+      <button class="match-item ${active ? "active" : ""}" data-api="${escapeHtml(item.api)}" aria-pressed="${active ? "true" : "false"}">
         <span><code>${escapeHtml(item.api)}</code></span>
         <small>${item.has_prompt ? "约束就绪" : "缺少约束"} · ${escapeHtml(countText)}</small>
       </button>
@@ -126,22 +133,31 @@ function renderApiMatches(items) {
   });
 }
 
-async function searchApis() {
+function markSelectedApiButton() {
+  document.querySelectorAll("[data-api]").forEach((btn) => {
+    const active = state.selectedApi?.api === btn.dataset.api;
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+}
+
+async function searchApis(autoSelect = true) {
   const lib = $("apiLib").value;
   const q = $("apiSearch").value.trim();
-  const data = await api(`/api/apis?lib=${encodeURIComponent(lib)}&q=${encodeURIComponent(q)}&limit=80`);
+  const limit = q ? 200 : 5000;
+  const data = await api(`/api/apis?lib=${encodeURIComponent(lib)}&q=${encodeURIComponent(q)}&limit=${limit}`);
   renderApiMatches(data);
-  if (!state.selectedApi && data.length) {
+  if (autoSelect && !state.selectedApi && data.length) {
     await selectApi(data[0].api);
   }
 }
 
-async function selectApi(apiName) {
-  const lib = $("apiLib").value;
-  const detail = await api(`/api/api-detail?lib=${encodeURIComponent(lib)}&api=${encodeURIComponent(apiName)}`);
-  state.selectedApi = detail;
-  $("startApiRun").disabled = !detail.has_prompt;
+function renderApiDetail(detail) {
   const counts = detail.result_counts || {};
+  const latest = detail.latest_job;
+  const latestText = latest
+    ? `${latest.job_id} · ${latest.status}${latest.error ? " · 有错误" : ""}`
+    : "暂无运行记录";
   $("apiDetail").innerHTML = `
     <div class="detail-grid">
       <div><span>API</span><code>${escapeHtml(detail.api)}</code></div>
@@ -149,6 +165,7 @@ async function selectApi(apiName) {
       <div><span>约束状态</span><strong>${detail.has_prompt ? "就绪" : "缺失"}</strong></div>
       <div><span>已有结果</span><strong>${sumCounts(counts)}</strong></div>
     </div>
+    <div class="file-row"><span>最近运行</span><code>${escapeHtml(latestText)}</code></div>
     <div class="file-row"><span>API 清单</span><code>${escapeHtml(detail.api_list)}</code></div>
     <div class="file-row"><span>约束路径</span><code>${escapeHtml(detail.prompt_path)}</code></div>
     <div class="file-row"><span>Results</span><code>${escapeHtml(detail.results_path)}</code></div>
@@ -156,6 +173,34 @@ async function selectApi(apiName) {
       ${Object.entries(counts).map(([name, value]) => `<span>${escapeHtml(name)}: <b>${escapeHtml(value)}</b></span>`).join("")}
     </div>
   `;
+}
+
+async function selectApi(apiName, options = {}) {
+  const lib = $("apiLib").value;
+  if (state.apiPollTimer) {
+    clearInterval(state.apiPollTimer);
+    state.apiPollTimer = null;
+  }
+  const detail = await api(`/api/api-detail?lib=${encodeURIComponent(lib)}&api=${encodeURIComponent(apiName)}`);
+  state.selectedApi = detail;
+  $("startApiRun").disabled = !detail.has_prompt;
+  renderApiDetail(detail);
+  markSelectedApiButton();
+
+  if (detail.latest_job?.job_id) {
+    state.currentApiJob = detail.latest_job.job_id;
+    await loadApiJob({ fromSelection: true });
+    if (["running", "pending"].includes(detail.latest_job.status)) {
+      state.apiPollTimer = setInterval(() => loadApiJob({ fromSelection: true }), 1000);
+    }
+  } else if (!options.keepJob) {
+    state.currentApiJob = null;
+    renderApiStages({});
+    $("apiJobSummary").innerHTML = `
+      <div class="empty">当前 API 暂无运行记录。点击“运行该 API”后，这里会显示任务摘要。</div>
+    `;
+    $("apiJobLogs").textContent = "";
+  }
 }
 
 function renderApiStages(status) {
@@ -183,17 +228,58 @@ async function startApiRun() {
   };
   const data = await post("/api/run-api", payload);
   state.currentApiJob = data.job_id;
-  $("apiJobSummary").textContent = `Job started: ${data.job_id}\nOutput: ${data.out}`;
+  $("apiJobSummary").innerHTML = `
+    <div class="detail-grid">
+      <div><span>Job</span><code>${escapeHtml(data.job_id)}</code></div>
+      <div><span>模式</span><strong>${escapeHtml(modeLabel(payload.mode))}</strong></div>
+      <div><span>状态</span><strong>running</strong></div>
+      <div><span>输出目录</span><code>${escapeHtml(data.out)}</code></div>
+    </div>
+  `;
   if (state.apiPollTimer) clearInterval(state.apiPollTimer);
   state.apiPollTimer = setInterval(loadApiJob, 1000);
   await loadApiJob();
+}
+
+function renderApiJobSummary(data) {
+  const summary = data.summary || {};
+  const status = data.status || {};
+  const counts = summary.result_counts || {};
+  const shownStatus = summary.status || status.status || "pending";
+  const error = summary.error || status.error || "";
+  $("apiJobSummary").innerHTML = `
+    <div class="detail-grid">
+      <div><span>Job</span><code>${escapeHtml(data.job_id)}</code></div>
+      <div><span>模式</span><strong>${escapeHtml(modeLabel(summary.mode || status.mode))}</strong></div>
+      <div><span>状态</span><strong>${escapeHtml(shownStatus)}</strong></div>
+      <div><span>Qwen valid seed</span><strong>${escapeHtml(summary.qwen_valid_seed_count ?? "-")}</strong></div>
+      <div><span>Trace 命中</span><strong>${escapeHtml(summary.catch_count ?? "-")}</strong></div>
+      <div><span>输出目录</span><code>${escapeHtml(data.out)}</code></div>
+    </div>
+    <div class="mini-counts">
+      ${Object.entries(counts).map(([name, value]) => `<span>${escapeHtml(name)}: <b>${escapeHtml(value)}</b></span>`).join("") || "<span>暂无结果计数</span>"}
+    </div>
+    ${error ? `<div class="text-block error-text"><b>错误</b><p>${escapeHtml(error)}</p></div>` : ""}
+  `;
+}
+
+async function refreshSelectedApiAfterJob() {
+  if (!state.selectedApi) return;
+  const apiName = state.selectedApi.api;
+  const lib = state.selectedApi.lib;
+  if ($("apiLib").value !== lib) return;
+  const detail = await api(`/api/api-detail?lib=${encodeURIComponent(lib)}&api=${encodeURIComponent(apiName)}`);
+  state.selectedApi = detail;
+  renderApiDetail(detail);
+  await searchApis(false);
+  markSelectedApiButton();
 }
 
 async function loadApiJob() {
   if (!state.currentApiJob) return;
   const data = await api(`/api/api-jobs/${encodeURIComponent(state.currentApiJob)}`);
   renderApiStages(data.status);
-  $("apiJobSummary").textContent = JSON.stringify(data.summary || data.status || {}, null, 2);
+  renderApiJobSummary(data);
   $("apiJobLogs").textContent = Object.entries(data.logs || {})
     .map(([name, content]) => `===== ${name} =====\n${content}`)
     .join("\n\n");
@@ -202,6 +288,7 @@ async function loadApiJob() {
     clearInterval(state.apiPollTimer);
     state.apiPollTimer = null;
     loadOverview().catch(console.error);
+    refreshSelectedApiAfterJob().catch(console.error);
   }
 }
 

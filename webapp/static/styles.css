@@ -398,6 +398,12 @@ button:disabled {
   background: #f6f8fa;
 }
 
+.match-item.active,
+.bug-item.active {
+  border-color: var(--accent);
+  background: #e6fffb;
+}
+
 .match-item small,
 .bug-item small,
 .bug-item span {
@@ -443,6 +449,18 @@ button:disabled {
 .text-block p {
   margin: 6px 0 0;
   color: var(--text);
+}
+
+.error-text {
+  color: var(--danger);
+}
+
+.error-text p {
+  color: var(--danger);
+}
+
+.job-summary {
+  margin-bottom: 12px;
 }
 
 .pre {
