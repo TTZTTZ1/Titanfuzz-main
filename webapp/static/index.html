@@ -3,162 +3,154 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TensorGuard Demo</title>
+    <title>TensorGuard</title>
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
   <body>
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand">
-          <div class="brand-mark">TG</div>
+          <div class="brand-mark" aria-hidden="true">TG</div>
           <div>
             <h1>TensorGuard</h1>
-            <p>深度学习框架缺陷验证</p>
+            <p>框架缺陷检测工作台</p>
           </div>
         </div>
-        <nav class="nav">
-          <button class="nav-item active" data-view="overview">总览</button>
-          <button class="nav-item" data-view="apiRun">单 API 运行</button>
-          <button class="nav-item" data-view="bugReplay">Bug 复现</button>
+        <nav class="nav" aria-label="主导航">
+          <button class="nav-item active" data-view="overview"><span>01</span>系统总览</button>
+          <button class="nav-item" data-view="apiRun"><span>02</span>单 API 运行</button>
+          <button class="nav-item" data-view="bugReplay"><span>03</span>Bug 复现</button>
         </nav>
+        <div class="sidebar-foot">
+          <button id="openEnvironment" class="environment-trigger">
+            <span id="environmentDot" class="status-dot muted"></span>
+            <span><b>运行环境</b><small id="environmentBrief">正在采集</small></span>
+          </button>
+        </div>
       </aside>
 
       <main class="main">
         <section id="overview" class="view active">
-          <header class="hero-panel">
+          <header class="page-head overview-head">
             <div>
-              <p class="eyebrow">TensorGuard Workbench</p>
-              <h2>深度学习框架 API 缺陷检测与复现系统</h2>
-              <p>覆盖 PyTorch 与 TensorFlow API，支持单 API 自动测试、已确认缺陷复现和当前环境报告生成。</p>
-              <div class="hero-actions">
-                <button class="primary" data-jump="apiRun">运行单 API</button>
-                <button class="secondary" data-jump="bugReplay">复现已确认 Bug</button>
-              </div>
+              <h2>系统总览</h2>
+              <p>API 覆盖、检测流程与已确认证据的当前快照</p>
             </div>
+            <button id="refreshOverview" class="secondary">刷新数据</button>
           </header>
 
-          <div id="overviewMetrics" class="metric-grid"></div>
+          <div id="overviewMetrics" class="metric-strip"></div>
 
-          <section class="panel">
-            <h3>自动化流程</h3>
-            <div class="flow-steps">
-              <div><b>API 清单</b><span>PyTorch 与 TensorFlow 目标 API</span></div>
-              <div><b>结构化约束</b><span>参数类型、形状与取值</span></div>
-              <div><b>Qwen 种子生成</b><span>生成可执行初始程序</span></div>
-              <div><b>InCoder 变异</b><span>演化更多测试程序</span></div>
-              <div><b>CPU/GPU 差异检测</b><span>定位崩溃与不一致</span></div>
-              <div><b>复现报告</b><span>证据链与当前环境输出</span></div>
+          <div class="overview-grid">
+            <section class="surface distribution-surface">
+              <div class="section-heading">
+                <h3>框架覆盖</h3>
+                <p>来自项目 API 清单的实际统计</p>
+              </div>
+              <div id="frameworkDistribution" class="bar-list"></div>
+            </section>
+            <section class="surface distribution-surface">
+              <div class="section-heading">
+                <h3>已确认问题类型</h3>
+                <p>按结构化元数据聚合</p>
+              </div>
+              <div id="bugTypeDistribution" class="bar-list"></div>
+            </section>
+          </div>
+
+          <section class="surface process-surface">
+            <div class="section-heading">
+              <h3>检测链路</h3>
+              <p>单个 API 从约束到证据输出的完整路径</p>
+            </div>
+            <div class="process-line">
+              <div><span>01</span><b>约束加载</b><small>结构化 API 信息</small></div>
+              <i></i>
+              <div><span>02</span><b>种子生成</b><small>可执行测试程序</small></div>
+              <i></i>
+              <div><span>03</span><b>变异测试</b><small>扩展输入空间</small></div>
+              <i></i>
+              <div><span>04</span><b>差异检测</b><small>CPU / 加速器证据</small></div>
+              <i></i>
+              <div><span>05</span><b>复现归档</b><small>最小代码与报告</small></div>
             </div>
           </section>
 
-          <section class="panel compact-panel">
-            <div class="panel-head-row">
-              <div>
-                <h3>已确认 Bug 概览</h3>
-                <p>只展示已整理为最小复现与结构化元数据的缺陷。</p>
-              </div>
-              <button class="secondary" data-jump="bugReplay">查看复现</button>
+          <section class="surface evidence-surface">
+            <div class="section-heading row-heading">
+              <div><h3>已确认证据</h3><p>可进入复现页查看代码、运行输出和环境报告</p></div>
+              <button class="text-action" data-jump="bugReplay">进入证据库</button>
             </div>
             <div id="bugSummary" class="table-wrap"></div>
           </section>
-
-          <details class="panel disclosure">
-            <summary>系统信息与数据来源</summary>
-            <button id="refreshOverview" class="secondary small-action">刷新状态</button>
-            <div id="overviewSources" class="source-grid"></div>
-          </details>
         </section>
 
         <section id="apiRun" class="view">
           <header class="page-head">
-            <div>
-              <h2>单 API 完整运行</h2>
-              <p>从 API 清单中选择目标 API，在服务器上启动一次完整流程。</p>
-            </div>
+            <div><h2>单 API 运行</h2><p>选择目标并在服务器执行完整检测链路</p></div>
           </header>
-
-          <section class="panel">
+          <section class="surface api-selector-surface">
             <div class="form-grid">
-              <label>
-                框架
-                <select id="apiLib">
-                  <option value="torch">PyTorch</option>
-                  <option value="tf">TensorFlow</option>
-                </select>
-              </label>
-              <label>
-                搜索 API
-                <input id="apiSearch" type="search" placeholder="输入 conv、pool、gather 等关键词" />
-              </label>
-              <label>
-                运行模式
-                <select id="apiMode">
-                  <option value="demo">演示模式</option>
-                  <option value="normal">完整模式（正式参数）</option>
-                </select>
-              </label>
+              <label>框架<select id="apiLib"><option value="torch">PyTorch</option><option value="tf">TensorFlow</option></select></label>
+              <label>搜索 API<input id="apiSearch" type="search" placeholder="输入 API 名称或关键词" autocomplete="off" /></label>
+              <label>运行模式<select id="apiMode"><option value="demo">演示模式</option><option value="normal">完整模式</option></select></label>
+              <label>计算设备<select id="apiGpuSelect"><option value="0">正在读取环境</option></select></label>
             </div>
-            <div id="apiMatches" class="match-list"></div>
-            <div id="apiDetail" class="detail-box">请选择一个 API。</div>
-            <button id="startApiRun" class="primary" disabled>运行该 API</button>
+            <div class="api-choice-grid">
+              <div id="apiMatches" class="match-list"></div>
+              <div class="selection-detail">
+                <div id="apiDetail" class="detail-box">请选择一个 API。</div>
+                <button id="startApiRun" class="primary" disabled>运行该 API</button>
+              </div>
+            </div>
           </section>
-
-          <section class="panel">
-            <h3>运行状态</h3>
+          <section class="surface">
+            <div class="section-heading"><h3>运行状态</h3><p>按流水线阶段更新</p></div>
             <div id="apiStages" class="stages"></div>
             <div id="apiJobSummary" class="job-summary detail-box">请选择一个 API。</div>
           </section>
-
-          <section class="panel">
-            <h3>实时日志</h3>
+          <section class="surface">
+            <div class="section-heading"><h3>实时日志</h3><p>当前任务的标准输出与错误输出</p></div>
             <pre id="apiJobLogs" class="pre tall"></pre>
           </section>
         </section>
 
         <section id="bugReplay" class="view">
           <header class="page-head">
-            <div>
-              <h2>已确认 Bug 复现</h2>
-              <p>选择已确认缺陷，在服务器上复现并生成当前环境报告。</p>
-            </div>
+            <div><h2>Bug 复现</h2><p>在当前服务器环境中运行已确认问题的最小复现程序</p></div>
           </header>
-
           <div class="bug-layout">
-            <section class="panel">
-              <h3>Bug 列表</h3>
+            <section class="surface bug-list-surface">
+              <div class="section-heading"><h3>问题列表</h3><p>已确认并完成结构化归档</p></div>
               <div id="confirmedBugList" class="bug-list"></div>
             </section>
-
-            <section class="panel">
-              <h3>Bug 详情</h3>
+            <section class="surface">
+              <div class="section-heading"><h3>问题详情</h3><p>触发条件、预期与已知观测</p></div>
               <div id="confirmedBugDetail" class="detail-box">请选择一个 Bug。</div>
               <div class="button-row">
-                <button id="runCpuRepro" class="secondary" disabled>运行 CPU 复现</button>
-                <button id="runGpuRepro" class="secondary" disabled>运行 GPU0 复现</button>
-                <button id="runBothRepro" class="primary" disabled>一键运行 CPU + GPU0</button>
-                <button id="generateReport" class="secondary" disabled>一键生成报告</button>
+                <button id="runCpuRepro" class="secondary" disabled>隐藏加速器运行</button>
+                <button id="runGpuRepro" class="secondary" disabled>选定加速器运行</button>
+                <button id="runBothRepro" class="primary" disabled>运行两种配置</button>
+                <button id="generateReport" class="secondary" disabled>生成证据报告</button>
               </div>
             </section>
           </div>
-
-          <section class="panel">
-            <h3>最小复现代码</h3>
-            <pre id="reproCode" class="pre code-view">请选择一个 Bug。</pre>
-          </section>
-
-          <section class="panel">
-            <h3>复现输出</h3>
-            <div id="reproStatus" class="detail-box">尚未启动复现。</div>
-            <pre id="reproLogs" class="pre tall"></pre>
-          </section>
-
-          <section class="panel">
-            <h3>生成报告</h3>
-            <pre id="generatedReport" class="pre tall">复现后可生成当前环境报告。</pre>
-          </section>
+          <section class="surface"><div class="section-heading"><h3>最小复现代码</h3></div><pre id="reproCode" class="pre code-view">请选择一个 Bug。</pre></section>
+          <section class="surface"><div class="section-heading"><h3>复现输出</h3></div><div id="reproStatus" class="detail-box">尚未启动复现。</div><pre id="reproLogs" class="pre tall"></pre></section>
+          <section class="surface"><div class="section-heading"><h3>证据报告</h3></div><pre id="generatedReport" class="pre tall">复现后可生成当前环境报告。</pre></section>
         </section>
       </main>
     </div>
+
+    <div id="environmentDrawer" class="drawer-layer" hidden>
+      <button class="drawer-scrim" data-close-environment aria-label="关闭环境信息"></button>
+      <aside class="environment-drawer" aria-labelledby="environmentTitle">
+        <div class="drawer-head"><div><h2 id="environmentTitle">运行环境</h2><p>由当前服务实时采集</p></div><button class="icon-button" data-close-environment aria-label="关闭">×</button></div>
+        <div id="environmentContent" class="environment-content"><div class="empty">正在读取环境信息。</div></div>
+        <button id="refreshEnvironment" class="secondary full-button">重新采集</button>
+      </aside>
+    </div>
+
     <script src="/static/app.js"></script>
   </body>
 </html>

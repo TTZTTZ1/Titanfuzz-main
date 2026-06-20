@@ -7,6 +7,7 @@ const state = {
   reproPollTimer: null,
   confirmedBugs: [],
   apiMatches: [],
+  environment: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -50,12 +51,8 @@ function switchView(name) {
   document.querySelector(`[data-view="${name}"]`).classList.add("active");
 }
 
-function metric(label, value) {
-  return `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
-}
-
-function source(label, value) {
-  return `<div class="source-item"><span>${escapeHtml(label)}</span><code>${escapeHtml(value || "")}</code></div>`;
+function metric(label, value, note = "") {
+  return `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong>${note ? `<small>${escapeHtml(note)}</small>` : ""}</div>`;
 }
 
 function statusText(value) {
@@ -83,39 +80,127 @@ function modeLabel(value) {
 }
 
 function mutationModelLabel(value) {
-  if (!value) return "InCoder-1B 变异测试";
+  if (!value) return "InCoder 变异";
   if (value.includes("incoder-1B")) return "InCoder-1B 变异测试";
   if (value.includes("incoder-6B")) return "InCoder-6B 变异测试";
   return `${value.split("/").pop()} 变异测试`;
 }
 
+function renderBars(target, rows) {
+  const max = Math.max(...rows.map((row) => Number(row.value || 0)), 1);
+  $(target).innerHTML = rows.map((row) => `
+    <div class="bar-row">
+      <span class="bar-label" title="${escapeHtml(row.label)}">${escapeHtml(row.label)}</span>
+      <span class="bar-track"><span class="bar-fill" style="width:${Math.max(2, Number(row.value || 0) / max * 100)}%"></span></span>
+      <span class="bar-value">${escapeHtml(row.value)}</span>
+    </div>
+  `).join("") || `<div class="empty">暂无可展示数据</div>`;
+}
+
 async function loadOverview() {
-  const data = await api("/api/overview");
+  const [data, bugs] = await Promise.all([
+    api("/api/overview"),
+    state.confirmedBugs.length ? Promise.resolve(state.confirmedBugs) : api("/api/confirmed-bugs"),
+  ]);
+  state.confirmedBugs = bugs;
   $("overviewMetrics").innerHTML = [
-    metric("PyTorch 覆盖", data.api_by_lib?.torch || 0),
-    metric("TensorFlow 覆盖", data.api_by_lib?.tf || 0),
-    metric("API 总覆盖", data.api_total || 0),
-    metric("约束就绪", data.prompt_ready_total || 0),
-    metric("已确认 Bug", data.paper_bug_total || 0),
+    metric("API 总覆盖", data.api_total || 0, "目标接口总数"),
+    metric("PyTorch", data.api_by_lib?.torch || 0, "API 清单"),
+    metric("TensorFlow", data.api_by_lib?.tf || 0, "API 清单"),
+    metric("已确认 Bug", data.paper_bug_total || 0, "可复现证据"),
   ].join("");
 
-  const bugRows = Object.entries(data.paper_bug_by_framework || {}).map(([framework, count]) => `
-    <tr><td>${escapeHtml(framework)}</td><td>${escapeHtml(count)}</td></tr>
+  renderBars("frameworkDistribution", Object.entries(data.api_by_lib || {}).map(([label, value]) => ({
+    label: label === "torch" ? "PyTorch" : "TensorFlow",
+    value,
+  })));
+
+  const typeCounts = {};
+  bugs.forEach((bug) => {
+    const type = bug.bug_type || "其他";
+    typeCounts[type] = (typeCounts[type] || 0) + 1;
+  });
+  renderBars("bugTypeDistribution", Object.entries(typeCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([label, value]) => ({ label, value })));
+
+  const bugRows = bugs.slice(0, 8).map((bug) => `
+    <tr>
+      <td><strong>${escapeHtml(bug.display_id || bug.id)}</strong></td>
+      <td>${escapeHtml(bug.framework)}</td>
+      <td><code>${escapeHtml(bug.api)}</code></td>
+      <td>${escapeHtml(bug.bug_type || bug.title || "")}</td>
+      <td><button class="text-action" data-open-bug="${escapeHtml(bug.id)}">查看证据</button></td>
+    </tr>
   `).join("");
   $("bugSummary").innerHTML = `
     <table>
-      <thead><tr><th>来源框架</th><th>确认 Bug 数</th></tr></thead>
-      <tbody>${bugRows || `<tr><td colspan="2">暂无数据</td></tr>`}</tbody>
+      <thead><tr><th>编号</th><th>框架</th><th>API</th><th>问题类型</th><th></th></tr></thead>
+      <tbody>${bugRows || `<tr><td colspan="5">暂无数据</td></tr>`}</tbody>
     </table>
   `;
+  document.querySelectorAll("[data-open-bug]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      switchView("bugReplay");
+      await selectConfirmedBug(button.dataset.openBug);
+    });
+  });
+}
 
-  $("overviewSources").innerHTML = [
-    source("PyTorch API 清单", data.sources?.torch_api_list),
-    source("TensorFlow API 清单", data.sources?.tf_api_list),
-    source("Prompt 约束目录", data.sources?.prompt_library),
-    source("单 API 运行", data.sources?.api_jobs),
-    source("Bug 复现", data.sources?.repro_jobs),
-  ].join("");
+function environmentRow(label, value) {
+  return `<div class="environment-row"><span>${escapeHtml(label)}</span><code>${escapeHtml(value ?? "-")}</code></div>`;
+}
+
+function populateGpuControls(environment) {
+  const gpus = environment.gpus || [];
+  const select = $("apiGpuSelect");
+  select.innerHTML = gpus.length
+    ? gpus.map((gpu) => `<option value="${escapeHtml(gpu.index)}">${escapeHtml(gpu.index)} · ${escapeHtml(gpu.name)}</option>`).join("")
+    : `<option value="">未检测到可用 GPU</option>`;
+  select.disabled = !gpus.length;
+  const gpuLabel = gpus.length ? `设备 ${gpus[0].index} 运行` : "加速器运行";
+  $("runGpuRepro").textContent = gpuLabel;
+  $("runBothRepro").textContent = gpus.length ? `隐藏加速器 + 设备 ${gpus[0].index}` : "运行两种配置";
+}
+
+function renderEnvironment(environment) {
+  const platform = environment.platform || {};
+  const python = environment.python || {};
+  const frameworks = environment.frameworks || {};
+  const gpus = environment.gpus || [];
+  const gpuRows = gpus.map((gpu) => `
+    <div class="environment-group">
+      <h3>GPU ${escapeHtml(gpu.index)}</h3>
+      ${environmentRow("型号", gpu.name)}
+      ${environmentRow("显存", gpu.memory_total_mib == null ? "-" : `${gpu.memory_total_mib} MiB`)}
+      ${environmentRow("驱动", gpu.driver_version)}
+    </div>
+  `).join("");
+  const warningRows = (environment.warnings || []).map((warning) => `<li>${escapeHtml(warning)}</li>`).join("");
+  $("environmentContent").innerHTML = `
+    <div class="environment-group">
+      <h3>系统</h3>
+      ${environmentRow("平台", [platform.system, platform.release, platform.machine].filter(Boolean).join(" "))}
+      ${environmentRow("Python", python.version)}
+      ${environmentRow("解释器", python.executable)}
+      ${environmentRow("PyTorch", frameworks.torch?.installed ? frameworks.torch.version : "未安装")}
+      ${environmentRow("TensorFlow", frameworks.tensorflow?.installed ? frameworks.tensorflow.version : "未安装")}
+      ${environmentRow("采集时间", environment.collected_at)}
+    </div>
+    ${gpuRows || `<div class="environment-group"><h3>GPU</h3><div class="empty">当前服务未获得 GPU 清单。</div></div>`}
+    ${warningRows ? `<div class="environment-group"><h3>采集提示</h3><ul class="warning-list">${warningRows}</ul></div>` : ""}
+  `;
+  $("environmentBrief").textContent = gpus.length ? `${gpus.length} 个 GPU · Python ${python.version || "-"}` : `Python ${python.version || "-"}`;
+  $("environmentDot").className = `status-dot ${environment.warnings?.length ? "warn" : ""}`;
+  populateGpuControls(environment);
+}
+
+async function loadEnvironment(force = false) {
+  const endpoint = "/api/environment";
+  const environment = await api(`${endpoint}${force ? "?refresh=1" : ""}`);
+  state.environment = environment;
+  renderEnvironment(environment);
 }
 
 function renderApiMatches(items) {
@@ -202,7 +287,7 @@ async function selectApi(apiName, options = {}) {
     }
   } else if (!options.keepJob) {
     state.currentApiJob = null;
-    renderApiStages({}, { mutation_model: "facebook/incoder-1B" });
+    renderApiStages({}, {});
     $("apiJobSummary").innerHTML = `
       <div class="empty">当前 API 暂无运行记录。点击“运行该 API”后，这里会显示任务摘要。</div>
     `;
@@ -216,7 +301,7 @@ function renderApiStages(status, summary = {}) {
     summary.mutation_model ||
     status?.mutation_model ||
     state.selectedApi?.latest_job?.mutation_model ||
-    "facebook/incoder-1B";
+    "";
   const names = [
     ["prompt_check", "约束检查"],
     ["qwen_seed", "Qwen 种子生成"],
@@ -236,7 +321,7 @@ async function startApiRun() {
     lib: state.selectedApi.lib,
     api: state.selectedApi.api,
     mode: $("apiMode").value,
-    cuda_device: "0",
+    cuda_device: $("apiGpuSelect").value,
   };
   const data = await post("/api/run-api", payload);
   state.currentApiJob = data.job_id;
@@ -424,6 +509,15 @@ function bindEvents() {
   document.querySelectorAll("[data-jump]").forEach((btn) => {
     btn.addEventListener("click", () => switchView(btn.dataset.jump));
   });
+  $("openEnvironment").addEventListener("click", () => {
+    $("environmentDrawer").hidden = false;
+  });
+  document.querySelectorAll("[data-close-environment]").forEach((button) => {
+    button.addEventListener("click", () => {
+      $("environmentDrawer").hidden = true;
+    });
+  });
+  $("refreshEnvironment").addEventListener("click", () => loadEnvironment(true).catch(alertError));
   $("refreshOverview").addEventListener("click", () => loadOverview().catch(alertError));
   $("apiLib").addEventListener("change", async () => {
     state.selectedApi = null;
@@ -445,8 +539,9 @@ function alertError(err) {
 
 async function init() {
   bindEvents();
-  renderApiStages({}, { mutation_model: "facebook/incoder-1B" });
+  renderApiStages({}, {});
   await Promise.all([
+    loadEnvironment(),
     loadOverview(),
     searchApis(),
     loadConfirmedBugs(),
