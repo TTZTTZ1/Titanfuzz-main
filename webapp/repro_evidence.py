@@ -21,6 +21,17 @@ EVIDENCE_PATTERNS = (
 )
 
 
+def execution_profile_for_mode(mode: str) -> tuple[str, str]:
+    if mode == "cpu":
+        return "cuda_hidden", ""
+    if mode == "gpu0":
+        return "visible_gpu_0", "0"
+    if mode.startswith("gpu:") and mode[4:].isdigit():
+        index = int(mode[4:])
+        return f"visible_gpu_{index}", str(index)
+    raise ValueError(f"unknown execution mode: {mode}")
+
+
 def classify_execution(returncode: Optional[int], timed_out: bool, log_text: str) -> dict:
     """Classify observable process evidence without inferring a root cause."""
     if timed_out:

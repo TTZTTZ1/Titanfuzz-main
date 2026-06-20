@@ -38,10 +38,18 @@ def test_frontend_loads_dependency_free_chart_module():
     assert '/static/charts.js' in html
 
 
+def test_repro_workspace_has_explanation_evidence_and_report_regions():
+    html = INDEX.read_text(encoding="utf-8")
+    for expected in ("bugExplanation", "reproEvidence", "reproEnvironment", "reportPreview"):
+        assert f'id="{expected}"' in html, expected
+    assert "严重程度" not in html
+
+
 if __name__ == "__main__":
     test_frontend_has_no_hardcoded_gpu_or_environment_examples()
     test_frontend_has_three_primary_views()
     test_overview_uses_live_environment_surface()
     test_single_api_workspace_contains_stage_tabs_and_live_surfaces()
     test_frontend_loads_dependency_free_chart_module()
+    test_repro_workspace_has_explanation_evidence_and_report_regions()
     print("ok")

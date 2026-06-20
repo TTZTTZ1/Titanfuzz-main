@@ -13,6 +13,11 @@ const state = {
   followLiveStage: true,
   selectedResultCategory: "crash",
   selectedResultFile: null,
+  bugSource: "confirmed",
+  candidates: [],
+  selectedCandidateId: null,
+  currentBugDetail: null,
+  reportMarkdown: "",
 };
 
 const resultCategories = ["seed", "valid", "exception", "crash", "notarget", "hangs", "flaky"];
@@ -175,9 +180,7 @@ function populateGpuControls(environment) {
     ? gpus.map((gpu) => `<option value="${escapeHtml(gpu.index)}">${escapeHtml(gpu.index)} · ${escapeHtml(gpu.name)}</option>`).join("")
     : `<option value="">未检测到可用 GPU</option>`;
   select.disabled = !gpus.length;
-  const gpuLabel = gpus.length ? `设备 ${gpus[0].index} 运行` : "加速器运行";
-  $("runGpuRepro").textContent = gpuLabel;
-  $("runBothRepro").textContent = gpus.length ? `隐藏加速器 + 设备 ${gpus[0].index}` : "运行两种配置";
+  if (state.selectedBugId && state.bugSource === "confirmed") renderReproProfiles();
 }
 
 function renderEnvironment(environment) {
@@ -554,109 +557,253 @@ async function addSelectedCandidate() {
   button.textContent = `${record.id} 已加入候选`;
 }
 
-function renderConfirmedBugList() {
-  $("confirmedBugList").innerHTML = state.confirmedBugs.map((bug) => `
-    <button class="bug-item" data-bug="${escapeHtml(bug.id)}">
-      <strong>${escapeHtml(bug.display_id || bug.id)}</strong>
-      <span>${escapeHtml(bug.framework)} · ${escapeHtml(bug.api)}</span>
-      <small>${escapeHtml(bug.bug_type || bug.title || "")}</small>
-    </button>
-  `).join("");
-  document.querySelectorAll("[data-bug]").forEach((btn) => {
-    btn.addEventListener("click", () => selectConfirmedBug(btn.dataset.bug));
+function bugMatches(item, query) {
+  const haystack = [item.id, item.display_id, item.api, item.framework, item.bug_type, item.title, item.category, item.status].join(" ").toLowerCase();
+  return haystack.includes(query.toLowerCase());
+}
+
+function renderBugList() {
+  const query = $("bugSearch").value.trim();
+  const items = (state.bugSource === "confirmed" ? state.confirmedBugs : state.candidates).filter((item) => bugMatches(item, query));
+  $("confirmedBugList").innerHTML = items.map((item) => {
+    const id = state.bugSource === "confirmed" ? item.id : item.id;
+    const active = state.bugSource === "confirmed" ? state.selectedBugId === id : state.selectedCandidateId === id;
+    return `<button class="bug-item ${active ? "active" : ""}" data-evidence-id="${escapeHtml(id)}">
+      <strong>${escapeHtml(item.display_id || item.id)}</strong>
+      <span>${escapeHtml(item.framework || item.lib)} · ${escapeHtml(item.api)}</span>
+      <small>${escapeHtml(item.bug_type || item.category || item.title || "")}</small>
+    </button>`;
+  }).join("") || `<div class="empty">没有匹配的记录</div>`;
+  document.querySelectorAll("[data-evidence-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const action = state.bugSource === "confirmed" ? selectConfirmedBug(button.dataset.evidenceId) : selectCandidate(button.dataset.evidenceId);
+      action.catch(alertError);
+    });
   });
 }
 
 async function loadConfirmedBugs() {
-  state.confirmedBugs = await api("/api/confirmed-bugs");
-  renderConfirmedBugList();
-  if (state.confirmedBugs.length) {
-    await selectConfirmedBug(state.confirmedBugs[0].id);
-  }
+  const [bugs, candidates] = await Promise.all([api("/api/confirmed-bugs"), api("/api/candidates")]);
+  state.confirmedBugs = bugs;
+  state.candidates = candidates;
+  renderBugList();
+  if (state.confirmedBugs.length && !state.selectedBugId) await selectConfirmedBug(state.confirmedBugs[0].id);
+}
+
+function renderReproProfiles() {
+  const gpus = state.environment?.gpus || [];
+  const profiles = [
+    { mode: "cpu", title: "隐藏 CUDA 设备", detail: "CUDA_VISIBLE_DEVICES 为空" },
+    ...gpus.map((gpu) => ({ mode: `gpu:${gpu.index}`, title: `设备 ${gpu.index} 可见`, detail: `${gpu.name} · ${gpu.memory_total_mib ?? "-"} MiB` })),
+  ];
+  $("reproProfileControls").innerHTML = profiles.map((profile) => `
+    <label class="profile-option"><input type="checkbox" value="${escapeHtml(profile.mode)}" checked /><span>${escapeHtml(profile.title)}<small>${escapeHtml(profile.detail)}</small></span></label>
+  `).join("");
+}
+
+function resetReproRun() {
+  if (state.reproPollTimer) clearInterval(state.reproPollTimer);
+  state.reproPollTimer = null;
+  state.currentReproJob = null;
+  state.reportMarkdown = "";
+  $("reproLogs").textContent = "";
+  $("reproEvidence").innerHTML = `<div class="empty">尚未启动复现</div>`;
+  $("reproEnvironment").innerHTML = "";
+  $("reportPreview").innerHTML = `<div class="empty">完成复现后可生成报告</div>`;
+  $("generateReport").textContent = "生成报告";
+  $("generateReport").disabled = true;
+  $("downloadReport").disabled = true;
+  $("printReport").disabled = true;
 }
 
 async function selectConfirmedBug(id) {
   const detail = await api(`/api/confirmed-bugs/${encodeURIComponent(id)}`);
+  state.bugSource = "confirmed";
   state.selectedBugId = id;
-  $("runCpuRepro").disabled = false;
-  $("runGpuRepro").disabled = false;
-  $("runBothRepro").disabled = false;
-  $("generateReport").disabled = true;
+  state.currentBugDetail = detail;
+  document.querySelectorAll("[data-bug-source]").forEach((button) => button.classList.toggle("active", button.dataset.bugSource === "confirmed"));
+  renderBugList();
+  resetReproRun();
   const meta = detail.meta || {};
   $("confirmedBugDetail").innerHTML = `
     <div class="detail-grid">
-      <div><span>ID</span><strong>${escapeHtml(detail.display_id || meta.id)}</strong></div>
+      <div><span>编号</span><strong>${escapeHtml(detail.display_id || meta.id)}</strong></div>
       <div><span>框架</span><strong>${escapeHtml(meta.framework)}</strong></div>
       <div><span>API</span><code>${escapeHtml(meta.api)}</code></div>
-      <div><span>严重程度</span><strong>${escapeHtml(meta.severity)}</strong></div>
+      <div><span>问题类型</span><strong>${escapeHtml(meta.bug_type)}</strong></div>
     </div>
-    <div class="file-row"><span>缺陷类型</span><code>${escapeHtml(meta.bug_type)}</code></div>
-    <div class="file-row"><span>触发原因</span><code>${escapeHtml(meta.trigger)}</code></div>
-    <div class="text-block"><b>已确认现象</b><p>${escapeHtml(meta.observed)}</p></div>
-    <div class="text-block"><b>预期行为</b><p>${escapeHtml(meta.expected)}</p></div>
+    <div class="file-row"><span>触发条件</span><code>${escapeHtml(meta.trigger)}</code></div>
+  `;
+  $("bugExplanation").innerHTML = `
+    <div class="behavior-panel expected"><b>预期行为</b><p>${escapeHtml(meta.expected)}</p></div>
+    <div class="behavior-panel observed"><b>已知观测</b><p>${escapeHtml(meta.observed)}</p></div>
   `;
   $("reproCode").textContent = detail.repro_code || "";
-  $("reproStatus").textContent = "尚未启动复现。";
-  $("reproLogs").textContent = "";
-  $("generatedReport").textContent = "复现后可生成当前环境报告。";
+  renderReproProfiles();
+  $("runSelectedRepro").disabled = false;
 }
 
-async function startRepro(modes) {
-  if (!state.selectedBugId) return;
+async function selectCandidate(id) {
+  const detail = await api(`/api/candidates/${encodeURIComponent(id)}`);
+  state.bugSource = "candidates";
+  state.selectedCandidateId = id;
+  state.currentBugDetail = detail;
+  renderBugList();
+  resetReproRun();
+  $("confirmedBugDetail").innerHTML = `
+    <div class="detail-grid">
+      <div><span>候选编号</span><strong>${escapeHtml(detail.id)}</strong></div>
+      <div><span>状态</span><strong>${escapeHtml(detail.status)}</strong></div>
+      <div><span>API</span><code>${escapeHtml(detail.api)}</code></div>
+      <div><span>结果分类</span><strong>${escapeHtml(detail.category)}</strong></div>
+    </div>
+  `;
+  $("bugExplanation").innerHTML = `
+    <div class="behavior-panel expected"><b>候选含义</b><p>该记录来自一次具体运行结果，尚未进入已确认问题库。</p></div>
+    <div class="behavior-panel observed"><b>当前依据</b><p>${escapeHtml(detail.recommended ? "命中系统建议审查规则，需要人工最小化与复现。" : "由用户加入候选，需要人工检查其异常语义。")}</p></div>
+  `;
+  $("reproCode").textContent = detail.source_code || "";
+  $("reproProfileControls").innerHTML = `<div class="empty">候选记录需要先完成人工最小化，网页不会直接提升为已确认 Bug。</div>`;
+  $("runSelectedRepro").disabled = true;
+}
+
+function selectedReproModes() {
+  return [...document.querySelectorAll("#reproProfileControls input:checked")].map((input) => input.value);
+}
+
+async function startRepro() {
+  if (!state.selectedBugId || state.bugSource !== "confirmed") return;
+  const modes = selectedReproModes();
+  if (!modes.length) throw new Error("至少选择一种执行配置");
   const data = await post(`/api/confirmed-bugs/${encodeURIComponent(state.selectedBugId)}/reproduce`, { modes });
   state.currentReproJob = data.job_id;
-  $("reproStatus").textContent = `Job started: ${data.job_id}\nOutput: ${data.out}`;
-  $("generateReport").disabled = false;
+  $("runSelectedRepro").disabled = true;
   if (state.reproPollTimer) clearInterval(state.reproPollTimer);
   state.reproPollTimer = setInterval(loadReproJob, 1000);
   await loadReproJob();
 }
 
-function reproStatusSummary(status) {
-  if (!status || !status.modes) return "尚未启动复现。";
-  const rows = Object.entries(status.modes).map(([mode, item]) => `
-    <tr>
-      <td>${escapeHtml(mode)}</td>
+function renderReproEvidence(status) {
+  const rows = Object.values(status?.modes || {}).map((item) => {
+    const evidence = item.evidence || {};
+    return `<tr>
+      <td><code>${escapeHtml(item.execution_profile)}</code></td>
       <td>${statusText(item.status)}</td>
-      <td>${verdictText(item.verdict)}</td>
-      <td>${escapeHtml(item.returncode)}</td>
-      <td>${escapeHtml(item.timed_out)}</td>
-      <td><code>${escapeHtml(item.log)}</code></td>
-    </tr>
-  `).join("");
-  return `
-    <div class="file-row"><span>Job</span><code>${escapeHtml(status.job_id)}</code></div>
-    <div class="file-row"><span>输出目录</span><code>${escapeHtml(status.out)}</code></div>
-    <table>
-      <thead><tr><th>模式</th><th>状态</th><th>判定</th><th>返回码</th><th>超时</th><th>日志</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  `;
+      <td>${verdictText(evidence.verdict || item.verdict)}</td>
+      <td>${escapeHtml(item.returncode ?? "-")}</td>
+      <td>${escapeHtml(evidence.outcome || "-")}</td>
+      <td>${escapeHtml(evidence.signal || "-")}</td>
+      <td>${escapeHtml(item.actual_device || "unknown")}</td>
+    </tr>`;
+  }).join("");
+  $("reproEvidence").innerHTML = `<table><thead><tr><th>执行配置</th><th>状态</th><th>规则结论</th><th>返回码</th><th>观测类型</th><th>信号</th><th>实际设备</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function renderReproEnvironment(environment) {
+  const platform = environment?.platform || {};
+  const python = environment?.python || {};
+  const frameworks = environment?.frameworks || {};
+  $("reproEnvironment").innerHTML = [
+    environmentRow("平台", [platform.system, platform.release, platform.machine].filter(Boolean).join(" ")),
+    environmentRow("Python", python.version),
+    environmentRow("PyTorch", frameworks.torch?.version || "未安装"),
+    environmentRow("TensorFlow", frameworks.tensorflow?.version || "未安装"),
+    environmentRow("GPU 数量", environment?.gpus?.length || 0),
+    environmentRow("采集时间", environment?.collected_at),
+  ].join("");
+}
+
+function inlineMarkdown(text) {
+  return escapeHtml(text)
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+}
+
+function renderSafeMarkdown(markdown) {
+  const lines = String(markdown || "").split("\n");
+  const html = [];
+  let inCode = false;
+  let code = [];
+  let listOpen = false;
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (line.startsWith("```")) {
+      if (inCode) {
+        html.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
+        code = [];
+      }
+      inCode = !inCode;
+      continue;
+    }
+    if (inCode) { code.push(line); continue; }
+    if (/^\|.*\|$/.test(line) && /^\|[\s:|-]+\|$/.test(lines[index + 1] || "")) {
+      const headers = line.slice(1, -1).split("|");
+      index += 1;
+      const rows = [];
+      while (/^\|.*\|$/.test(lines[index + 1] || "")) rows.push(lines[++index].slice(1, -1).split("|"));
+      html.push(`<table><thead><tr>${headers.map((cell) => `<th>${inlineMarkdown(cell.trim())}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${inlineMarkdown(cell.trim())}</td>`).join("")}</tr>`).join("")}</tbody></table>`);
+      continue;
+    }
+    const heading = line.match(/^(#{1,3})\s+(.+)$/);
+    if (heading) { html.push(`<h${heading[1].length}>${inlineMarkdown(heading[2])}</h${heading[1].length}>`); continue; }
+    if (line.startsWith("> ")) { html.push(`<blockquote>${inlineMarkdown(line.slice(2))}</blockquote>`); continue; }
+    if (line.startsWith("- ")) {
+      if (!listOpen) { html.push("<ul>"); listOpen = true; }
+      html.push(`<li>${inlineMarkdown(line.slice(2))}</li>`);
+      continue;
+    }
+    if (listOpen) { html.push("</ul>"); listOpen = false; }
+    if (line.trim()) html.push(`<p>${inlineMarkdown(line)}</p>`);
+  }
+  if (listOpen) html.push("</ul>");
+  if (inCode) html.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
+  return html.join("");
+}
+
+function showReport(markdown) {
+  state.reportMarkdown = markdown || "";
+  $("generatedReport").textContent = state.reportMarkdown;
+  $("reportPreview").innerHTML = state.reportMarkdown ? renderSafeMarkdown(state.reportMarkdown) : `<div class="empty">报告内容为空</div>`;
+  $("generateReport").textContent = "查看报告";
+  $("generateReport").disabled = false;
+  $("downloadReport").disabled = !state.reportMarkdown;
+  $("printReport").disabled = !state.reportMarkdown;
 }
 
 async function loadReproJob() {
   if (!state.currentReproJob) return;
   const data = await api(`/api/repro-jobs/${encodeURIComponent(state.currentReproJob)}`);
-  $("reproStatus").innerHTML = reproStatusSummary(data.status);
-  $("reproLogs").textContent = Object.entries(data.logs || {})
-    .map(([name, content]) => `===== ${name} =====\n${content}`)
-    .join("\n\n");
-  if (data.report_markdown) {
-    $("generatedReport").textContent = data.report_markdown;
-  }
-  const done = data.status?.status === "finished" || data.status?.status === "failed";
+  renderReproEvidence(data.status);
+  renderReproEnvironment(data.environment || {});
+  $("reproLogs").textContent = Object.entries(data.logs || {}).map(([name, content]) => `===== ${name} =====\n${content}`).join("\n\n");
+  if (data.report_markdown) showReport(data.report_markdown);
+  const done = ["finished", "failed"].includes(data.status?.status);
   if (done) {
     clearInterval(state.reproPollTimer);
     state.reproPollTimer = null;
+    $("runSelectedRepro").disabled = false;
     $("generateReport").disabled = false;
   }
 }
 
 async function generateCurrentReport() {
+  if (state.reportMarkdown) {
+    $("reportPreview").scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
   if (!state.currentReproJob) return;
   const data = await post(`/api/repro-jobs/${encodeURIComponent(state.currentReproJob)}/report`, {});
-  $("generatedReport").textContent = data.report_markdown || "";
-  $("generateReport").disabled = false;
+  showReport(data.report_markdown || "");
+}
+
+function downloadCurrentReport() {
+  if (!state.reportMarkdown) return;
+  const blob = new Blob([state.reportMarkdown], { type: "text/markdown;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `${state.currentBugDetail?.display_id || state.selectedBugId || "tensorguard"}-report.md`;
+  link.click();
+  URL.revokeObjectURL(link.href);
 }
 
 function debounce(fn, delay = 250) {
@@ -697,10 +844,23 @@ function bindEvents() {
     renderApiVisualization();
   });
   $("addCandidate").addEventListener("click", () => addSelectedCandidate().catch(alertError));
-  $("runCpuRepro").addEventListener("click", () => startRepro(["cpu"]).catch(alertError));
-  $("runGpuRepro").addEventListener("click", () => startRepro(["gpu0"]).catch(alertError));
-  $("runBothRepro").addEventListener("click", () => startRepro(["cpu", "gpu0"]).catch(alertError));
+  document.querySelectorAll("[data-bug-source]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      state.bugSource = button.dataset.bugSource;
+      document.querySelectorAll("[data-bug-source]").forEach((tab) => tab.classList.toggle("active", tab === button));
+      renderBugList();
+      const items = state.bugSource === "confirmed" ? state.confirmedBugs : state.candidates;
+      if (items.length) {
+        if (state.bugSource === "confirmed") await selectConfirmedBug(items[0].id);
+        else await selectCandidate(items[0].id);
+      }
+    });
+  });
+  $("bugSearch").addEventListener("input", renderBugList);
+  $("runSelectedRepro").addEventListener("click", () => startRepro().catch(alertError));
   $("generateReport").addEventListener("click", () => generateCurrentReport().catch(alertError));
+  $("downloadReport").addEventListener("click", downloadCurrentReport);
+  $("printReport").addEventListener("click", () => window.print());
 }
 
 function alertError(err) {

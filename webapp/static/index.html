@@ -146,27 +146,61 @@
 
         <section id="bugReplay" class="view">
           <header class="page-head">
-            <div><h2>Bug 复现</h2><p>在当前服务器环境中运行已确认问题的最小复现程序</p></div>
+            <div><h2>Bug 复现</h2><p>核对问题依据，在当前环境执行最小程序并固化证据</p></div>
           </header>
-          <div class="bug-layout">
-            <section class="surface bug-list-surface">
-              <div class="section-heading"><h3>问题列表</h3><p>已确认并完成结构化归档</p></div>
-              <div id="confirmedBugList" class="bug-list"></div>
-            </section>
-            <section class="surface">
-              <div class="section-heading"><h3>问题详情</h3><p>触发条件、预期与已知观测</p></div>
-              <div id="confirmedBugDetail" class="detail-box">请选择一个 Bug。</div>
-              <div class="button-row">
-                <button id="runCpuRepro" class="secondary" disabled>隐藏加速器运行</button>
-                <button id="runGpuRepro" class="secondary" disabled>选定加速器运行</button>
-                <button id="runBothRepro" class="primary" disabled>运行两种配置</button>
-                <button id="generateReport" class="secondary" disabled>生成证据报告</button>
+          <div class="repro-workspace">
+            <aside class="surface repro-master">
+              <div class="source-tabs" role="tablist">
+                <button class="source-tab active" data-bug-source="confirmed">已确认</button>
+                <button class="source-tab" data-bug-source="candidates">候选</button>
               </div>
-            </section>
+              <input id="bugSearch" type="search" placeholder="搜索编号、API 或类型" autocomplete="off" />
+              <div id="confirmedBugList" class="bug-list"></div>
+            </aside>
+
+            <div class="repro-detail-stack">
+              <section class="surface">
+                <div class="section-heading"><h3>问题依据</h3><p>已知触发条件与判断逻辑</p></div>
+                <div id="confirmedBugDetail" class="detail-box">请选择一个 Bug。</div>
+                <div id="bugExplanation" class="behavior-compare"></div>
+              </section>
+
+              <section class="surface code-evidence-surface">
+                <div class="section-heading"><h3>最小复现程序</h3><p>归档代码与本次输出分开展示</p></div>
+                <div class="code-output-split">
+                  <div><b class="mini-title">SOURCE</b><pre id="reproCode" class="pre code-view">请选择一个 Bug。</pre></div>
+                  <div><b class="mini-title">OUTPUT</b><pre id="reproLogs" class="pre code-view"></pre></div>
+                </div>
+              </section>
+
+              <section class="surface">
+                <div class="section-heading"><h3>执行配置</h3><p>可见设备配置不等同于程序实际使用设备</p></div>
+                <div id="reproProfileControls" class="profile-controls"></div>
+                <div class="button-row">
+                  <button id="runSelectedRepro" class="primary" disabled>运行选定配置</button>
+                </div>
+              </section>
+
+              <section class="surface">
+                <div class="section-heading"><h3>本次复现证据</h3><p>由返回码、信号与日志规则确定性分类</p></div>
+                <div id="reproEvidence" class="table-wrap"><div class="empty">尚未启动复现</div></div>
+                <details class="evidence-disclosure"><summary>查看环境快照</summary><div id="reproEnvironment" class="environment-inline"></div></details>
+              </section>
+
+              <section class="surface report-surface">
+                <div class="section-heading row-heading">
+                  <div><h3>证据报告</h3><p>首次生成后保持不变</p></div>
+                  <div class="button-row report-actions">
+                    <button id="generateReport" class="secondary" disabled>生成报告</button>
+                    <button id="downloadReport" class="secondary" disabled>下载 Markdown</button>
+                    <button id="printReport" class="secondary" disabled>打印 / PDF</button>
+                  </div>
+                </div>
+                <article id="reportPreview" class="report-preview"><div class="empty">完成复现后可生成报告</div></article>
+                <pre id="generatedReport" class="raw-report" hidden></pre>
+              </section>
+            </div>
           </div>
-          <section class="surface"><div class="section-heading"><h3>最小复现代码</h3></div><pre id="reproCode" class="pre code-view">请选择一个 Bug。</pre></section>
-          <section class="surface"><div class="section-heading"><h3>复现输出</h3></div><div id="reproStatus" class="detail-box">尚未启动复现。</div><pre id="reproLogs" class="pre tall"></pre></section>
-          <section class="surface"><div class="section-heading"><h3>证据报告</h3></div><pre id="generatedReport" class="pre tall">复现后可生成当前环境报告。</pre></section>
         </section>
       </main>
     </div>

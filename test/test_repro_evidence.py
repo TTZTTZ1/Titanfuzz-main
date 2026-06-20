@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from webapp.repro_evidence import classify_execution, write_report_once  # noqa: E402
+from webapp.repro_evidence import classify_execution, execution_profile_for_mode, write_report_once  # noqa: E402
 
 
 def test_negative_sigfpe_returncode_is_reproduced_without_log_text():
@@ -36,9 +36,15 @@ def test_existing_report_is_returned_without_overwrite():
         assert path.read_text(encoding="utf-8") == "original"
 
 
+def test_execution_profile_uses_selected_visible_gpu():
+    assert execution_profile_for_mode("cpu") == ("cuda_hidden", "")
+    assert execution_profile_for_mode("gpu:2") == ("visible_gpu_2", "2")
+
+
 if __name__ == "__main__":
     test_negative_sigfpe_returncode_is_reproduced_without_log_text()
     test_unknown_nonzero_exit_needs_review()
     test_timeout_is_not_reported_as_crash()
     test_existing_report_is_returned_without_overwrite()
+    test_execution_profile_uses_selected_visible_gpu()
     print("ok")

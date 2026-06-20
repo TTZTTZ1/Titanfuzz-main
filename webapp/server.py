@@ -34,9 +34,9 @@ except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
     from candidates import CandidateStore, recommend_candidate
 
 try:
-    from webapp.repro_evidence import classify_execution, sha256_file, write_report_once
+    from webapp.repro_evidence import classify_execution, execution_profile_for_mode, sha256_file, write_report_once
 except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
-    from repro_evidence import classify_execution, sha256_file, write_report_once
+    from repro_evidence import classify_execution, execution_profile_for_mode, sha256_file, write_report_once
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -617,7 +617,7 @@ def repro_status_template(job_id: str, bug_id: str, modes: list[str], out: Path)
                 "log": rel(out / f"{mode}.log"),
                 "started_at": None,
                 "finished_at": None,
-                "execution_profile": "cuda_hidden" if mode == "cpu" else "visible_gpu_0",
+                "execution_profile": execution_profile_for_mode(mode)[0],
                 "actual_device": "unknown",
                 "evidence": None,
             }
@@ -630,14 +630,8 @@ def repro_status_template(job_id: str, bug_id: str, modes: list[str], out: Path)
 
 def run_repro_mode(repro: Path, mode: str, log_path: Path, timeout: int) -> dict:
     env = os.environ.copy()
-    if mode == "cpu":
-        env["CUDA_VISIBLE_DEVICES"] = ""
-        execution_profile = "cuda_hidden"
-    elif mode == "gpu0":
-        env["CUDA_VISIBLE_DEVICES"] = "0"
-        execution_profile = "visible_gpu_0"
-    else:
-        raise ValueError(f"unknown mode: {mode}")
+    execution_profile, visible_devices = execution_profile_for_mode(mode)
+    env["CUDA_VISIBLE_DEVICES"] = visible_devices
 
     cmd = [sys.executable, str(repro)]
     started = time.time()
@@ -705,12 +699,15 @@ def start_repro_job(bug_id: str, payload: dict) -> tuple[int, dict]:
     if not repro.is_file():
         return 404, {"error": "repro.py not found"}
 
-    requested = payload.get("modes", ["cpu", "gpu0"])
+    requested = payload.get("modes", ["cpu"])
     if isinstance(requested, str):
         requested = [requested]
-    modes = [mode for mode in requested if mode in ("cpu", "gpu0")]
+    inventory = environment_payload(force=True)
+    gpu_modes = {f"gpu:{gpu['index']}" for gpu in inventory.get("gpus", [])}
+    allowed_modes = {"cpu", *gpu_modes}
+    modes = list(dict.fromkeys(mode for mode in requested if mode in allowed_modes))
     if not modes:
-        return 400, {"error": "modes must include cpu or gpu0"}
+        return 400, {"error": "modes must include cpu or a GPU reported by /api/environment"}
 
     timeout = int(payload.get("timeout", REPRO_TIMEOUT_SECONDS) or REPRO_TIMEOUT_SECONDS)
     ts = time.strftime("%Y%m%d_%H%M%S")
@@ -726,8 +723,7 @@ def start_repro_job(bug_id: str, payload: dict) -> tuple[int, dict]:
         "bug_type": meta.get("bug_type", ""),
         "severity": meta.get("severity", ""),
     }
-    environment = environment_payload(force=True)
-    write_json(out / "environment.json", environment)
+    write_json(out / "environment.json", inventory)
     status["environment"] = rel(out / "environment.json")
     write_json(out / "status.json", status)
     (out / "repro.py").write_text(repro.read_text(encoding="utf-8", errors="replace"), encoding="utf-8")
@@ -787,7 +783,8 @@ def repro_job_payload(job_id: str) -> tuple[int, dict]:
         item["evidence"] = evidence
         item["verdict"] = evidence["verdict"]
     logs = {}
-    for name in ("cpu.log", "gpu0.log"):
+    for mode in status.get("modes", {}):
+        name = f"{mode}.log"
         path = out / name
         if path.is_file():
             logs[name] = tail(path)
