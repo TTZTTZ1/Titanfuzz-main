@@ -29,6 +29,11 @@ except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from scripts.demo_metrics import read_metrics
 
+try:
+    from webapp.candidates import CandidateStore
+except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
+    from candidates import CandidateStore
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 STATIC_ROOT = Path(__file__).resolve().parent / "static"
@@ -39,6 +44,7 @@ PAPER_BUG_INDEX = PAPER_BUG_ROOT / "index.json"
 DEMO_ROOT = REPO_ROOT / "demo_runs"
 API_JOB_ROOT = DEMO_ROOT / "api_jobs"
 REPRO_JOB_ROOT = DEMO_ROOT / "repro_jobs"
+CANDIDATE_STORE = CandidateStore(REPO_ROOT)
 
 API_LIST_PATHS = {
     "torch": REPO_ROOT / "data" / "torch_apis.txt",
@@ -479,6 +485,52 @@ def api_job_payload(job_id: str) -> tuple[int, dict]:
     }
 
 
+def candidate_payload(candidate_id: str) -> tuple[int, dict]:
+    record = CANDIDATE_STORE.get(candidate_id)
+    if record is None:
+        return 404, {"error": "candidate not found"}
+    source = REPO_ROOT / record.get("source_path", "")
+    payload = dict(record)
+    payload["source_exists"] = source.is_file()
+    payload["source_code"] = source.read_text(encoding="utf-8", errors="replace") if source.is_file() else ""
+    return 200, payload
+
+
+def create_candidate(payload: dict) -> tuple[int, dict]:
+    required = ("job_id", "lib", "api", "category", "source_path")
+    missing = [name for name in required if not payload.get(name)]
+    if missing:
+        return 400, {"error": f"missing candidate fields: {', '.join(missing)}"}
+    source = Path(str(payload["source_path"]))
+    if not source.is_absolute():
+        source = REPO_ROOT / source
+    try:
+        record = CANDIDATE_STORE.add(
+            job_id=str(payload["job_id"]),
+            lib=str(payload["lib"]),
+            api=str(payload["api"]),
+            category=str(payload["category"]),
+            source_path=source,
+            note=str(payload.get("note", "")),
+        )
+    except ValueError as exc:
+        return 400, {"error": str(exc)}
+    return 201, record
+
+
+def update_candidate(candidate_id: str, payload: dict) -> tuple[int, dict]:
+    status = str(payload.get("status", ""))
+    if status not in {"pending_review", "reproduced", "needs_review", "rejected"}:
+        return 400, {"error": "unsupported web candidate status"}
+    try:
+        record = CANDIDATE_STORE.update_status(candidate_id, status, payload.get("note"))
+    except KeyError:
+        return 404, {"error": "candidate not found"}
+    except ValueError as exc:
+        return 400, {"error": str(exc)}
+    return 200, record
+
+
 def load_paper_bugs() -> list[dict]:
     items = read_json(PAPER_BUG_INDEX, [])
     out = []
@@ -878,6 +930,13 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/apis":
             self.api_apis(query)
             return
+        if path == "/api/candidates":
+            send_json(self, CANDIDATE_STORE.list())
+            return
+        if path.startswith("/api/candidates/"):
+            status, payload = candidate_payload(unquote(path.rsplit("/", 1)[-1]))
+            send_json(self, payload, status=status)
+            return
         if path == "/api/api-detail":
             self.api_api_detail(query)
             return
@@ -911,6 +970,15 @@ class Handler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/api/run-api":
             status, response = start_api_job(payload)
+            send_json(self, response, status=status)
+            return
+        if parsed.path == "/api/candidates":
+            status, response = create_candidate(payload)
+            send_json(self, response, status=status)
+            return
+        if parsed.path.startswith("/api/candidates/") and parsed.path.endswith("/status"):
+            candidate_id = unquote(parsed.path.split("/")[-2])
+            status, response = update_candidate(candidate_id, payload)
             send_json(self, response, status=status)
             return
         if (parsed.path.startswith("/api/confirmed-bugs/") or parsed.path.startswith("/api/paper-bugs/")) and parsed.path.endswith("/reproduce"):
