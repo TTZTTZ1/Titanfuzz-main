@@ -8,7 +8,6 @@ import datetime as dt
 import json
 import mimetypes
 import os
-import platform
 import subprocess
 import sys
 import threading
@@ -33,6 +32,11 @@ try:
     from webapp.candidates import CandidateStore
 except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
     from candidates import CandidateStore
+
+try:
+    from webapp.repro_evidence import classify_execution, sha256_file, write_report_once
+except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
+    from repro_evidence import classify_execution, sha256_file, write_report_once
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -66,20 +70,6 @@ TRACE_PATTERNS = (
     "free()",
     "Aborted",
     "Check failed",
-)
-REPRO_SUCCESS_PATTERNS = (
-    "Segmentation fault",
-    "Floating point exception",
-    "Aborted",
-    "Check failed",
-    "INTERNAL ASSERT",
-    "Assertion failure",
-    "double free",
-    "free():",
-    "invalid next size",
-    "device-side assert",
-    "Fatal",
-    "fatal",
 )
 API_STAGE_ORDER = ("prompt_check", "qwen_seed", "ev_generation", "driver", "summary")
 REPRO_TIMEOUT_SECONDS = 60
@@ -599,6 +589,9 @@ def repro_status_template(job_id: str, bug_id: str, modes: list[str], out: Path)
                 "log": rel(out / f"{mode}.log"),
                 "started_at": None,
                 "finished_at": None,
+                "execution_profile": "cuda_hidden" if mode == "cpu" else "visible_gpu_0",
+                "actual_device": "unknown",
+                "evidence": None,
             }
             for mode in modes
         },
@@ -611,8 +604,10 @@ def run_repro_mode(repro: Path, mode: str, log_path: Path, timeout: int) -> dict
     env = os.environ.copy()
     if mode == "cpu":
         env["CUDA_VISIBLE_DEVICES"] = ""
+        execution_profile = "cuda_hidden"
     elif mode == "gpu0":
         env["CUDA_VISIBLE_DEVICES"] = "0"
+        execution_profile = "visible_gpu_0"
     else:
         raise ValueError(f"unknown mode: {mode}")
 
@@ -632,45 +627,45 @@ def run_repro_mode(repro: Path, mode: str, log_path: Path, timeout: int) -> dict
                 text=True,
                 timeout=timeout,
             )
+            evidence = classify_execution(proc.returncode, False, tail(log_path))
             return {
                 "status": "finished",
                 "returncode": proc.returncode,
                 "timed_out": False,
                 "elapsed_seconds": round(time.time() - started, 3),
-                "verdict": classify_repro_result(proc.returncode, False, tail(log_path)),
+                "execution_profile": execution_profile,
+                "actual_device": "unknown",
+                "evidence": evidence,
+                "verdict": evidence["verdict"],
             }
         except subprocess.TimeoutExpired as exc:
             log.write(f"\n[TIMEOUT] exceeded {timeout}s\n")
+            evidence = classify_execution(None, True, "")
             return {
                 "status": "timeout",
                 "returncode": None,
                 "timed_out": True,
                 "elapsed_seconds": round(time.time() - started, 3),
                 "error": str(exc),
-                "verdict": "timeout",
+                "execution_profile": execution_profile,
+                "actual_device": "unknown",
+                "evidence": evidence,
+                "verdict": evidence["verdict"],
             }
         except Exception as exc:
             log.write(f"\n[SERVER ERROR] {exc}\n")
+            evidence = classify_execution(None, False, str(exc))
             return {
                 "status": "failed",
                 "returncode": None,
                 "timed_out": False,
                 "elapsed_seconds": round(time.time() - started, 3),
                 "error": str(exc),
-                "verdict": "needs_review",
+                "execution_profile": execution_profile,
+                "actual_device": "unknown",
+                "evidence": evidence,
+                "verdict": evidence["verdict"],
             }
-
-
-def classify_repro_result(returncode: Optional[int], timed_out: bool, log_text: str) -> str:
-    if timed_out:
-        return "timeout"
-    if returncode == 0:
-        return "not_reproduced"
-    if returncode is None:
-        return "needs_review"
-    if any(pattern in log_text for pattern in REPRO_SUCCESS_PATTERNS):
-        return "reproduced"
-    return "needs_review"
 
 
 def start_repro_job(bug_id: str, payload: dict) -> tuple[int, dict]:
@@ -703,6 +698,9 @@ def start_repro_job(bug_id: str, payload: dict) -> tuple[int, dict]:
         "bug_type": meta.get("bug_type", ""),
         "severity": meta.get("severity", ""),
     }
+    environment = environment_payload(force=True)
+    write_json(out / "environment.json", environment)
+    status["environment"] = rel(out / "environment.json")
     write_json(out / "status.json", status)
     (out / "repro.py").write_text(repro.read_text(encoding="utf-8", errors="replace"), encoding="utf-8")
 
@@ -751,13 +749,15 @@ def repro_job_payload(job_id: str) -> tuple[int, dict]:
         return 404, {"error": "repro job not found"}
     status = read_json(out / "status.json", {})
     for mode, item in status.get("modes", {}).items():
-        if item.get("verdict") or item.get("status") not in ("finished", "timeout", "failed"):
+        if item.get("evidence") or item.get("status") not in ("finished", "timeout", "failed"):
             continue
-        item["verdict"] = classify_repro_result(
+        evidence = classify_execution(
             item.get("returncode"),
             bool(item.get("timed_out")),
             tail(out / f"{mode}.log"),
         )
+        item["evidence"] = evidence
+        item["verdict"] = evidence["verdict"]
     logs = {}
     for name in ("cpu.log", "gpu0.log"):
         path = out / name
@@ -769,6 +769,7 @@ def repro_job_payload(job_id: str) -> tuple[int, dict]:
         "out": rel(out),
         "status": status,
         "logs": logs,
+        "environment": read_json(out / "environment.json", {}),
         "report_exists": report.is_file(),
         "report_path": rel(report),
         "report_markdown": report.read_text(encoding="utf-8", errors="replace") if report.is_file() else "",
@@ -788,26 +789,6 @@ def latest_repro_summaries(limit: int = 6) -> list[dict]:
     return out
 
 
-def summarize_mode(status: dict, mode: str, out: Path) -> str:
-    item = status.get("modes", {}).get(mode, {})
-    log_name = f"{mode}.log"
-    return "\n".join(
-        [
-            f"### {mode.upper()}",
-            "",
-            f"- Status: `{item.get('status', 'not-run')}`",
-            f"- Return code: `{item.get('returncode')}`",
-            f"- Timed out: `{item.get('timed_out', False)}`",
-            f"- Log: `{rel(out / log_name)}`",
-            "",
-            "```text",
-            tail(out / log_name, max_chars=12000).rstrip(),
-            "```",
-            "",
-        ]
-    )
-
-
 def repro_conclusion(status: dict) -> str:
     modes = status.get("modes", {})
     finished = [m for m, item in modes.items() if item.get("status") in ("finished", "timeout", "failed")]
@@ -818,10 +799,7 @@ def repro_conclusion(status: dict) -> str:
     timed_out = []
     needs_review = []
     for mode, item in modes.items():
-        verdict = item.get("verdict")
-        if not verdict and item.get("status") in ("finished", "timeout", "failed"):
-            log_name = f"{mode}.log"
-            verdict = classify_repro_result(item.get("returncode"), bool(item.get("timed_out")), tail(find_repro_job(status.get("job_id", "")) / log_name) if find_repro_job(status.get("job_id", "")) else "")
+        verdict = item.get("evidence", {}).get("verdict") or item.get("verdict")
         if verdict == "reproduced":
             reproduced.append(mode)
         elif verdict == "not_reproduced":
@@ -832,7 +810,7 @@ def repro_conclusion(status: dict) -> str:
             needs_review.append(mode)
     parts = []
     if reproduced:
-        parts.append(f"{', '.join(reproduced)} 在当前环境中复现到崩溃或断言类异常。")
+        parts.append(f"{', '.join(reproduced)} 捕获到与规则匹配的崩溃、断言或后端差异证据。")
     if not_reproduced:
         parts.append(f"{', '.join(not_reproduced)} 返回码为 0，当前环境未复现该异常，可能是版本差异或该后端未触发。")
     if timed_out:
@@ -842,65 +820,147 @@ def repro_conclusion(status: dict) -> str:
     return " ".join(parts) if parts else "复现状态无法从当前输出自动判断，请人工查看日志。"
 
 
+def report_id_for(status: dict) -> str:
+    started = str(status.get("started_at", "")).replace("-", "").replace(":", "").replace("T", "-")
+    return f"TG-RPT-{display_bug_id(str(status.get('bug_id', 'UNKNOWN')))}-{safe_name(started)}"
+
+
+def report_execution_table(status: dict) -> list[str]:
+    rows = [
+        "| 执行配置 | 状态 | 返回码 | 观测类型 | 信号 | 规则结论 | 实际设备 | 耗时 |",
+        "| --- | --- | ---: | --- | --- | --- | --- | ---: |",
+    ]
+    for mode, item in status.get("modes", {}).items():
+        evidence = item.get("evidence") or {}
+        signal_name = evidence.get("signal") or "-"
+        rows.append(
+            "| {profile} | {status} | {returncode} | {outcome} | {signal} | {verdict} | {device} | {elapsed}s |".format(
+                profile=item.get("execution_profile", mode),
+                status=item.get("status", "pending"),
+                returncode=item.get("returncode", "-"),
+                outcome=evidence.get("outcome", "unclassified"),
+                signal=signal_name,
+                verdict=evidence.get("verdict", item.get("verdict", "pending")),
+                device=item.get("actual_device", "unknown"),
+                elapsed=item.get("elapsed_seconds", "-"),
+            )
+        )
+    return rows
+
+
+def report_attachments(status: dict, out: Path) -> list[str]:
+    rows = ["| 附件 | SHA-256 |", "| --- | --- |"]
+    candidates = [out / "repro.py", out / "environment.json"]
+    candidates.extend(out / f"{mode}.log" for mode in status.get("modes", {}))
+    for path in candidates:
+        if path.is_file():
+            rows.append(f"| `{rel(path)}` | `{sha256_file(path)}` |")
+    return rows
+
+
 def generate_repro_report(job_id: str) -> tuple[int, dict]:
     out = find_repro_job(job_id)
     if out is None:
         return 404, {"error": "repro job not found"}
+    report_path = out / "report.md"
+    if report_path.is_file():
+        return 200, {
+            "job_id": job_id,
+            "report_path": rel(report_path),
+            "report_markdown": report_path.read_text(encoding="utf-8", errors="replace"),
+            "immutable": True,
+        }
     status = read_json(out / "status.json", {})
+    if status.get("status") != "finished":
+        return 409, {"error": "reproduction must finish before report generation"}
     bug_id = status.get("bug_id", "")
     detail_code, detail = paper_bug_detail(bug_id)
     if detail_code != 200:
         return detail_code, detail
     meta = detail["meta"]
+    environment = read_json(out / "environment.json", {})
+    report_id = report_id_for(status)
     lines = [
-        f"# Reproduction Report: {display_bug_id(bug_id)}",
+        f"# TensorGuard 复现证据报告 {display_bug_id(bug_id)}",
         "",
-        "## Bug",
+        "## 报告摘要",
         "",
-        f"- Title: {meta.get('title', '')}",
-        f"- Framework: `{meta.get('framework', '')}`",
-        f"- API: `{meta.get('api', '')}`",
-        f"- Type: `{meta.get('bug_type', '')}`",
-        f"- Severity: `{meta.get('severity', '')}`",
+        f"- 报告编号：`{report_id}`",
+        f"- 问题编号：`{display_bug_id(bug_id)}`",
+        f"- API：`{meta.get('api', '')}`",
+        f"- 框架：`{meta.get('framework', '')}`",
+        f"- 问题类型：`{meta.get('bug_type', '')}`",
+        f"- 生成时间：`{now()}`",
         "",
-        "## Current Environment",
-        "",
-        f"- Python executable: `{sys.executable}`",
-        f"- Python version: `{platform.python_version()}`",
-        f"- Platform: `{platform.platform()}`",
-        f"- Working directory: `{rel(REPO_ROOT)}`",
-        f"- Repro job: `{rel(out)}`",
-        "",
-        "## Expected Behavior",
-        "",
-        meta.get("expected", ""),
-        "",
-        "## Confirmed Observed Behavior",
-        "",
-        meta.get("observed", ""),
-        "",
-        "## Current Reproduction Conclusion",
+        "## 当前复现结论",
         "",
         repro_conclusion(status),
         "",
-        "## Reproduction Code",
+        "> 本结论由退出码、POSIX 信号和明确日志模式确定性生成，只描述本次运行证据，不推断根因、可利用性或风险等级。",
+        "",
+        "## 预期与观测",
+        "",
+        f"**预期行为**：{meta.get('expected', '')}",
+        "",
+        f"**已知观测**：{meta.get('observed', '')}",
+        "",
+        "## 本次执行证据",
+        "",
+        *report_execution_table(status),
+        "",
+        "## 最小复现代码",
         "",
         "```python",
         detail.get("repro_code", "").rstrip(),
         "```",
         "",
-        "## Current Run Output",
+        "## 输出摘录",
         "",
     ]
-    for mode in ("cpu", "gpu0"):
-        lines.append(summarize_mode(status, mode, out))
+    for mode in status.get("modes", {}):
+        lines.extend(
+            [
+                f"### {status['modes'][mode].get('execution_profile', mode)}",
+                "",
+                "```text",
+                tail(out / f"{mode}.log", max_chars=6000).rstrip(),
+                "```",
+                "",
+            ]
+        )
+    lines.extend(
+        [
+            "## 环境快照",
+            "",
+            "```json",
+            json.dumps(environment, ensure_ascii=False, indent=2),
+            "```",
+            "",
+            "## 证据附件",
+            "",
+            *report_attachments(status, out),
+            "",
+            "## 适用边界",
+            "",
+            "- 该报告只证明所列环境与执行配置下捕获到的行为。",
+            "- `CUDA_VISIBLE_DEVICES` 仅代表可见设备配置；除非复现程序自行打印设备，否则实际执行设备记为 `unknown`。",
+            "- 自动规则不会判断根因、漏洞可利用性、CVSS 或严重程度；这些结论需要框架维护者或人工源码审查。",
+            "- 首次生成后报告保持不变；后续复现会创建新的证据记录。",
+            "",
+        ]
+    )
     report = "\n".join(lines).rstrip() + "\n"
-    report_path = out / "report.md"
-    report_path.write_text(report, encoding="utf-8")
+    report = write_report_once(report_path, report)
+    status["report_id"] = report_id
     status["report"] = rel(report_path)
     status["updated_at"] = now()
     write_json(out / "status.json", status)
-    return 200, {"job_id": job_id, "report_path": rel(report_path), "report_markdown": report}
+    return 200, {
+        "job_id": job_id,
+        "report_path": rel(report_path),
+        "report_markdown": report,
+        "immutable": True,
+    }
 
 
 class Handler(BaseHTTPRequestHandler):
