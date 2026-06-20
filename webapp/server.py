@@ -23,6 +23,12 @@ try:
 except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
     from runtime_data import collect_environment
 
+try:
+    from scripts.demo_metrics import read_metrics
+except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from scripts.demo_metrics import read_metrics
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 STATIC_ROOT = Path(__file__).resolve().parent / "static"
@@ -467,6 +473,8 @@ def api_job_payload(job_id: str) -> tuple[int, dict]:
         "out": rel(out),
         "status": status,
         "summary": summary,
+        "metrics": read_metrics(out / "metrics.jsonl", limit=2000),
+        "environment": read_json(out / "environment.json", {}),
         "logs": logs,
     }
 

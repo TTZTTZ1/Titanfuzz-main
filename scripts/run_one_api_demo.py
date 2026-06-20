@@ -19,8 +19,16 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Dict, List, Optional
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.demo_metrics import append_metric, build_metric  # noqa: E402
+from webapp.runtime_data import collect_environment, collect_gpu_sample  # noqa: E402
 
 
 STAGE_ORDER = ["prompt_check", "qwen_seed", "ev_generation", "driver", "summary"]
@@ -118,6 +126,8 @@ class DemoRun:
         self.status_path = self.out / "status.json"
         self.summary_json_path = self.out / "summary.json"
         self.summary_md_path = self.out / "summary.md"
+        self.metrics_path = self.out / "metrics.jsonl"
+        self.environment_path = self.out / "environment.json"
         self.qwen_out = self.out / "qwen_seed"
         self.results_root = self.out / "Results" / args.lib
         self.canonical_results_root = repo_root / "Results" / args.lib
@@ -128,6 +138,10 @@ class DemoRun:
             "mode": args.mode,
             "dry_run": args.dry_run,
             "mutation_model": args.mut_model,
+            "qwen_model": args.qwen_model,
+            "cuda_device": str(args.cuda_device),
+            "metrics_path": rel(self.metrics_path, self.repo_root),
+            "environment_path": rel(self.environment_path, self.repo_root),
             "status": "pending",
             "stage": "init",
             "started_at": now(),
@@ -158,6 +172,31 @@ class DemoRun:
         self.logs.mkdir(parents=True, exist_ok=True)
         return self.logs / name
 
+    def selected_gpu_sample(self) -> Optional[dict]:
+        sample = collect_gpu_sample()
+        try:
+            selected_index = int(str(self.args.cuda_device).split(",", 1)[0])
+        except ValueError:
+            return None
+        for gpu in sample.get("gpus", []):
+            if gpu.get("index") == selected_index:
+                return {
+                    "collected_at": sample.get("collected_at"),
+                    **gpu,
+                }
+        return None
+
+    def record_metric(self, stage: str, started: float) -> None:
+        metric = build_metric(
+            stage=stage,
+            elapsed_seconds=time.monotonic() - started,
+            qwen_root=self.qwen_out,
+            results_root=self.results_root,
+            api=self.args.api,
+            gpu_sample=self.selected_gpu_sample(),
+        )
+        append_metric(self.metrics_path, metric)
+
     def run_command(self, stage: str, cmd: List[str], log_name: str, env: Optional[dict] = None) -> int:
         log_path = self.log_path(log_name)
         self.status["logs"][stage] = rel(log_path, self.repo_root)
@@ -169,7 +208,7 @@ class DemoRun:
             if self.args.dry_run:
                 log.write("[dry-run] command not executed\n")
                 return 0
-            proc = subprocess.run(
+            proc = subprocess.Popen(
                 cmd,
                 cwd=self.repo_root,
                 stdout=log,
@@ -177,7 +216,12 @@ class DemoRun:
                 env=env,
                 text=True,
             )
-            return proc.returncode
+            started = time.monotonic()
+            while proc.poll() is None:
+                self.record_metric(stage, started)
+                time.sleep(1)
+            self.record_metric(stage, started)
+            return int(proc.returncode)
 
     def check_prompt_library(self) -> Path:
         self.update_stage("prompt_check", "running")
@@ -377,6 +421,7 @@ class DemoRun:
             shutil.rmtree(self.out)
         self.out.mkdir(parents=True, exist_ok=True)
         self.logs.mkdir(parents=True, exist_ok=True)
+        write_json(self.environment_path, collect_environment())
         write_json(self.status_path, self.status)
 
         try:
