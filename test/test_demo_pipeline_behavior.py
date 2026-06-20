@@ -20,7 +20,7 @@ def make_args(out: str = "demo_runs/job") -> SimpleNamespace:
         job_id="job",
         qwen_model="../Qwen2.5-Coder-7B-Instruct",
         dtype="bfloat16",
-        mut_model="facebook/incoder-6B",
+        mut_model="facebook/incoder-1B",
         constraints_dir="experiment/torch",
         qwen_n_samples=1,
         qwen_min_valid=1,
@@ -42,6 +42,12 @@ def test_normal_mode_uses_formal_single_api_budget():
     assert cfg["ev_max_valid"] == 200
     assert cfg["ev_batch_size"] == 100
     assert cfg["ev_timeout"] == 1000
+
+
+def test_status_records_actual_mutation_model():
+    with tempfile.TemporaryDirectory() as tmp:
+        run = demo.DemoRun(make_args(), Path(tmp))
+        assert run.status["mutation_model"] == make_args().mut_model
 
 
 def test_publish_results_replaces_only_selected_api_files():
@@ -75,5 +81,6 @@ def test_publish_results_replaces_only_selected_api_files():
 
 if __name__ == "__main__":
     test_normal_mode_uses_formal_single_api_budget()
+    test_status_records_actual_mutation_model()
     test_publish_results_replaces_only_selected_api_files()
     print("ok")

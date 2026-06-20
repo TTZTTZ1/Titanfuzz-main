@@ -82,6 +82,13 @@ function modeLabel(value) {
   return value === "normal" ? "完整模式" : "演示模式";
 }
 
+function mutationModelLabel(value) {
+  if (!value) return "InCoder-1B 变异测试";
+  if (value.includes("incoder-1B")) return "InCoder-1B 变异测试";
+  if (value.includes("incoder-6B")) return "InCoder-6B 变异测试";
+  return `${value.split("/").pop()} 变异测试`;
+}
+
 async function loadOverview() {
   const data = await api("/api/overview");
   $("overviewMetrics").innerHTML = [
@@ -195,7 +202,7 @@ async function selectApi(apiName, options = {}) {
     }
   } else if (!options.keepJob) {
     state.currentApiJob = null;
-    renderApiStages({});
+    renderApiStages({}, { mutation_model: "facebook/incoder-1B" });
     $("apiJobSummary").innerHTML = `
       <div class="empty">当前 API 暂无运行记录。点击“运行该 API”后，这里会显示任务摘要。</div>
     `;
@@ -203,12 +210,17 @@ async function selectApi(apiName, options = {}) {
   }
 }
 
-function renderApiStages(status) {
+function renderApiStages(status, summary = {}) {
   const stages = status?.stages || {};
+  const mutationModel =
+    summary.mutation_model ||
+    status?.mutation_model ||
+    state.selectedApi?.latest_job?.mutation_model ||
+    "facebook/incoder-1B";
   const names = [
     ["prompt_check", "约束检查"],
     ["qwen_seed", "Qwen 种子生成"],
-    ["ev_generation", "InCoder-6B 变异测试"],
+    ["ev_generation", mutationModelLabel(mutationModel)],
     ["driver", "CPU/GPU 差异检测"],
     ["summary", "摘要生成"],
   ];
@@ -278,7 +290,7 @@ async function refreshSelectedApiAfterJob() {
 async function loadApiJob() {
   if (!state.currentApiJob) return;
   const data = await api(`/api/api-jobs/${encodeURIComponent(state.currentApiJob)}`);
-  renderApiStages(data.status);
+  renderApiStages(data.status, data.summary);
   renderApiJobSummary(data);
   $("apiJobLogs").textContent = Object.entries(data.logs || {})
     .map(([name, content]) => `===== ${name} =====\n${content}`)
@@ -433,7 +445,7 @@ function alertError(err) {
 
 async function init() {
   bindEvents();
-  renderApiStages({});
+  renderApiStages({}, { mutation_model: "facebook/incoder-1B" });
   await Promise.all([
     loadOverview(),
     searchApis(),

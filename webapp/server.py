@@ -253,6 +253,7 @@ def latest_api_job(lib: str, api: str) -> Optional[dict]:
         "stage": status.get("stage", "init"),
         "updated_at": status.get("updated_at"),
         "summary_status": summary.get("status"),
+        "mutation_model": status.get("mutation_model") or summary.get("mutation_model"),
         "error": status.get("error") or summary.get("error"),
     }
 
@@ -360,7 +361,7 @@ def start_api_job(payload: dict) -> tuple[int, dict]:
     api = payload.get("api", "")
     mode = payload.get("mode", "demo")
     qwen_model = payload.get("qwen_model", "../Qwen2.5-Coder-7B-Instruct")
-    mut_model = payload.get("mut_model", "facebook/incoder-6B")
+    mut_model = payload.get("mut_model", "facebook/incoder-1B")
     cuda_device = str(payload.get("cuda_device", "0"))
 
     if lib not in ("torch", "tf"):

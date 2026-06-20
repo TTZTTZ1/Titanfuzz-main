@@ -127,6 +127,7 @@ class DemoRun:
             "api": args.api,
             "mode": args.mode,
             "dry_run": args.dry_run,
+            "mutation_model": args.mut_model,
             "status": "pending",
             "stage": "init",
             "started_at": now(),
@@ -436,7 +437,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--constraints_dir", default=None)
     parser.add_argument("--qwen_model", default="../Qwen2.5-Coder-7B-Instruct")
     parser.add_argument("--dtype", default="bfloat16", choices=["bfloat16", "float16", "float32"])
-    parser.add_argument("--mut_model", default="facebook/incoder-6B")
+    parser.add_argument("--mut_model", default="facebook/incoder-1B")
     parser.add_argument("--out", default=None)
     parser.add_argument("--mode", default="demo", choices=["demo", "normal"])
     parser.add_argument("--cuda_device", default="0")
