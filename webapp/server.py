@@ -18,6 +18,11 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 from urllib.parse import parse_qs, unquote, urlparse
 
+try:
+    from webapp.runtime_data import collect_environment
+except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
+    from runtime_data import collect_environment
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 STATIC_ROOT = Path(__file__).resolve().parent / "static"
@@ -66,10 +71,25 @@ REPRO_SUCCESS_PATTERNS = (
 )
 API_STAGE_ORDER = ("prompt_check", "qwen_seed", "ev_generation", "driver", "summary")
 REPRO_TIMEOUT_SECONDS = 60
+ENVIRONMENT_CACHE_SECONDS = 30
+_ENVIRONMENT_CACHE: Dict[str, Any] = {"expires_at": 0.0, "data": None}
+_ENVIRONMENT_LOCK = threading.Lock()
 
 
 def now() -> str:
     return dt.datetime.now().isoformat(timespec="seconds")
+
+
+def environment_payload(force: bool = False) -> dict:
+    current = time.monotonic()
+    with _ENVIRONMENT_LOCK:
+        cached = _ENVIRONMENT_CACHE.get("data")
+        if not force and cached is not None and current < _ENVIRONMENT_CACHE["expires_at"]:
+            return cached
+        data = collect_environment()
+        _ENVIRONMENT_CACHE["data"] = data
+        _ENVIRONMENT_CACHE["expires_at"] = current + ENVIRONMENT_CACHE_SECONDS
+        return data
 
 
 def safe_name(value: str) -> str:
@@ -842,6 +862,10 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/overview":
             send_json(self, overview_payload())
+            return
+        if path == "/api/environment":
+            force = query.get("refresh", ["0"])[0] == "1"
+            send_json(self, environment_payload(force=force))
             return
         if path == "/api/apis":
             self.api_apis(query)
