@@ -9,6 +9,7 @@ from typing import Optional
 
 
 RESULT_SUBDIRS = ("seed", "valid", "exception", "crash", "notarget", "hangs", "flaky")
+TRACE_PATTERNS = ("Catch", "Fail", "INTERNAL ASSERT", "device-side assert", "Segmentation fault", "Floating point exception", "free()")
 
 
 def timestamp() -> str:
@@ -24,6 +25,12 @@ def count_py(path: Path) -> int:
 def snapshot_results(root: Path) -> dict:
     counts = {name: count_py(root / name) for name in RESULT_SUBDIRS}
     counts["total_files"] = sum(counts.values())
+    trace_path = root / "trace.txt"
+    trace_hits = 0
+    if trace_path.is_file():
+        with trace_path.open("r", encoding="utf-8", errors="replace") as stream:
+            trace_hits = sum(1 for line in stream if any(pattern in line for pattern in TRACE_PATTERNS))
+    counts["trace_hits"] = trace_hits
     return counts
 
 

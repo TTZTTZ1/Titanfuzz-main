@@ -34,9 +34,14 @@ except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
     from candidates import CandidateStore, recommend_candidate
 
 try:
-    from webapp.repro_evidence import classify_execution, execution_profile_for_mode, sha256_file, write_report_once
+    from webapp.confirmed_bugs import load_confirmed_records
 except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
-    from repro_evidence import classify_execution, execution_profile_for_mode, sha256_file, write_report_once
+    from confirmed_bugs import load_confirmed_records
+
+try:
+    from webapp.repro_evidence import classify_execution, execution_profile_for_mode, extract_actual_device, sha256_file, write_report_once
+except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
+    from repro_evidence import classify_execution, execution_profile_for_mode, extract_actual_device, sha256_file, write_report_once
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -100,6 +105,19 @@ def safe_name(value: str) -> str:
         keep.append(ch if ch.isalnum() or ch in "._-" else "_")
     name = "".join(keep).strip("._")
     return name or "item"
+
+
+def unique_job_directory(root: Path, base_id: str) -> tuple[str, Path]:
+    root.mkdir(parents=True, exist_ok=True)
+    suffix = 1
+    while True:
+        job_id = base_id if suffix == 1 else f"{base_id}_{suffix}"
+        out = root / job_id
+        try:
+            out.mkdir()
+            return job_id, out
+        except FileExistsError:
+            suffix += 1
 
 
 def display_bug_id(bug_id: str) -> str:
@@ -378,6 +396,31 @@ def api_detail_payload(lib: str, api: str) -> tuple[int, dict]:
     }
 
 
+def initial_api_status(
+    job_id: str,
+    lib: str,
+    api: str,
+    mode: str,
+    qwen_model: str,
+    mutation_model: str,
+    cuda_device: str,
+) -> dict:
+    return {
+        "job_id": job_id,
+        "lib": lib,
+        "api": api,
+        "mode": mode,
+        "qwen_model": qwen_model,
+        "mutation_model": mutation_model,
+        "cuda_device": cuda_device,
+        "status": "pending",
+        "stage": "launch",
+        "stages": {stage: "pending" for stage in API_STAGE_ORDER},
+        "error": None,
+        "updated_at": now(),
+    }
+
+
 def start_api_job(payload: dict) -> tuple[int, dict]:
     lib = payload.get("lib", "torch")
     api = payload.get("api", "")
@@ -396,10 +439,10 @@ def start_api_job(payload: dict) -> tuple[int, dict]:
         return 400, {"error": f"prompt library missing for {lib}:{api}"}
 
     ts = time.strftime("%Y%m%d_%H%M%S")
-    job_id = f"api_{safe_name(lib)}_{safe_name(api)}_{ts}"
-    out = API_JOB_ROOT / job_id
-    out.mkdir(parents=True, exist_ok=True)
+    job_id, out = unique_job_directory(API_JOB_ROOT, f"api_{safe_name(lib)}_{safe_name(api)}_{ts}")
     server_log = out / "server_launch.log"
+    launch_status = initial_api_status(job_id, lib, api, mode, qwen_model, mut_model, cuda_device)
+    write_json(out / "status.json", launch_status)
     cmd = [
         sys.executable,
         "scripts/run_one_api_demo.py",
@@ -421,20 +464,27 @@ def start_api_job(payload: dict) -> tuple[int, dict]:
         job_id,
         "--cuda_device",
         cuda_device,
-        "--force_redo",
     ]
 
     def _launch() -> None:
         with server_log.open("w", encoding="utf-8") as log:
             log.write("$ " + " ".join(cmd) + "\n\n")
             log.flush()
-            subprocess.Popen(
-                cmd,
-                cwd=REPO_ROOT,
-                stdout=log,
-                stderr=subprocess.STDOUT,
-                text=True,
-            )
+            try:
+                subprocess.Popen(
+                    cmd,
+                    cwd=REPO_ROOT,
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                )
+            except Exception as exc:
+                failed = read_json(out / "status.json", launch_status)
+                failed["status"] = "failed"
+                failed["error"] = f"failed to launch pipeline: {exc}"
+                failed["updated_at"] = now()
+                write_json(out / "status.json", failed)
+                log.write(f"\n[SERVER ERROR] {exc}\n")
 
     threading.Thread(target=_launch, daemon=True).start()
     return 202, {"job_id": job_id, "out": rel(out)}
@@ -550,28 +600,25 @@ def update_candidate(candidate_id: str, payload: dict) -> tuple[int, dict]:
 
 
 def load_paper_bugs() -> list[dict]:
-    items = read_json(PAPER_BUG_INDEX, [])
+    items = load_confirmed_records(PAPER_BUG_INDEX, REPO_ROOT)
     out = []
     for item in items:
         item = dict(item)
-        meta_path = REPO_ROOT / item.get("path", "")
-        if meta_path.is_file():
-            meta = read_json(meta_path, {})
-            item.update({k: v for k, v in meta.items() if k not in item or item[k] in ("", None)})
-            item["meta_path"] = rel(meta_path)
+        item["meta_path"] = item.get("path", "")
         item["display_id"] = display_bug_id(str(item.get("id", "")))
         out.append(item)
     return out
 
 
 def paper_bug_detail(bug_id: str) -> tuple[int, dict]:
-    for item in read_json(PAPER_BUG_INDEX, []):
+    for item in load_paper_bugs():
         if item.get("id") != bug_id:
             continue
         meta_path = REPO_ROOT / item.get("path", "")
         if not meta_path.is_file():
             return 404, {"error": "bug meta not found"}
         meta = read_json(meta_path, {})
+        meta.pop("severity", None)
         bug_dir = meta_path.parent
         repro = bug_dir / meta.get("files", {}).get("repro", "repro.py")
         report = bug_dir / meta.get("files", {}).get("report", "report.md")
@@ -649,14 +696,15 @@ def run_repro_mode(repro: Path, mode: str, log_path: Path, timeout: int) -> dict
                 text=True,
                 timeout=timeout,
             )
-            evidence = classify_execution(proc.returncode, False, tail(log_path))
+            log_text = tail(log_path)
+            evidence = classify_execution(proc.returncode, False, log_text)
             return {
                 "status": "finished",
                 "returncode": proc.returncode,
                 "timed_out": False,
                 "elapsed_seconds": round(time.time() - started, 3),
                 "execution_profile": execution_profile,
-                "actual_device": "unknown",
+                "actual_device": extract_actual_device(log_text),
                 "evidence": evidence,
                 "verdict": evidence["verdict"],
             }
@@ -670,7 +718,7 @@ def run_repro_mode(repro: Path, mode: str, log_path: Path, timeout: int) -> dict
                 "elapsed_seconds": round(time.time() - started, 3),
                 "error": str(exc),
                 "execution_profile": execution_profile,
-                "actual_device": "unknown",
+                "actual_device": extract_actual_device(tail(log_path)),
                 "evidence": evidence,
                 "verdict": evidence["verdict"],
             }
@@ -711,9 +759,7 @@ def start_repro_job(bug_id: str, payload: dict) -> tuple[int, dict]:
 
     timeout = int(payload.get("timeout", REPRO_TIMEOUT_SECONDS) or REPRO_TIMEOUT_SECONDS)
     ts = time.strftime("%Y%m%d_%H%M%S")
-    job_id = f"repro_{safe_name(display_bug_id(bug_id))}_{ts}"
-    out = REPRO_JOB_ROOT / job_id
-    out.mkdir(parents=True, exist_ok=True)
+    job_id, out = unique_job_directory(REPRO_JOB_ROOT, f"repro_{safe_name(display_bug_id(bug_id))}_{ts}")
     status = repro_status_template(job_id, bug_id, modes, out)
     status["timeout_seconds"] = timeout
     status["meta"] = {
@@ -721,7 +767,6 @@ def start_repro_job(bug_id: str, payload: dict) -> tuple[int, dict]:
         "framework": meta.get("framework", ""),
         "api": meta.get("api", ""),
         "bug_type": meta.get("bug_type", ""),
-        "severity": meta.get("severity", ""),
     }
     write_json(out / "environment.json", inventory)
     status["environment"] = rel(out / "environment.json")
@@ -852,14 +897,14 @@ def report_id_for(status: dict) -> str:
 
 def report_execution_table(status: dict) -> list[str]:
     rows = [
-        "| 执行配置 | 状态 | 返回码 | 观测类型 | 信号 | 规则结论 | 实际设备 | 耗时 |",
-        "| --- | --- | ---: | --- | --- | --- | --- | ---: |",
+        "| 执行配置 | 状态 | 返回码 | 观测类型 | 信号 | 规则结论 | 实际设备 | 耗时 | 判定依据 |",
+        "| --- | --- | ---: | --- | --- | --- | --- | ---: | --- |",
     ]
     for mode, item in status.get("modes", {}).items():
         evidence = item.get("evidence") or {}
         signal_name = evidence.get("signal") or "-"
         rows.append(
-            "| {profile} | {status} | {returncode} | {outcome} | {signal} | {verdict} | {device} | {elapsed}s |".format(
+            "| {profile} | {status} | {returncode} | {outcome} | {signal} | {verdict} | {device} | {elapsed}s | {reason} |".format(
                 profile=item.get("execution_profile", mode),
                 status=item.get("status", "pending"),
                 returncode=item.get("returncode", "-"),
@@ -868,6 +913,7 @@ def report_execution_table(status: dict) -> list[str]:
                 verdict=evidence.get("verdict", item.get("verdict", "pending")),
                 device=item.get("actual_device", "unknown"),
                 elapsed=item.get("elapsed_seconds", "-"),
+                reason=str(evidence.get("reason", "-")).replace("|", "/"),
             )
         )
     return rows

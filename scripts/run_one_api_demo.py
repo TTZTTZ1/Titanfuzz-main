@@ -140,6 +140,18 @@ class DemoRun:
             "mutation_model": args.mut_model,
             "qwen_model": args.qwen_model,
             "cuda_device": str(args.cuda_device),
+            "parameters": {
+                "qwen_n_samples": args.qwen_n_samples,
+                "qwen_min_valid": args.qwen_min_valid,
+                "qwen_max_rounds": args.qwen_max_rounds,
+                "qwen_per_api_budget": args.qwen_per_api_budget,
+                "qwen_validate_timeout": args.qwen_validate_timeout,
+                "ev_max_valid": args.ev_max_valid,
+                "ev_batch_size": args.ev_batch_size,
+                "ev_timeout": args.ev_timeout,
+                "seed_pool_size": args.seed_pool_size,
+                "random_seed": args.random_seed,
+            },
             "metrics_path": rel(self.metrics_path, self.repo_root),
             "environment_path": rel(self.environment_path, self.repo_root),
             "status": "pending",
@@ -166,6 +178,17 @@ class DemoRun:
         self.status["updated_at"] = now()
         if error:
             self.status["error"] = error
+        write_json(self.status_path, self.status)
+
+    def mark_remaining_skipped(self, failed_stage: str) -> None:
+        execution_stages = STAGE_ORDER[:-1]
+        if failed_stage not in execution_stages:
+            return
+        start = execution_stages.index(failed_stage) + 1
+        for stage in execution_stages[start:]:
+            if self.status["stages"].get(stage) == "pending":
+                self.status["stages"][stage] = "skipped"
+        self.status["updated_at"] = now()
         write_json(self.status_path, self.status)
 
     def log_path(self, name: str) -> Path:
@@ -429,6 +452,7 @@ class DemoRun:
         except Exception as exc:
             message = str(exc)
             self.update_stage("prompt_check", "failed", error=message)
+            self.mark_remaining_skipped("prompt_check")
             self.write_summary("failed", error=message)
             self.finish("failed", error=message)
             print(message)
@@ -437,6 +461,7 @@ class DemoRun:
         if self.run_qwen_seed() != 0:
             error = "qwen_seed.py failed; see logs/01_qwen_seed.log"
             self.update_stage("qwen_seed", "failed", error=error)
+            self.mark_remaining_skipped("qwen_seed")
             self.write_summary("failed", error=error)
             self.finish("failed", error=error)
             return 1
@@ -445,6 +470,7 @@ class DemoRun:
         qwen_valid = count_py(self.qwen_out / "fix" / self.args.api)
         if qwen_valid == 0 and not self.args.dry_run:
             error = "Qwen produced zero valid fixed seeds; stop before mutation"
+            self.mark_remaining_skipped("qwen_seed")
             self.write_summary("failed", error=error)
             self.finish("failed", error=error)
             print(error)
@@ -453,6 +479,7 @@ class DemoRun:
         if self.run_ev_generation() != 0:
             error = "ev_generation.py failed; see logs/02_ev_generation.log"
             self.update_stage("ev_generation", "failed", error=error)
+            self.mark_remaining_skipped("ev_generation")
             self.write_summary("failed", error=error)
             self.finish("failed", error=error)
             return 1

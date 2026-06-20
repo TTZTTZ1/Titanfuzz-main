@@ -50,6 +50,24 @@ def test_status_records_actual_mutation_model():
         assert run.status["mutation_model"] == make_args().mut_model
 
 
+def test_status_records_effective_run_parameters():
+    with tempfile.TemporaryDirectory() as tmp:
+        args = make_args()
+        run = demo.DemoRun(args, Path(tmp))
+        assert run.status["parameters"]["ev_max_valid"] == args.ev_max_valid
+        assert run.status["parameters"]["seed_pool_size"] == args.seed_pool_size
+        assert run.status["parameters"]["qwen_per_api_budget"] == args.qwen_per_api_budget
+
+
+def test_failed_stage_marks_later_execution_stages_skipped():
+    with tempfile.TemporaryDirectory() as tmp:
+        run = demo.DemoRun(make_args(), Path(tmp))
+        run.mark_remaining_skipped("qwen_seed")
+        assert run.status["stages"]["ev_generation"] == "skipped"
+        assert run.status["stages"]["driver"] == "skipped"
+        assert run.status["stages"]["summary"] == "pending"
+
+
 def test_publish_results_replaces_only_selected_api_files():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -82,5 +100,7 @@ def test_publish_results_replaces_only_selected_api_files():
 if __name__ == "__main__":
     test_normal_mode_uses_formal_single_api_budget()
     test_status_records_actual_mutation_model()
+    test_status_records_effective_run_parameters()
+    test_failed_stage_marks_later_execution_stages_skipped()
     test_publish_results_replaces_only_selected_api_files()
     print("ok")

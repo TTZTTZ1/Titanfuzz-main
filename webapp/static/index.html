@@ -36,10 +36,15 @@
               <h2>系统总览</h2>
               <p>API 覆盖、检测流程与已确认证据的当前快照</p>
             </div>
-            <button id="refreshOverview" class="secondary">刷新数据</button>
+            <div class="header-actions">
+              <button class="primary" data-jump="apiRun">运行单 API</button>
+              <button class="secondary" data-jump="bugReplay">复现 Bug</button>
+              <button id="refreshOverview" class="secondary">刷新数据</button>
+            </div>
           </header>
 
           <div id="overviewMetrics" class="metric-strip"></div>
+          <div id="overviewDataCheck" class="data-check" hidden></div>
 
           <div class="overview-grid">
             <section class="surface distribution-surface">
@@ -110,6 +115,7 @@
               <button id="followLiveStage" class="text-action" hidden>返回实时阶段</button>
             </div>
             <div id="apiStages" class="stages"></div>
+            <div id="apiDataCheck" class="data-check" hidden></div>
             <div id="apiStageTabs" class="stage-tabs" role="tablist" aria-label="运行阶段"></div>
             <div class="stage-workspace">
               <div>
@@ -215,6 +221,7 @@
     </div>
 
     <script src="/static/charts.js"></script>
+    <script src="/static/markdown.js"></script>
     <script src="/static/app.js"></script>
   </body>
 </html>

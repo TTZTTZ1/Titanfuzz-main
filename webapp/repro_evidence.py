@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import os
+import re
 import signal
+import threading
 from pathlib import Path
 from typing import Optional
 
@@ -30,6 +32,16 @@ def execution_profile_for_mode(mode: str) -> tuple[str, str]:
         index = int(mode[4:])
         return f"visible_gpu_{index}", str(index)
     raise ValueError(f"unknown execution mode: {mode}")
+
+
+def extract_actual_device(log_text: str) -> str:
+    """Read only an explicit device declaration emitted by the testcase."""
+    pattern = re.compile(
+        r"^\s*(?:actual[_ ]device|device)\s*[:=]\s*(cpu|cuda(?::\d+)?|mps|xpu(?::\d+)?)\s*$",
+        re.IGNORECASE | re.MULTILINE,
+    )
+    match = pattern.search(log_text or "")
+    return match.group(1).lower() if match else "unknown"
 
 
 def classify_execution(returncode: Optional[int], timed_out: bool, log_text: str) -> dict:
@@ -96,7 +108,7 @@ def write_report_once(path: Path, content: str) -> str:
     if path.is_file():
         return path.read_text(encoding="utf-8", errors="replace")
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
     tmp.write_text(content, encoding="utf-8")
     try:
         os.link(tmp, path)

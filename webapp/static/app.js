@@ -28,7 +28,7 @@ const resultCategoryLabels = {
 const stageDefinitions = [
   { key: "qwen_seed", label: "Qwen 种子", metricKeys: [["候选", "qwen_raw"], ["有效种子", "qwen_valid"]] },
   { key: "ev_generation", label: "InCoder 变异", metricKeys: [["有效", "valid"], ["异常", "exception"], ["崩溃", "crash"], ["超时", "hangs"]] },
-  { key: "driver", label: "差异检测", metricKeys: [["有效", "valid"], ["异常", "exception"], ["崩溃", "crash"], ["不稳定", "flaky"]] },
+  { key: "driver", label: "差异检测", metricKeys: [["已检查程序", "total_files"], ["差异 Catch", "trace_hits"], ["崩溃", "crash"], ["不稳定", "flaky"]] },
 ];
 
 const $ = (id) => document.getElementById(id);
@@ -100,6 +100,11 @@ function modeLabel(value) {
   return value === "normal" ? "完整模式" : "演示模式";
 }
 
+function modelName(value) {
+  const text = String(value || "");
+  return text ? text.split("/").filter(Boolean).pop() : "未记录";
+}
+
 function mutationModelLabel(value) {
   if (!value) return "InCoder 变异";
   if (value.includes("incoder-1B")) return "InCoder-1B 变异测试";
@@ -124,6 +129,13 @@ async function loadOverview() {
     state.confirmedBugs.length ? Promise.resolve(state.confirmedBugs) : api("/api/confirmed-bugs"),
   ]);
   state.confirmedBugs = bugs;
+  const expectedTotal = Number(data.api_by_lib?.torch || 0) + Number(data.api_by_lib?.tf || 0);
+  const overviewCheck = $("overviewDataCheck");
+  overviewCheck.hidden = false;
+  overviewCheck.className = `data-check ${expectedTotal === Number(data.api_total) ? "ok" : ""}`;
+  overviewCheck.textContent = expectedTotal === Number(data.api_total)
+    ? `数据校验通过：${data.api_total} = PyTorch ${data.api_by_lib?.torch || 0} + TensorFlow ${data.api_by_lib?.tf || 0}`
+    : `数据校验失败：API 总数 ${data.api_total} 与框架分项 ${expectedTotal} 不一致`;
   $("overviewMetrics").innerHTML = [
     metric("API 总覆盖", data.api_total || 0, "目标接口总数"),
     metric("PyTorch", data.api_by_lib?.torch || 0, "API 清单"),
@@ -146,19 +158,28 @@ async function loadOverview() {
     .slice(0, 6)
     .map(([label, value]) => ({ label, value })));
 
-  const bugRows = bugs.slice(0, 8).map((bug) => `
+  const reproByBug = new Map();
+  (data.latest_repro_jobs || []).forEach((job) => {
+    if (!reproByBug.has(job.bug_id)) reproByBug.set(job.bug_id, job);
+  });
+  const bugRows = bugs.slice(0, 8).map((bug) => {
+    const latestRepro = reproByBug.get(bug.id);
+    const currentStatusLabels = { finished: "本机已运行", running: "正在复现", pending: "等待复现", failed: "复现任务失败" };
+    const currentStatus = latestRepro ? (currentStatusLabels[latestRepro.status] || latestRepro.status) : "尚未在本机运行";
+    return `
     <tr>
       <td><strong>${escapeHtml(bug.display_id || bug.id)}</strong></td>
-      <td>${escapeHtml(bug.framework)}</td>
       <td><code>${escapeHtml(bug.api)}</code></td>
       <td>${escapeHtml(bug.bug_type || bug.title || "")}</td>
+      <td>${escapeHtml(currentStatus)}</td>
+      <td>${bug.status === "confirmed" || !bug.status ? "已确认" : escapeHtml(bug.status)}</td>
       <td><button class="text-action" data-open-bug="${escapeHtml(bug.id)}">查看证据</button></td>
     </tr>
-  `).join("");
+  `; }).join("");
   $("bugSummary").innerHTML = `
     <table>
-      <thead><tr><th>编号</th><th>框架</th><th>API</th><th>问题类型</th><th></th></tr></thead>
-      <tbody>${bugRows || `<tr><td colspan="5">暂无数据</td></tr>`}</tbody>
+      <thead><tr><th>编号</th><th>API</th><th>失效类型</th><th>当前环境复现</th><th>证据状态</th><th></th></tr></thead>
+      <tbody>${bugRows || `<tr><td colspan="6">暂无数据</td></tr>`}</tbody>
     </table>
   `;
   document.querySelectorAll("[data-open-bug]").forEach((button) => {
@@ -210,7 +231,9 @@ function renderEnvironment(environment) {
     ${gpuRows || `<div class="environment-group"><h3>GPU</h3><div class="empty">当前服务未获得 GPU 清单。</div></div>`}
     ${warningRows ? `<div class="environment-group"><h3>采集提示</h3><ul class="warning-list">${warningRows}</ul></div>` : ""}
   `;
-  $("environmentBrief").textContent = gpus.length ? `${gpus.length} 个 GPU · Python ${python.version || "-"}` : `Python ${python.version || "-"}`;
+  $("environmentBrief").textContent = gpus.length
+    ? `${gpus.map((gpu) => gpu.name).join(" / ")} · Python ${python.version || "-"}`
+    : `未检测到 GPU · Python ${python.version || "-"}`;
   $("environmentDot").className = `status-dot ${environment.warnings?.length ? "warn" : ""}`;
   populateGpuControls(environment);
 }
@@ -307,6 +330,7 @@ async function selectApi(apiName, options = {}) {
     state.selectedApiStage = null;
     state.followLiveStage = true;
     state.selectedResultFile = null;
+    $("apiDataCheck").hidden = true;
     renderApiStages({}, {});
     renderApiVisualization();
     $("apiJobSummary").innerHTML = `
@@ -403,11 +427,16 @@ function renderApiVisualization() {
 }
 
 function renderGpuChart(metrics) {
-  const samples = metrics.filter((row) => row.gpu && Number.isFinite(Number(row.gpu.utilization_percent)));
-  const utilization = samples.map((row, index) => ({ x: index, y: Number(row.gpu.utilization_percent) }));
-  const memory = samples
-    .filter((row) => Number(row.gpu.memory_total_mib) > 0 && Number.isFinite(Number(row.gpu.memory_used_mib)))
-    .map((row, index) => ({ x: index, y: Number(row.gpu.memory_used_mib) / Number(row.gpu.memory_total_mib) * 100 }));
+  const utilization = metrics.map((row, index) => ({
+    x: index,
+    y: row.gpu && Number.isFinite(Number(row.gpu.utilization_percent)) ? Number(row.gpu.utilization_percent) : null,
+  }));
+  const memory = metrics.map((row, index) => ({
+    x: index,
+    y: row.gpu && Number(row.gpu.memory_total_mib) > 0 && Number.isFinite(Number(row.gpu.memory_used_mib))
+      ? Number(row.gpu.memory_used_mib) / Number(row.gpu.memory_total_mib) * 100
+      : null,
+  }));
   window.TensorCharts.renderLineChart("gpuChart", [
     { label: "GPU 利用率 %", color: "#087f73", points: utilization },
     { label: "显存占比 %", color: "#a76505", points: memory },
@@ -473,6 +502,7 @@ async function startApiRun() {
     cuda_device: $("apiGpuSelect").value,
   };
   const data = await post("/api/run-api", payload);
+  $("startApiRun").disabled = true;
   state.currentApiJob = data.job_id;
   state.latestApiPayload = null;
   state.selectedApiStage = "qwen_seed";
@@ -497,20 +527,47 @@ function renderApiJobSummary(data) {
   const counts = summary.result_counts || {};
   const shownStatus = summary.status || status.status || "pending";
   const error = summary.error || status.error || "";
+  const parameters = status.parameters || {};
   $("apiJobSummary").innerHTML = `
     <div class="detail-grid">
       <div><span>Job</span><code>${escapeHtml(data.job_id)}</code></div>
       <div><span>模式</span><strong>${escapeHtml(modeLabel(summary.mode || status.mode))}</strong></div>
       <div><span>状态</span><strong>${escapeHtml(shownStatus)}</strong></div>
-      <div><span>Qwen valid seed</span><strong>${escapeHtml(summary.qwen_valid_seed_count ?? "-")}</strong></div>
+      <div><span>计算设备</span><strong>${escapeHtml(status.cuda_device ?? "-")}</strong></div>
+      <div><span>Qwen 模型</span><code title="${escapeHtml(status.qwen_model)}">${escapeHtml(modelName(status.qwen_model))}</code></div>
+      <div><span>变异模型</span><code title="${escapeHtml(status.mutation_model)}">${escapeHtml(modelName(status.mutation_model))}</code></div>
+      <div><span>Qwen 预算</span><strong>${escapeHtml(parameters.qwen_per_api_budget ?? "-")}s</strong></div>
+      <div><span>最大有效程序</span><strong>${escapeHtml(parameters.ev_max_valid ?? "-")}</strong></div>
+      <div><span>Batch size</span><strong>${escapeHtml(parameters.ev_batch_size ?? "-")}</strong></div>
+      <div><span>Seed pool</span><strong>${escapeHtml(parameters.seed_pool_size ?? "-")}</strong></div>
+      <div><span>有效 Qwen 种子</span><strong>${escapeHtml(summary.qwen_valid_seed_count ?? "-")}</strong></div>
       <div><span>Trace 命中</span><strong>${escapeHtml(summary.catch_count ?? "-")}</strong></div>
-      <div><span>输出目录</span><code>${escapeHtml(data.out)}</code></div>
     </div>
     <div class="mini-counts">
       ${Object.entries(counts).map(([name, value]) => `<span>${escapeHtml(name)}: <b>${escapeHtml(value)}</b></span>`).join("") || "<span>暂无结果计数</span>"}
     </div>
     ${error ? `<div class="text-block error-text"><b>错误</b><p>${escapeHtml(error)}</p></div>` : ""}
   `;
+}
+
+function renderApiDataCheck(data) {
+  const check = $("apiDataCheck");
+  const status = data.status?.status;
+  if (!["success", "failed"].includes(status)) {
+    check.hidden = true;
+    return;
+  }
+  const summaryCounts = data.summary?.result_counts || {};
+  const fileCounts = Object.fromEntries(resultCategories.map((category) => [category, (data.result_files?.[category] || []).length]));
+  const lastMetric = (data.metrics || []).at(-1) || {};
+  const mismatches = [];
+  resultCategories.forEach((category) => {
+    if (Number(summaryCounts[category] || 0) !== fileCounts[category]) mismatches.push(`${category}: summary=${summaryCounts[category] || 0}, files=${fileCounts[category]}`);
+    if (data.metrics?.length && Number(lastMetric[category] || 0) !== fileCounts[category]) mismatches.push(`${category}: metric=${lastMetric[category] || 0}, files=${fileCounts[category]}`);
+  });
+  check.hidden = false;
+  check.className = `data-check ${mismatches.length ? "" : "ok"}`;
+  check.textContent = mismatches.length ? `数据校验警告：${mismatches.join("；")}` : "数据校验通过：最终指标、Summary 与当前 Job 的 Results 文件一致";
 }
 
 async function refreshSelectedApiAfterJob() {
@@ -531,8 +588,10 @@ async function loadApiJob() {
   state.latestApiPayload = data;
   renderApiStages(data.status, data.summary);
   renderApiJobSummary(data);
+  renderApiDataCheck(data);
   renderApiVisualization();
   const status = data.status?.status;
+  $("startApiRun").disabled = ["running", "pending"].includes(status) || !state.selectedApi?.has_prompt;
   if (status === "success" || status === "failed") {
     clearInterval(state.apiPollTimer);
     state.apiPollTimer = null;
@@ -657,14 +716,27 @@ async function selectCandidate(id) {
       <div><span>API</span><code>${escapeHtml(detail.api)}</code></div>
       <div><span>结果分类</span><strong>${escapeHtml(detail.category)}</strong></div>
     </div>
+    <div class="button-row candidate-review-actions">
+      <button class="secondary" data-candidate-status="needs_review">保留人工复核</button>
+      <button class="secondary" data-candidate-status="rejected">排除该候选</button>
+    </div>
   `;
   $("bugExplanation").innerHTML = `
     <div class="behavior-panel expected"><b>候选含义</b><p>该记录来自一次具体运行结果，尚未进入已确认问题库。</p></div>
-    <div class="behavior-panel observed"><b>当前依据</b><p>${escapeHtml(detail.recommended ? "命中系统建议审查规则，需要人工最小化与复现。" : "由用户加入候选，需要人工检查其异常语义。")}</p></div>
+    <div class="behavior-panel observed"><b>当前依据</b><p>${escapeHtml(!detail.source_exists ? "原始 Job 文件已缺失，当前证据不完整。" : detail.recommended ? "命中系统建议审查规则，需要人工最小化与复现。" : "由用户加入候选，需要人工检查其异常语义。")}</p></div>
   `;
   $("reproCode").textContent = detail.source_code || "";
   $("reproProfileControls").innerHTML = `<div class="empty">候选记录需要先完成人工最小化，网页不会直接提升为已确认 Bug。</div>`;
   $("runSelectedRepro").disabled = true;
+  document.querySelectorAll("[data-candidate-status]").forEach((button) => {
+    button.addEventListener("click", () => updateCandidateStatus(detail.id, button.dataset.candidateStatus).catch(alertError));
+  });
+}
+
+async function updateCandidateStatus(candidateId, candidateStatus) {
+  const updated = await post(`/api/candidates/${encodeURIComponent(candidateId)}/status`, { status: candidateStatus });
+  state.candidates = state.candidates.map((item) => item.id === candidateId ? updated : item);
+  await selectCandidate(candidateId);
 }
 
 function selectedReproModes() {
@@ -694,9 +766,10 @@ function renderReproEvidence(status) {
       <td>${escapeHtml(evidence.outcome || "-")}</td>
       <td>${escapeHtml(evidence.signal || "-")}</td>
       <td>${escapeHtml(item.actual_device || "unknown")}</td>
+      <td>${escapeHtml(evidence.reason || "-")}</td>
     </tr>`;
   }).join("");
-  $("reproEvidence").innerHTML = `<table><thead><tr><th>执行配置</th><th>状态</th><th>规则结论</th><th>返回码</th><th>观测类型</th><th>信号</th><th>实际设备</th></tr></thead><tbody>${rows}</tbody></table>`;
+  $("reproEvidence").innerHTML = `<table><thead><tr><th>执行配置</th><th>状态</th><th>规则结论</th><th>返回码</th><th>观测类型</th><th>信号</th><th>实际设备</th><th>判定依据</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
 function renderReproEnvironment(environment) {
@@ -713,57 +786,10 @@ function renderReproEnvironment(environment) {
   ].join("");
 }
 
-function inlineMarkdown(text) {
-  return escapeHtml(text)
-    .replace(/`([^`]+)`/g, "<code>$1</code>")
-    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
-}
-
-function renderSafeMarkdown(markdown) {
-  const lines = String(markdown || "").split("\n");
-  const html = [];
-  let inCode = false;
-  let code = [];
-  let listOpen = false;
-  for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index];
-    if (line.startsWith("```")) {
-      if (inCode) {
-        html.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
-        code = [];
-      }
-      inCode = !inCode;
-      continue;
-    }
-    if (inCode) { code.push(line); continue; }
-    if (/^\|.*\|$/.test(line) && /^\|[\s:|-]+\|$/.test(lines[index + 1] || "")) {
-      const headers = line.slice(1, -1).split("|");
-      index += 1;
-      const rows = [];
-      while (/^\|.*\|$/.test(lines[index + 1] || "")) rows.push(lines[++index].slice(1, -1).split("|"));
-      html.push(`<table><thead><tr>${headers.map((cell) => `<th>${inlineMarkdown(cell.trim())}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${inlineMarkdown(cell.trim())}</td>`).join("")}</tr>`).join("")}</tbody></table>`);
-      continue;
-    }
-    const heading = line.match(/^(#{1,3})\s+(.+)$/);
-    if (heading) { html.push(`<h${heading[1].length}>${inlineMarkdown(heading[2])}</h${heading[1].length}>`); continue; }
-    if (line.startsWith("> ")) { html.push(`<blockquote>${inlineMarkdown(line.slice(2))}</blockquote>`); continue; }
-    if (line.startsWith("- ")) {
-      if (!listOpen) { html.push("<ul>"); listOpen = true; }
-      html.push(`<li>${inlineMarkdown(line.slice(2))}</li>`);
-      continue;
-    }
-    if (listOpen) { html.push("</ul>"); listOpen = false; }
-    if (line.trim()) html.push(`<p>${inlineMarkdown(line)}</p>`);
-  }
-  if (listOpen) html.push("</ul>");
-  if (inCode) html.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
-  return html.join("");
-}
-
 function showReport(markdown) {
   state.reportMarkdown = markdown || "";
   $("generatedReport").textContent = state.reportMarkdown;
-  $("reportPreview").innerHTML = state.reportMarkdown ? renderSafeMarkdown(state.reportMarkdown) : `<div class="empty">报告内容为空</div>`;
+  $("reportPreview").innerHTML = state.reportMarkdown ? window.TensorMarkdown.renderSafeMarkdown(state.reportMarkdown) : `<div class="empty">报告内容为空</div>`;
   $("generateReport").textContent = "查看报告";
   $("generateReport").disabled = false;
   $("downloadReport").disabled = !state.reportMarkdown;

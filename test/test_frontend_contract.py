@@ -29,7 +29,7 @@ def test_overview_uses_live_environment_surface():
 
 def test_single_api_workspace_contains_stage_tabs_and_live_surfaces():
     html = INDEX.read_text(encoding="utf-8")
-    for expected in ("apiStageTabs", "apiStageChart", "apiResultComposition", "gpuMonitor", "candidateResults"):
+    for expected in ("apiStageTabs", "apiStageChart", "apiResultComposition", "gpuMonitor", "candidateResults", "apiDataCheck"):
         assert f'id="{expected}"' in html, expected
 
 
@@ -45,6 +45,13 @@ def test_repro_workspace_has_explanation_evidence_and_report_regions():
     assert "严重程度" not in html
 
 
+def test_candidate_review_can_update_non_confirming_states():
+    js = APP_JS.read_text(encoding="utf-8")
+    assert "updateCandidateStatus" in js
+    assert "/status" in js
+    assert "rejected" in js
+
+
 if __name__ == "__main__":
     test_frontend_has_no_hardcoded_gpu_or_environment_examples()
     test_frontend_has_three_primary_views()
@@ -52,4 +59,5 @@ if __name__ == "__main__":
     test_single_api_workspace_contains_stage_tabs_and_live_surfaces()
     test_frontend_loads_dependency_free_chart_module()
     test_repro_workspace_has_explanation_evidence_and_report_regions()
+    test_candidate_review_can_update_non_confirming_states()
     print("ok")

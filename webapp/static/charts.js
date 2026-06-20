@@ -20,6 +20,21 @@
     return element;
   }
 
+  function buildPath(points, x, y) {
+    let drawing = false;
+    const commands = [];
+    (points || []).forEach((point) => {
+      const valid = point.y !== null && point.y !== undefined && Number.isFinite(point.x) && Number.isFinite(point.y);
+      if (!valid) {
+        drawing = false;
+        return;
+      }
+      commands.push(`${drawing ? "L" : "M"}${x(point.x)},${y(point.y)}`);
+      drawing = true;
+    });
+    return commands.join(" ");
+  }
+
   function renderLineChart(target, series, options = {}) {
     const element = targetElement(target);
     const visible = (series || []).filter((item) => Array.isArray(item.points) && item.points.length);
@@ -36,7 +51,8 @@
       empty(element, options.emptyMessage);
       return;
     }
-    const xMax = Math.max(...points.map((point) => point.x), 1);
+    const allX = visible.flatMap((item) => item.points).map((point) => point.x).filter(Number.isFinite);
+    const xMax = Math.max(...allX, 1);
     const yMax = Math.max(...points.map((point) => point.y), 1);
     const x = (value) => pad.left + value / xMax * (width - pad.left - pad.right);
     const y = (value) => height - pad.bottom - value / yMax * (height - pad.top - pad.bottom);
@@ -51,8 +67,8 @@
       svg.appendChild(text);
     });
     visible.forEach((item, index) => {
-      const usable = item.points.filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y));
-      const path = usable.map((point, pointIndex) => `${pointIndex ? "L" : "M"}${x(point.x)},${y(point.y)}`).join(" ");
+      const usable = item.points.filter((point) => point.y !== null && point.y !== undefined && Number.isFinite(point.x) && Number.isFinite(point.y));
+      const path = buildPath(item.points, x, y);
       svg.appendChild(node("path", { d: path, fill: "none", stroke: item.color || COLORS[index % COLORS.length], class: "chart-series-line" }));
       usable.forEach((point) => svg.appendChild(node("circle", { cx: x(point.x), cy: y(point.y), r: 2.6, fill: item.color || COLORS[index % COLORS.length] })));
     });
@@ -95,5 +111,5 @@
     `;
   }
 
-  window.TensorCharts = { renderLineChart, renderStackedBar, renderProgress };
+  window.TensorCharts = { buildPath, renderLineChart, renderStackedBar, renderProgress };
 })();
