@@ -8,7 +8,23 @@ const state = {
   confirmedBugs: [],
   apiMatches: [],
   environment: null,
+  latestApiPayload: null,
+  selectedApiStage: null,
+  followLiveStage: true,
+  selectedResultCategory: "crash",
+  selectedResultFile: null,
 };
+
+const resultCategories = ["seed", "valid", "exception", "crash", "notarget", "hangs", "flaky"];
+const resultCategoryLabels = {
+  seed: "种子", valid: "有效", exception: "异常", crash: "崩溃",
+  notarget: "无目标", hangs: "超时", flaky: "不稳定",
+};
+const stageDefinitions = [
+  { key: "qwen_seed", label: "Qwen 种子", metricKeys: [["候选", "qwen_raw"], ["有效种子", "qwen_valid"]] },
+  { key: "ev_generation", label: "InCoder 变异", metricKeys: [["有效", "valid"], ["异常", "exception"], ["崩溃", "crash"], ["超时", "hangs"]] },
+  { key: "driver", label: "差异检测", metricKeys: [["有效", "valid"], ["异常", "exception"], ["崩溃", "crash"], ["不稳定", "flaky"]] },
+];
 
 const $ = (id) => document.getElementById(id);
 
@@ -258,9 +274,6 @@ function renderApiDetail(detail) {
       <div><span>已有结果</span><strong>${sumCounts(counts)}</strong></div>
     </div>
     <div class="file-row"><span>最近运行</span><code>${escapeHtml(latestText)}</code></div>
-    <div class="file-row"><span>API 清单</span><code>${escapeHtml(detail.api_list)}</code></div>
-    <div class="file-row"><span>约束路径</span><code>${escapeHtml(detail.prompt_path)}</code></div>
-    <div class="file-row"><span>Results</span><code>${escapeHtml(detail.results_path)}</code></div>
     <div class="mini-counts">
       ${Object.entries(counts).map(([name, value]) => `<span>${escapeHtml(name)}: <b>${escapeHtml(value)}</b></span>`).join("")}
     </div>
@@ -287,7 +300,12 @@ async function selectApi(apiName, options = {}) {
     }
   } else if (!options.keepJob) {
     state.currentApiJob = null;
+    state.latestApiPayload = null;
+    state.selectedApiStage = null;
+    state.followLiveStage = true;
+    state.selectedResultFile = null;
     renderApiStages({}, {});
+    renderApiVisualization();
     $("apiJobSummary").innerHTML = `
       <div class="empty">当前 API 暂无运行记录。点击“运行该 API”后，这里会显示任务摘要。</div>
     `;
@@ -315,6 +333,134 @@ function renderApiStages(status, summary = {}) {
   }).join("");
 }
 
+function liveStageKey(status) {
+  const stages = status?.stages || {};
+  const running = stageDefinitions.find((stage) => stages[stage.key] === "running");
+  if (running) return running.key;
+  const started = [...stageDefinitions].reverse().find((stage) => ![undefined, "pending", "skipped"].includes(stages[stage.key]));
+  return started?.key || "qwen_seed";
+}
+
+function renderStageTabs(status) {
+  const stages = status?.stages || {};
+  const live = liveStageKey(status);
+  if (state.followLiveStage || !state.selectedApiStage) state.selectedApiStage = live;
+  $("followLiveStage").hidden = state.followLiveStage || state.selectedApiStage === live;
+  $("apiStageTabs").innerHTML = stageDefinitions.map((stage) => {
+    const value = stages[stage.key] || "pending";
+    const disabled = ["pending", "skipped"].includes(value);
+    return `<button class="stage-tab ${state.selectedApiStage === stage.key ? "active" : ""}" role="tab" data-stage-tab="${stage.key}" ${disabled ? "disabled" : ""} aria-selected="${state.selectedApiStage === stage.key}">${escapeHtml(stage.label)}<small>${escapeHtml(value)}</small></button>`;
+  }).join("");
+  document.querySelectorAll("[data-stage-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedApiStage = button.dataset.stageTab;
+      state.followLiveStage = false;
+      renderApiVisualization();
+    });
+  });
+}
+
+function stageSeries(metrics, stage) {
+  const rows = (metrics || []).filter((row) => row.stage === stage.key);
+  return stage.metricKeys.map(([label, key], index) => ({
+    label,
+    color: ["#087f73", "#2f67a6", "#a76505", "#b52a35"][index],
+    points: rows.map((row) => ({ x: Number(row.elapsed_seconds || 0), y: Number(row[key] || 0) })),
+  })).filter((series) => series.points.length);
+}
+
+function latestResultCounts(data) {
+  const metrics = data?.metrics || [];
+  const last = metrics[metrics.length - 1] || {};
+  const summaryCounts = data?.summary?.result_counts || {};
+  return Object.fromEntries(resultCategories.map((category) => [category, Number(summaryCounts[category] ?? last[category] ?? 0)]));
+}
+
+function renderApiVisualization() {
+  const data = state.latestApiPayload || {};
+  const status = data.status || {};
+  renderStageTabs(status);
+  const stage = stageDefinitions.find((item) => item.key === state.selectedApiStage) || stageDefinitions[0];
+  const stageStatus = status.stages?.[stage.key] || "pending";
+  $("apiStageChartTitle").textContent = stage.label;
+  $("apiStageChartMeta").textContent = `${stageStatus} · ${stageSeries(data.metrics, stage)[0]?.points.length || 0} 次采样`;
+  window.TensorCharts.renderLineChart("apiStageChart", stageSeries(data.metrics, stage), {
+    label: `${stage.label}指标`,
+    xLabel: "阶段耗时（秒）",
+    emptyMessage: stageStatus === "pending" ? "该阶段尚未开始" : "该阶段暂无可用采样",
+  });
+
+  const counts = latestResultCounts(data);
+  window.TensorCharts.renderStackedBar("apiResultComposition", resultCategories.map((category) => ({
+    label: resultCategoryLabels[category], value: counts[category],
+  })));
+  renderGpuChart(data.metrics || []);
+  renderResultExplorer(data.result_files || {}, counts);
+  renderSelectedStageLog();
+}
+
+function renderGpuChart(metrics) {
+  const samples = metrics.filter((row) => row.gpu && Number.isFinite(Number(row.gpu.utilization_percent)));
+  const utilization = samples.map((row, index) => ({ x: index, y: Number(row.gpu.utilization_percent) }));
+  const memory = samples
+    .filter((row) => Number(row.gpu.memory_total_mib) > 0 && Number.isFinite(Number(row.gpu.memory_used_mib)))
+    .map((row, index) => ({ x: index, y: Number(row.gpu.memory_used_mib) / Number(row.gpu.memory_total_mib) * 100 }));
+  window.TensorCharts.renderLineChart("gpuChart", [
+    { label: "GPU 利用率 %", color: "#087f73", points: utilization },
+    { label: "显存占比 %", color: "#a76505", points: memory },
+  ], { label: "GPU 利用率与显存占比", xLabel: "采样序号", emptyMessage: "当前任务尚无 GPU 采样" });
+}
+
+function renderResultExplorer(filesByCategory, counts) {
+  if (!resultCategories.includes(state.selectedResultCategory)) state.selectedResultCategory = "crash";
+  $("resultCategoryTabs").innerHTML = resultCategories.map((category) => `
+    <button class="result-category-tab ${state.selectedResultCategory === category ? "active" : ""}" data-result-category="${category}">${resultCategoryLabels[category]}<b>${escapeHtml(counts[category] || 0)}</b></button>
+  `).join("");
+  document.querySelectorAll("[data-result-category]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedResultCategory = button.dataset.resultCategory;
+      state.selectedResultFile = null;
+      renderResultExplorer(filesByCategory, counts);
+    });
+  });
+
+  const files = filesByCategory[state.selectedResultCategory] || [];
+  $("resultFileList").innerHTML = files.map((file, index) => `
+    <button class="result-file-button ${state.selectedResultFile?.path === file.path ? "active" : ""}" data-result-file-index="${index}">
+      <code title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</code>
+      ${file.recommended ? `<span class="recommend-mark">建议审查</span>` : ""}
+      <small>${escapeHtml(file.size_bytes)} bytes</small>
+    </button>
+  `).join("") || `<div class="empty">该分类暂无文件</div>`;
+  document.querySelectorAll("[data-result-file-index]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedResultFile = files[Number(button.dataset.resultFileIndex)];
+      renderResultExplorer(filesByCategory, counts);
+    });
+  });
+  const selected = state.selectedResultFile;
+  $("resultFileMeta").innerHTML = selected
+    ? `<code>${escapeHtml(selected.path)}</code>${selected.recommended ? ` <span class="pill status-running">系统建议审查</span>` : ""}`
+    : "请选择结果文件";
+  $("resultSourcePreview").textContent = selected?.source_excerpt || "";
+  $("addCandidate").textContent = "加入候选";
+  $("addCandidate").disabled = !selected || state.selectedResultCategory === "seed";
+}
+
+function renderSelectedStageLog() {
+  const data = state.latestApiPayload || {};
+  const logNames = {
+    qwen_seed: "01_qwen_seed.log",
+    ev_generation: "02_ev_generation.log",
+    driver: "03_driver.log",
+  };
+  const name = logNames[state.selectedApiStage];
+  $("apiLogStageLabel").textContent = name || "当前任务输出";
+  $("apiJobLogs").textContent = name && data.logs?.[name]
+    ? data.logs[name]
+    : Object.entries(data.logs || {}).map(([logName, content]) => `===== ${logName} =====\n${content}`).join("\n\n");
+}
+
 async function startApiRun() {
   if (!state.selectedApi) return;
   const payload = {
@@ -325,6 +471,10 @@ async function startApiRun() {
   };
   const data = await post("/api/run-api", payload);
   state.currentApiJob = data.job_id;
+  state.latestApiPayload = null;
+  state.selectedApiStage = "qwen_seed";
+  state.followLiveStage = true;
+  state.selectedResultFile = null;
   $("apiJobSummary").innerHTML = `
     <div class="detail-grid">
       <div><span>Job</span><code>${escapeHtml(data.job_id)}</code></div>
@@ -375,11 +525,10 @@ async function refreshSelectedApiAfterJob() {
 async function loadApiJob() {
   if (!state.currentApiJob) return;
   const data = await api(`/api/api-jobs/${encodeURIComponent(state.currentApiJob)}`);
+  state.latestApiPayload = data;
   renderApiStages(data.status, data.summary);
   renderApiJobSummary(data);
-  $("apiJobLogs").textContent = Object.entries(data.logs || {})
-    .map(([name, content]) => `===== ${name} =====\n${content}`)
-    .join("\n\n");
+  renderApiVisualization();
   const status = data.status?.status;
   if (status === "success" || status === "failed") {
     clearInterval(state.apiPollTimer);
@@ -387,6 +536,22 @@ async function loadApiJob() {
     loadOverview().catch(console.error);
     refreshSelectedApiAfterJob().catch(console.error);
   }
+}
+
+async function addSelectedCandidate() {
+  const file = state.selectedResultFile;
+  const status = state.latestApiPayload?.status || {};
+  if (!file || !state.currentApiJob || !state.selectedApi) return;
+  const button = $("addCandidate");
+  button.disabled = true;
+  const record = await post("/api/candidates", {
+    job_id: state.currentApiJob,
+    lib: status.lib || state.selectedApi.lib,
+    api: status.api || state.selectedApi.api,
+    category: state.selectedResultCategory,
+    source_path: file.path,
+  });
+  button.textContent = `${record.id} 已加入候选`;
 }
 
 function renderConfirmedBugList() {
@@ -527,6 +692,11 @@ function bindEvents() {
   });
   $("apiSearch").addEventListener("input", debounce(() => searchApis().catch(alertError)));
   $("startApiRun").addEventListener("click", () => startApiRun().catch(alertError));
+  $("followLiveStage").addEventListener("click", () => {
+    state.followLiveStage = true;
+    renderApiVisualization();
+  });
+  $("addCandidate").addEventListener("click", () => addSelectedCandidate().catch(alertError));
   $("runCpuRepro").addEventListener("click", () => startRepro(["cpu"]).catch(alertError));
   $("runGpuRepro").addEventListener("click", () => startRepro(["gpu0"]).catch(alertError));
   $("runBothRepro").addEventListener("click", () => startRepro(["cpu", "gpu0"]).catch(alertError));
@@ -540,6 +710,7 @@ function alertError(err) {
 async function init() {
   bindEvents();
   renderApiStages({}, {});
+  renderApiVisualization();
   await Promise.all([
     loadEnvironment(),
     loadOverview(),

@@ -104,13 +104,42 @@
               </div>
             </div>
           </section>
-          <section class="surface">
-            <div class="section-heading"><h3>运行状态</h3><p>按流水线阶段更新</p></div>
+          <section class="surface run-surface">
+            <div class="section-heading row-heading">
+              <div><h3>运行过程</h3><p>三个主要阶段均展示真实采样指标</p></div>
+              <button id="followLiveStage" class="text-action" hidden>返回实时阶段</button>
+            </div>
             <div id="apiStages" class="stages"></div>
-            <div id="apiJobSummary" class="job-summary detail-box">请选择一个 API。</div>
+            <div id="apiStageTabs" class="stage-tabs" role="tablist" aria-label="运行阶段"></div>
+            <div class="stage-workspace">
+              <div>
+                <div class="chart-head"><b id="apiStageChartTitle">阶段指标</b><span id="apiStageChartMeta">等待任务开始</span></div>
+                <div id="apiStageChart" class="chart-frame"></div>
+              </div>
+              <div class="run-side-column">
+                <div id="apiJobSummary" class="job-summary detail-box">请选择一个 API。</div>
+                <div><b class="mini-title">Results 构成</b><div id="apiResultComposition" class="composition-frame"></div></div>
+              </div>
+            </div>
+          </section>
+          <details id="gpuMonitor" class="surface gpu-monitor">
+            <summary><span>GPU 监控</span><small>利用率与显存占用</small></summary>
+            <div id="gpuChart" class="chart-frame compact-chart"></div>
+          </details>
+          <section id="candidateResults" class="surface results-surface">
+            <div class="section-heading"><h3>Results 文件审查</h3><p>查看本次任务生成的精确源码，并按证据加入候选</p></div>
+            <div id="resultCategoryTabs" class="result-category-tabs"></div>
+            <div class="result-explorer">
+              <div id="resultFileList" class="result-file-list"><div class="empty">运行后显示结果文件</div></div>
+              <div class="result-preview">
+                <div id="resultFileMeta" class="result-file-meta">请选择结果文件</div>
+                <pre id="resultSourcePreview" class="pre code-view"></pre>
+                <button id="addCandidate" class="primary" disabled>加入候选</button>
+              </div>
+            </div>
           </section>
           <section class="surface">
-            <div class="section-heading"><h3>实时日志</h3><p>当前任务的标准输出与错误输出</p></div>
+            <div class="section-heading"><h3>实时日志</h3><p id="apiLogStageLabel">当前任务输出</p></div>
             <pre id="apiJobLogs" class="pre tall"></pre>
           </section>
         </section>
@@ -151,6 +180,7 @@
       </aside>
     </div>
 
+    <script src="/static/charts.js"></script>
     <script src="/static/app.js"></script>
   </body>
 </html>

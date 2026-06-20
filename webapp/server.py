@@ -29,9 +29,9 @@ except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
     from scripts.demo_metrics import read_metrics
 
 try:
-    from webapp.candidates import CandidateStore
+    from webapp.candidates import CandidateStore, recommend_candidate
 except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
-    from candidates import CandidateStore
+    from candidates import CandidateStore, recommend_candidate
 
 try:
     from webapp.repro_evidence import classify_execution, sha256_file, write_report_once
@@ -453,6 +453,29 @@ def find_api_job(job_id: str) -> Optional[Path]:
     return None
 
 
+def list_job_result_files(out: Path, lib: str, api: str) -> dict[str, list[dict]]:
+    root = out / "Results" / lib
+    files: dict[str, list[dict]] = {category: [] for category in RESULT_SUBDIRS}
+    for category in RESULT_SUBDIRS:
+        folder = root / category
+        if not folder.is_dir():
+            continue
+        for path in sorted(folder.glob("*.py")):
+            if path.stem.rsplit("_", 1)[0] != api:
+                continue
+            source = path.read_text(encoding="utf-8", errors="replace")
+            files[category].append(
+                {
+                    "name": path.name,
+                    "path": rel(path),
+                    "size_bytes": path.stat().st_size,
+                    "source_excerpt": source[:4000],
+                    "recommended": recommend_candidate(category, source[:4000]),
+                }
+            )
+    return files
+
+
 def api_job_payload(job_id: str) -> tuple[int, dict]:
     out = find_api_job(job_id)
     if out is None:
@@ -471,6 +494,11 @@ def api_job_payload(job_id: str) -> tuple[int, dict]:
         "summary": summary,
         "metrics": read_metrics(out / "metrics.jsonl", limit=2000),
         "environment": read_json(out / "environment.json", {}),
+        "result_files": list_job_result_files(
+            out,
+            str(status.get("lib") or summary.get("lib") or ""),
+            str(status.get("api") or summary.get("api") or ""),
+        ),
         "logs": logs,
     }
 

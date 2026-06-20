@@ -27,8 +27,21 @@ def test_overview_uses_live_environment_surface():
     assert '"/api/environment"' in js
 
 
+def test_single_api_workspace_contains_stage_tabs_and_live_surfaces():
+    html = INDEX.read_text(encoding="utf-8")
+    for expected in ("apiStageTabs", "apiStageChart", "apiResultComposition", "gpuMonitor", "candidateResults"):
+        assert f'id="{expected}"' in html, expected
+
+
+def test_frontend_loads_dependency_free_chart_module():
+    html = INDEX.read_text(encoding="utf-8")
+    assert '/static/charts.js' in html
+
+
 if __name__ == "__main__":
     test_frontend_has_no_hardcoded_gpu_or_environment_examples()
     test_frontend_has_three_primary_views()
     test_overview_uses_live_environment_surface()
+    test_single_api_workspace_contains_stage_tabs_and_live_surfaces()
+    test_frontend_loads_dependency_free_chart_module()
     print("ok")
