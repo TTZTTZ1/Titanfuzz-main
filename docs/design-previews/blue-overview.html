@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TensorGuard 蓝色总览页</title>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --ink: #172033;
+      --muted: #68758d;
+      --line: #dbe3f0;
+      --blue: #246bfd;
+      --blue-2: #4c84ff;
+      --blue-soft: #eaf1ff;
+      --violet: #8269d6;
+      --cyan: #1598bd;
+      --success: #168367;
+      --warning: #b36f16;
+      --danger: #c64756;
+      --paper: rgba(255,255,255,.92);
+    }
+    body { margin: 0; color: var(--ink); background: linear-gradient(135deg,#f8fbff 0%,#edf4ff 52%,#f8f5ff 100%); font-family: Inter,"PingFang SC","Microsoft YaHei",sans-serif; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: 218px minmax(0,1fr); }
+    aside { position: sticky; top: 0; height: 100vh; padding: 23px 15px; background: #131c2d; color: #fff; display: flex; flex-direction: column; box-shadow: 12px 0 32px rgba(28,46,84,.08); }
+    .brand { padding: 2px 11px 24px; }
+    .brand strong { font-size: 18px; }
+    .brand small { display: block; margin-top: 6px; color: #8391aa; font-size: 10px; }
+    .brand-line { width: 31px; height: 3px; margin-top: 13px; border-radius: 2px; background: var(--blue-2); }
+    nav { display: grid; gap: 6px; }
+    .nav { min-height: 43px; padding: 0 12px; border-radius: 6px; display: flex; align-items: center; gap: 11px; color: #9eabc0; font-size: 12px; }
+    .nav i { width: 7px; height: 7px; border: 1px solid currentColor; border-radius: 2px; }
+    .nav.on { color: #fff; background: #202d43; box-shadow: inset 3px 0 var(--blue-2); }
+    .aside-foot { margin-top: auto; padding: 16px 11px 3px; border-top: 1px solid #29364b; color: #8290a8; font-size: 10px; line-height: 1.8; }
+    .online { display: inline-flex; align-items: center; gap: 7px; color: #6bd5bd; }
+    .online::before { content:""; width: 6px; height: 6px; border-radius: 50%; background: #3cc49f; box-shadow: 0 0 0 4px rgba(60,196,159,.12); }
+    main { min-width: 0; }
+    header { height: 72px; padding: 0 31px; border-bottom: 1px solid rgba(204,216,235,.9); background: rgba(251,253,255,.76); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: space-between; }
+    header h1 { margin: 0; font-size: 17px; }
+    header p { margin: 5px 0 0; color: var(--muted); font-size: 10px; }
+    .actions { display: flex; gap: 8px; }
+    button { min-height: 35px; padding: 0 13px; border: 1px solid #d2ddec; border-radius: 6px; background: rgba(255,255,255,.88); color: #36445e; font-weight: 650; }
+    button.primary { border-color: var(--blue); color: #fff; background: var(--blue); box-shadow: 0 7px 18px rgba(36,107,253,.2); }
+    .content { max-width: 1380px; margin: 0 auto; padding: 27px 31px 46px; }
+    .intro { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 13px; }
+    .intro h2 { margin: 0; font-size: 13px; }
+    .intro span { color: var(--muted); font-size: 10px; }
+    .overview-strip { display: grid; grid-template-columns: 1.2fr 1fr 1fr .9fr; border: 1px solid rgba(206,218,237,.95); border-radius: 7px; background: var(--paper); box-shadow: 0 15px 36px rgba(47,73,117,.07); overflow: hidden; }
+    .metric { min-height: 112px; padding: 19px 20px; border-right: 1px solid var(--line); }
+    .metric:last-child { border-right: 0; }
+    .metric label { display: block; color: var(--muted); font-size: 10px; }
+    .metric strong { display: block; margin: 9px 0 7px; font: 650 28px "SFMono-Regular",Consolas,monospace; }
+    .metric small { color: #77849a; font-size: 9px; }
+    .metric .up { color: var(--blue); }
+    .main-grid { display: grid; grid-template-columns: minmax(0,1.45fr) minmax(320px,.75fr); gap: 15px; margin-top: 16px; }
+    .surface { border: 1px solid rgba(206,218,237,.95); border-radius: 7px; background: var(--paper); box-shadow: 0 12px 30px rgba(47,73,117,.055); overflow: hidden; }
+    .surface-head { min-height: 60px; padding: 13px 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+    .surface-head h3 { margin: 0 0 4px; font-size: 12px; }
+    .surface-head p { margin: 0; color: var(--muted); font-size: 9px; }
+    .segmented { display: flex; padding: 3px; border: 1px solid #d9e2f0; border-radius: 6px; background: #f2f6fc; }
+    .segmented span { padding: 6px 9px; border-radius: 4px; color: #748096; font-size: 9px; }
+    .segmented .on { color: #fff; background: var(--blue); box-shadow: 0 3px 8px rgba(36,107,253,.2); }
+    .chart-area { height: 284px; padding: 26px 20px 28px 45px; position: relative; background: rgba(251,253,255,.7); }
+    .chart-grid { position: absolute; inset: 25px 19px 38px 44px; border-left: 1px solid #cfd9e8; border-bottom: 1px solid #cfd9e8; background: repeating-linear-gradient(to bottom,transparent 0,transparent 49px,#e7edf6 50px); }
+    .chart-area svg { position: relative; width: 100%; height: 100%; overflow: visible; }
+    .legend { position: absolute; left: 48px; bottom: 12px; display: flex; gap: 15px; color: #738096; font-size: 9px; }
+    .legend i { display: inline-block; width: 8px; height: 3px; margin: 0 5px 2px 0; border-radius: 2px; }
+    .flow { padding: 5px 16px 10px; }
+    .stage { min-height: 61px; display: grid; grid-template-columns: 26px minmax(0,1fr) auto; gap: 10px; align-items: center; border-bottom: 1px solid #e9eef5; }
+    .stage:last-child { border-bottom: 0; }
+    .stage-num { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 5px; background: #f0f4fa; color: #77849a; font: 10px monospace; }
+    .stage.done .stage-num { color: var(--blue); background: var(--blue-soft); }
+    .stage.running .stage-num { color: #fff; background: var(--blue); box-shadow: 0 0 0 4px rgba(36,107,253,.1); }
+    .stage b { display: block; font-size: 10px; }
+    .stage small { color: var(--muted); font-size: 8px; }
+    .state { padding: 5px 7px; border-radius: 4px; color: #748096; background: #eef2f7; font-size: 8px; font-weight: 700; }
+    .done .state { color: var(--success); background: #e5f5f0; }
+    .running .state { color: var(--blue); background: var(--blue-soft); }
+    .bottom-grid { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(360px,.85fr); gap: 15px; margin-top: 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 10px; }
+    th { padding: 10px 13px; color: #738096; background: #f5f8fc; text-align: left; font-weight: 650; }
+    td { padding: 12px 13px; border-top: 1px solid #e3e9f2; }
+    td strong { color: #2d3b54; }
+    .evidence { color: var(--danger); font-weight: 700; }
+    .badge { display: inline-block; padding: 4px 6px; border-radius: 4px; color: var(--success); background: #e5f5f0; font-size: 8px; font-weight: 700; }
+    .coverage { padding: 17px; }
+    .bar-label { display: flex; justify-content: space-between; margin: 0 0 7px; color: #5f6c82; font-size: 9px; }
+    .bar { height: 7px; margin-bottom: 16px; border-radius: 4px; background: #edf1f7; overflow: hidden; }
+    .bar span { display: block; height: 100%; border-radius: inherit; background: var(--blue); }
+    .bar.violet span { background: var(--violet); }
+    .bar.cyan span { background: var(--cyan); }
+    @media(max-width:980px){.app{grid-template-columns:72px 1fr}.brand small,.brand-line,.nav span,.aside-foot{display:none}.main-grid,.bottom-grid{grid-template-columns:1fr}.overview-strip{grid-template-columns:repeat(2,1fr)}.metric:nth-child(2){border-right:0}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand"><strong>TG.</strong><small>TensorGuard Research Console</small><div class="brand-line"></div></div>
+      <nav><div class="nav on"><i></i><span>总览</span></div><div class="nav"><i></i><span>单 API 检测</span></div><div class="nav"><i></i><span>Bug 复现</span></div></nav>
+      <div class="aside-foot"><span class="online">环境已就绪</span><br>NVIDIA A800 80GB<br>CUDA 13.0</div>
+    </aside>
+    <main>
+      <header><div><h1>深度学习框架安全测试</h1><p>生成、变异、差分执行与证据固化</p></div><div class="actions"><button>环境信息</button><button class="primary">运行单 API</button></div></header>
+      <div class="content">
+        <div class="intro"><h2>当前覆盖</h2><span>更新于 10:42:18</span></div>
+        <section class="overview-strip">
+          <div class="metric"><label>API 总数</label><strong>4,608</strong><small>PyTorch 1,568 / TensorFlow 3,040</small></div>
+          <div class="metric"><label>已确认问题</label><strong>14</strong><small class="up">全部具备可复现证据</small></div>
+          <div class="metric"><label>当前 API</label><strong style="font-size:16px;margin-top:16px">torch.Tensor.add</strong><small class="up">Qwen 生成中</small></div>
+          <div class="metric"><label>服务状态</label><strong style="font-size:19px;color:var(--success);margin-top:15px">READY</strong><small>GPU 0 可用</small></div>
+        </section>
+
+        <div class="main-grid">
+          <section class="surface">
+            <div class="surface-head"><div><h3>实时指标</h3><p>torch.Tensor.add / 00:03:42</p></div><div class="segmented"><span class="on">Qwen</span><span>InCoder</span><span>Driver</span></div></div>
+            <div class="chart-area"><div class="chart-grid"></div>
+              <svg viewBox="0 0 760 210" preserveAspectRatio="none">
+                <defs><linearGradient id="blueArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#246bfd" stop-opacity=".23"/><stop offset="1" stop-color="#246bfd" stop-opacity="0"/></linearGradient></defs>
+                <path d="M0 187 L70 177 L140 167 L210 170 L280 138 L350 122 L420 95 L490 100 L565 62 L635 70 L705 39 L760 28 L760 210 L0 210Z" fill="url(#blueArea)"/>
+                <path d="M0 187 L70 177 L140 167 L210 170 L280 138 L350 122 L420 95 L490 100 L565 62 L635 70 L705 39 L760 28" fill="none" stroke="#246bfd" stroke-width="3"/>
+                <path d="M0 196 L70 193 L140 186 L210 178 L280 169 L350 153 L420 147 L490 128 L565 115 L635 105 L705 94 L760 86" fill="none" stroke="#8269d6" stroke-width="2" stroke-dasharray="6 5"/>
+                <circle cx="760" cy="28" r="5" fill="#fff" stroke="#246bfd" stroke-width="3"/>
+              </svg>
+              <div class="legend"><span><i style="background:var(--blue)"></i>有效种子</span><span><i style="background:var(--violet)"></i>候选程序</span><span><i style="background:var(--cyan)"></i>GPU 利用率</span></div>
+            </div>
+          </section>
+          <section class="surface">
+            <div class="surface-head"><div><h3>自动化流程</h3><p>实时读取任务状态</p></div></div>
+            <div class="flow">
+              <div class="stage done"><div class="stage-num">01</div><div><b>约束检查</b><small>prompt_check</small></div><span class="state">已完成</span></div>
+              <div class="stage running"><div class="stage-num">02</div><div><b>Qwen 种子生成</b><small>qwen_seed</small></div><span class="state">运行中</span></div>
+              <div class="stage"><div class="stage-num">03</div><div><b>InCoder 变异</b><small>ev_generation</small></div><span class="state">等待</span></div>
+              <div class="stage"><div class="stage-num">04</div><div><b>CPU/GPU 差异检测</b><small>driver</small></div><span class="state">等待</span></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="bottom-grid">
+          <section class="surface"><div class="surface-head"><div><h3>最近证据</h3><p>已通过复现执行固化</p></div><button>查看证据库</button></div>
+            <table><thead><tr><th>ID</th><th>API</th><th>失效类型</th><th>复现状态</th></tr></thead><tbody>
+              <tr><td>TG-PT-001</td><td><strong>torch.arange</strong></td><td class="evidence">CPU/GPU 语义差异</td><td><span class="badge">可复现</span></td></tr>
+              <tr><td>TG-PT-006</td><td><strong>torch.sparse.mm</strong></td><td class="evidence">进程崩溃</td><td><span class="badge">证据完整</span></td></tr>
+            </tbody></table>
+          </section>
+          <section class="surface"><div class="surface-head"><div><h3>框架覆盖</h3><p>来自 API 清单</p></div></div><div class="coverage">
+            <div class="bar-label"><span>PyTorch</span><b>1,568</b></div><div class="bar"><span style="width:52%"></span></div>
+            <div class="bar-label"><span>TensorFlow</span><b>3,040</b></div><div class="bar violet"><span style="width:100%"></span></div>
+            <div class="bar-label"><span>已确认证据</span><b>14</b></div><div class="bar cyan"><span style="width:34%"></span></div>
+          </div></section>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
