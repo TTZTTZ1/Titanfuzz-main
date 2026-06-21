@@ -4,6 +4,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = ROOT / "webapp" / "static" / "index.html"
 APP_JS = ROOT / "webapp" / "static" / "app.js"
+STYLES = ROOT / "webapp" / "static" / "styles.css"
 
 
 def test_frontend_has_no_hardcoded_gpu_or_environment_examples():
@@ -52,6 +53,21 @@ def test_candidate_review_can_update_non_confirming_states():
     assert "rejected" in js
 
 
+def test_frontend_uses_approved_blue_theme_tokens():
+    css = STYLES.read_text(encoding="utf-8")
+    for expected in (
+        "--primary: #246bfd;",
+        "--primary-soft: #eaf1ff;",
+        "--shell: #131c2d;",
+        "--canvas-start: #f8fbff;",
+        "--canvas-mid: #edf4ff;",
+        "--canvas-end: #f8f5ff;",
+    ):
+        assert expected in css, expected
+    assert "background: linear-gradient(" in css
+    assert "--teal:" not in css
+
+
 if __name__ == "__main__":
     test_frontend_has_no_hardcoded_gpu_or_environment_examples()
     test_frontend_has_three_primary_views()
@@ -60,4 +76,5 @@ if __name__ == "__main__":
     test_frontend_loads_dependency_free_chart_module()
     test_repro_workspace_has_explanation_evidence_and_report_regions()
     test_candidate_review_can_update_non_confirming_states()
+    test_frontend_uses_approved_blue_theme_tokens()
     print("ok")
