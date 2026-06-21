@@ -2,7 +2,7 @@
   "use strict";
 
   const NS = "http://www.w3.org/2000/svg";
-  const COLORS = ["#087f73", "#2f67a6", "#a76505", "#b52a35", "#6a5aa3", "#657178", "#18794e"];
+  const COLORS = ["#246bfd", "#8269d6", "#1598bd", "#b36f16", "#c64756", "#68758d", "#168367"];
 
   function targetElement(target) {
     return typeof target === "string" ? document.getElementById(target) : target;
@@ -111,5 +111,5 @@
     `;
   }
 
-  window.TensorCharts = { buildPath, renderLineChart, renderStackedBar, renderProgress };
+  window.TensorCharts = { COLORS, buildPath, renderLineChart, renderStackedBar, renderProgress };
 })();

@@ -68,6 +68,52 @@ def test_frontend_uses_approved_blue_theme_tokens():
     assert "--teal:" not in css
 
 
+def test_overview_keeps_dense_dashboard_structure():
+    html = INDEX.read_text(encoding="utf-8")
+    css = STYLES.read_text(encoding="utf-8")
+    for expected in ("metric-strip", "overview-grid", "process-line", "evidence-surface"):
+        assert expected in html, expected
+    for expected in ("var(--shadow)", "backdrop-filter: blur", ".metric-strip", ".process-line"):
+        assert expected in css, expected
+
+
+def test_single_api_uses_blue_focus_and_stage_states():
+    css = STYLES.read_text(encoding="utf-8")
+    for expected in (
+        "border-color: var(--primary)",
+        ".stage-tab.active",
+        "background: var(--primary);",
+        ".match-item.active",
+    ):
+        assert expected in css, expected
+
+
+def test_bug_workspace_preserves_evidence_hierarchy():
+    html = INDEX.read_text(encoding="utf-8")
+    css = STYLES.read_text(encoding="utf-8")
+    for expected in ("repro-workspace", "behavior-compare", "code-evidence-surface", "report-surface"):
+        assert expected in html, expected
+    for expected in (
+        ".behavior-panel.observed",
+        "border-left: 3px solid var(--red)",
+        ".behavior-panel.expected",
+        "border-left: 3px solid var(--primary)",
+        "background: rgba(248, 251, 255, .88)",
+    ):
+        assert expected in css, expected
+
+
+def test_blue_theme_keeps_responsive_and_print_boundaries():
+    css = STYLES.read_text(encoding="utf-8")
+    for expected in (
+        "@media (max-width: 1060px)",
+        "@media (max-width: 720px)",
+        "@media print",
+        "@media (prefers-reduced-motion: reduce)",
+    ):
+        assert expected in css, expected
+
+
 if __name__ == "__main__":
     test_frontend_has_no_hardcoded_gpu_or_environment_examples()
     test_frontend_has_three_primary_views()
@@ -77,4 +123,8 @@ if __name__ == "__main__":
     test_repro_workspace_has_explanation_evidence_and_report_regions()
     test_candidate_review_can_update_non_confirming_states()
     test_frontend_uses_approved_blue_theme_tokens()
+    test_overview_keeps_dense_dashboard_structure()
+    test_single_api_uses_blue_focus_and_stage_states()
+    test_bug_workspace_preserves_evidence_hierarchy()
+    test_blue_theme_keeps_responsive_and_print_boundaries()
     print("ok")
