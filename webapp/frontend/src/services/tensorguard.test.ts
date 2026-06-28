@@ -1,4 +1,17 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
+
+import type {
+  ApiJobMetric,
+  ApiJobParameters,
+  ApiJobStatus,
+  CudaInfo,
+  EnvironmentPayload,
+  FrameworkInfo,
+  GpuInfo,
+  GpuMetricSample,
+  PlatformInfo,
+  PythonInfo,
+} from "../types/tensorguard";
 
 import { ApiError, request } from "./http";
 import {
@@ -31,15 +44,27 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
+describe("TensorGuard payload types", () => {
+  it("matches structured environment and job telemetry payloads", () => {
+    expectTypeOf<EnvironmentPayload["platform"]>().toEqualTypeOf<PlatformInfo>();
+    expectTypeOf<EnvironmentPayload["python"]>().toEqualTypeOf<PythonInfo>();
+    expectTypeOf<EnvironmentPayload["frameworks"]>().toEqualTypeOf<FrameworkInfo>();
+    expectTypeOf<EnvironmentPayload["cuda"]>().toEqualTypeOf<CudaInfo>();
+    expectTypeOf<EnvironmentPayload["gpus"]>().toEqualTypeOf<GpuInfo[]>();
+    expectTypeOf<ApiJobStatus["parameters"]>().toEqualTypeOf<ApiJobParameters | undefined>();
+    expectTypeOf<ApiJobMetric["gpu"]>().toEqualTypeOf<GpuMetricSample | undefined>();
+  });
+});
+
 describe("TensorGuard API service", () => {
   it("encodes API search parameters", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse([]));
     vi.stubGlobal("fetch", fetchMock);
 
-    await getApis("torch", "Tensor.add", 5000);
+    await getApis("torch", "Tensor add&slice/[0]", 5000);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/apis?lib=torch&q=Tensor.add&limit=5000",
+      "/api/apis?lib=torch&q=Tensor+add%26slice%2F%5B0%5D&limit=5000",
       expect.objectContaining({ method: "GET" }),
     );
   });

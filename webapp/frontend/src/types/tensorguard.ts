@@ -35,15 +35,47 @@ export interface OverviewPayload {
   sources: OverviewSources;
 }
 
+export interface PlatformInfo {
+  system: string;
+  release: string;
+  machine: string;
+}
+
+export interface PythonInfo {
+  version: string;
+  executable: string;
+}
+
+export type FrameworkPackageInfo =
+  | { installed: true; version: string }
+  | { installed: false; version: null }
+  | { installed: null; version: null; error: string };
+
+export interface FrameworkInfo {
+  torch: FrameworkPackageInfo;
+  tensorflow: FrameworkPackageInfo;
+}
+
+export interface CudaInfo {
+  available: boolean;
+  driver_version: string | null;
+}
+
+export interface GpuInfo {
+  index: number;
+  name: string;
+  driver_version: string;
+  memory_total_mib: number | null;
+}
+
 export interface EnvironmentPayload {
   collected_at: string;
-  platform: BackendRecord;
-  python: BackendRecord;
-  frameworks: Record<string, BackendRecord>;
-  cuda: BackendRecord;
-  gpus: BackendRecord[];
+  platform: PlatformInfo;
+  python: PythonInfo;
+  frameworks: FrameworkInfo;
+  cuda: CudaInfo;
+  gpus: GpuInfo[];
   warnings: string[];
-  [key: string]: unknown;
 }
 
 export interface ApiListItem {
@@ -94,6 +126,19 @@ export interface JobStartPayload {
   out: string;
 }
 
+export interface ApiJobParameters {
+  qwen_n_samples: number;
+  qwen_min_valid: number;
+  qwen_max_rounds: number;
+  qwen_per_api_budget: number;
+  qwen_validate_timeout: number;
+  ev_max_valid: number;
+  ev_batch_size: number;
+  ev_timeout: number;
+  seed_pool_size: number;
+  random_seed: number;
+}
+
 export interface ApiJobStatus {
   job_id: string;
   lib: Library;
@@ -108,7 +153,7 @@ export interface ApiJobStatus {
   error: string | null;
   updated_at: string;
   dry_run?: boolean;
-  parameters?: BackendRecord;
+  parameters?: ApiJobParameters;
   metrics_path?: string;
   environment_path?: string;
   started_at?: string;
@@ -140,6 +185,14 @@ export interface LatestApiJobSummary extends ApiJobSummary {
   _path: string;
 }
 
+export interface GpuMetricSample {
+  collected_at: string;
+  index: number;
+  utilization_percent: number | null;
+  memory_used_mib: number | null;
+  memory_total_mib: number | null;
+}
+
 export type ApiJobMetric = ResultCounts & {
   timestamp: string;
   stage: ApiPipelineStage;
@@ -148,7 +201,7 @@ export type ApiJobMetric = ResultCounts & {
   qwen_valid: number;
   total_files: number;
   trace_hits: number;
-  gpu?: BackendRecord;
+  gpu?: GpuMetricSample;
 };
 
 export interface ApiResultFile {
