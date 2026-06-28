@@ -73,7 +73,7 @@ export function getApiDetail(lib: Library, api: string): Promise<ApiDetailPayloa
 }
 
 export function startApiRun(input: ApiRunStartInput): Promise<JobStartPayload> {
-  return post(endpoints.runApi, input);
+  return post(endpoints.runApi, { lib: input.lib, api: input.api, mode: input.mode });
 }
 
 export function getApiJob(id: string): Promise<ApiJobPayload> {

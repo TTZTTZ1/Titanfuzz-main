@@ -1,16 +1,12 @@
-import { afterEach, describe, expect, expectTypeOf, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type {
   ApiJobMetric,
   ApiJobParameters,
-  ApiJobStatus,
-  CudaInfo,
+  ApiListItem,
+  ApiRunStartInput,
   EnvironmentPayload,
-  FrameworkInfo,
-  GpuInfo,
-  GpuMetricSample,
-  PlatformInfo,
-  PythonInfo,
+  PromptManifestEntry,
 } from "../types/tensorguard";
 
 import { ApiError, request } from "./http";
@@ -37,24 +33,79 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+type Equal<Left, Right> =
+  (<Value>() => Value extends Left ? 1 : 2) extends (<Value>() => Value extends Right ? 1 : 2) ? true : false;
+type Assert<Condition extends true> = Condition;
+type ManifestEntryContract = Assert<Equal<ApiListItem["manifest_entry"], PromptManifestEntry>>;
+type ApiRunInputKeys = Assert<Equal<keyof ApiRunStartInput, "lib" | "api" | "mode">>;
+
+const backendEnvironmentFixture = {
+  collected_at: "2026-06-28T17:00:00+08:00",
+  platform: { system: "Linux", release: "6.8.0", machine: "x86_64" },
+  python: { version: "3.11.9", executable: "/usr/bin/python3" },
+  frameworks: {
+    torch: { installed: true, version: "2.7.0" },
+    tensorflow: { installed: false, version: null },
+  },
+  cuda: { available: true, driver_version: "550.54.15" },
+  gpus: [{ index: 0, name: "NVIDIA A800", driver_version: "550.54.15", memory_total_mib: 81920 }],
+  warnings: [],
+} satisfies EnvironmentPayload;
+
+const backendJobParametersFixture = {
+  qwen_n_samples: 5,
+  qwen_min_valid: 2,
+  qwen_max_rounds: 1,
+  qwen_per_api_budget: 300,
+  qwen_validate_timeout: 30,
+  ev_max_valid: 5,
+  ev_batch_size: 1,
+  ev_timeout: 300,
+  seed_pool_size: 10,
+  random_seed: 420,
+} satisfies ApiJobParameters;
+
+const backendMetricFixture = {
+  timestamp: "2026-06-28T17:00:01+08:00",
+  stage: "ev_generation",
+  elapsed_seconds: 1.25,
+  qwen_raw: 5,
+  qwen_valid: 2,
+  seed: 2,
+  valid: 1,
+  exception: 0,
+  crash: 0,
+  notarget: 0,
+  hangs: 0,
+  flaky: 0,
+  total_files: 3,
+  trace_hits: 0,
+  gpu: {
+    collected_at: "2026-06-28T17:00:01+08:00",
+    index: 0,
+    utilization_percent: 37,
+    memory_used_mib: 20480,
+    memory_total_mib: 81920,
+  },
+} satisfies ApiJobMetric;
+
+const backendManifestEntryFixture = {
+  api: "torch.add",
+  library: "torch",
+  structured_info: "experiment/torch/torch.add/prompts/structured_info.txt",
+  greedy_prompt: "experiment/torch/torch.add/prompts/greedy_prompt.txt",
+  has_greedy_prompt: true,
+  structured_sha256: "a".repeat(64),
+  greedy_sha256: "b".repeat(64),
+  updated_at: "2026-04-11T04:28:00",
+} satisfies PromptManifestEntry;
+
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: { "Content-Type": "application/json" },
   });
 }
-
-describe("TensorGuard payload types", () => {
-  it("matches structured environment and job telemetry payloads", () => {
-    expectTypeOf<EnvironmentPayload["platform"]>().toEqualTypeOf<PlatformInfo>();
-    expectTypeOf<EnvironmentPayload["python"]>().toEqualTypeOf<PythonInfo>();
-    expectTypeOf<EnvironmentPayload["frameworks"]>().toEqualTypeOf<FrameworkInfo>();
-    expectTypeOf<EnvironmentPayload["cuda"]>().toEqualTypeOf<CudaInfo>();
-    expectTypeOf<EnvironmentPayload["gpus"]>().toEqualTypeOf<GpuInfo[]>();
-    expectTypeOf<ApiJobStatus["parameters"]>().toEqualTypeOf<ApiJobParameters | undefined>();
-    expectTypeOf<ApiJobMetric["gpu"]>().toEqualTypeOf<GpuMetricSample | undefined>();
-  });
-});
 
 describe("TensorGuard API service", () => {
   it("encodes API search parameters", async () => {
@@ -69,17 +120,24 @@ describe("TensorGuard API service", () => {
     );
   });
 
-  it("preserves the existing run-api body", async () => {
+  it("sends only the supported run-api fields", async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ job_id: "job-1", out: "demo_runs/job-1" }, 202));
     vi.stubGlobal("fetch", fetchMock);
-    const input = { lib: "torch", api: "torch.add", mode: "demo", cuda_device: "0" } as const;
+    const input = {
+      lib: "torch",
+      api: "torch.add",
+      mode: "demo",
+      cuda_device: "0",
+      qwen_model: "qwen-model",
+      mut_model: "mutation-model",
+    } as const;
 
     await startApiRun(input);
 
     const [path, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(path).toBe("/api/run-api");
     expect(init.method).toBe("POST");
-    expect(JSON.parse(String(init.body))).toEqual(input);
+    expect(JSON.parse(String(init.body))).toEqual({ lib: "torch", api: "torch.add", mode: "demo" });
   });
 
   it("throws ApiError with status and backend error message", async () => {

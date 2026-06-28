@@ -1,5 +1,3 @@
-export type BackendRecord = Record<string, unknown>;
-
 export type Library = "torch" | "tf";
 export type ResultCategory = "seed" | "valid" | "exception" | "crash" | "notarget" | "hangs" | "flaky";
 export type ResultCounts = Record<ResultCategory, number>;
@@ -78,6 +76,28 @@ export interface EnvironmentPayload {
   warnings: string[];
 }
 
+interface PromptManifestEntryBase {
+  api: string;
+  library: Library;
+  structured_info: string;
+  structured_sha256: string;
+  updated_at: string;
+}
+
+export type PromptManifestEntry = PromptManifestEntryBase &
+  (
+    | {
+        has_greedy_prompt: true;
+        greedy_prompt: string;
+        greedy_sha256: string;
+      }
+    | {
+        has_greedy_prompt: false;
+        greedy_prompt: null;
+        greedy_sha256: null;
+      }
+  );
+
 export interface ApiListItem {
   api: string;
   lib: Library;
@@ -85,7 +105,7 @@ export interface ApiListItem {
   prompt_path: string;
   result_counts: ResultCounts;
   has_results: boolean;
-  manifest_entry: BackendRecord;
+  manifest_entry: PromptManifestEntry;
 }
 
 export type ApiRunMode = "demo" | "normal";
@@ -116,9 +136,6 @@ export interface ApiRunStartInput {
   lib: Library;
   api: string;
   mode: ApiRunMode;
-  cuda_device: string;
-  qwen_model?: string;
-  mut_model?: string;
 }
 
 export interface JobStartPayload {
