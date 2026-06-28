@@ -1,0 +1,337 @@
+export type BackendRecord = Record<string, unknown>;
+
+export type Library = "torch" | "tf";
+export type ResultCategory = "seed" | "valid" | "exception" | "crash" | "notarget" | "hangs" | "flaky";
+export type ResultCounts = Record<ResultCategory, number>;
+
+export interface OverviewResultSummary {
+  path: string;
+  exists: boolean;
+  api_count: number;
+  counts: ResultCounts;
+  trace_path: string;
+  trace_exists: boolean;
+  trace_hits: number;
+}
+
+export interface OverviewSources {
+  torch_api_list: string;
+  tf_api_list: string;
+  prompt_library: string;
+  api_jobs: string;
+  repro_jobs: string;
+}
+
+export interface OverviewPayload {
+  api_total: number;
+  api_by_lib: Record<Library, number>;
+  prompt_ready_total: number;
+  prompt_ready_by_lib: Record<Library, number>;
+  results: Record<Library, OverviewResultSummary>;
+  paper_bug_total: number;
+  paper_bug_by_framework: Record<string, number>;
+  latest_api_jobs: LatestApiJobSummary[];
+  latest_repro_jobs: LatestReproJobSummary[];
+  sources: OverviewSources;
+}
+
+export interface EnvironmentPayload {
+  collected_at: string;
+  platform: BackendRecord;
+  python: BackendRecord;
+  frameworks: Record<string, BackendRecord>;
+  cuda: BackendRecord;
+  gpus: BackendRecord[];
+  warnings: string[];
+  [key: string]: unknown;
+}
+
+export interface ApiListItem {
+  api: string;
+  lib: Library;
+  has_prompt: boolean;
+  prompt_path: string;
+  result_counts: ResultCounts;
+  has_results: boolean;
+  manifest_entry: BackendRecord;
+}
+
+export type ApiRunMode = "demo" | "normal";
+export type ApiRunStatus = "pending" | "running" | "success" | "failed";
+export type ApiPipelineStage = "prompt_check" | "qwen_seed" | "ev_generation" | "driver" | "summary";
+export type ApiStage = "launch" | "init" | ApiPipelineStage | "done";
+export type ApiStageStatus = "pending" | "running" | "success" | "failed" | "skipped";
+
+export interface LatestApiJob {
+  job_id: string;
+  out: string;
+  status: ApiRunStatus;
+  stage: ApiStage;
+  updated_at: string | null;
+  summary_status: ApiRunStatus | null;
+  mutation_model: string | null;
+  error: string | null;
+}
+
+export interface ApiDetailPayload extends ApiListItem {
+  api_list: string;
+  prompt_exists: boolean;
+  results_path: string;
+  latest_job: LatestApiJob | null;
+}
+
+export interface ApiRunStartInput {
+  lib: Library;
+  api: string;
+  mode: ApiRunMode;
+  cuda_device: string;
+  qwen_model?: string;
+  mut_model?: string;
+}
+
+export interface JobStartPayload {
+  job_id: string;
+  out: string;
+}
+
+export interface ApiJobStatus {
+  job_id: string;
+  lib: Library;
+  api: string;
+  mode: ApiRunMode;
+  qwen_model: string;
+  mutation_model: string;
+  cuda_device: string;
+  status: ApiRunStatus;
+  stage: ApiStage;
+  stages: Record<ApiPipelineStage, ApiStageStatus>;
+  error: string | null;
+  updated_at: string;
+  dry_run?: boolean;
+  parameters?: BackendRecord;
+  metrics_path?: string;
+  environment_path?: string;
+  started_at?: string;
+  logs?: Record<string, string>;
+}
+
+export interface ApiJobSummary {
+  job_id: string;
+  lib: Library;
+  api: string;
+  mode: ApiRunMode;
+  dry_run: boolean;
+  prompt_library: string;
+  qwen_model: string;
+  mutation_model: string;
+  status: ApiRunStatus;
+  error: string | null;
+  canonical_results_path: string;
+  qwen_valid_seed_count: number;
+  result_counts: ResultCounts;
+  trace_path: string;
+  trace_exists: boolean;
+  catch_count: number;
+  logs: Record<string, string>;
+  updated_at: string;
+}
+
+export interface LatestApiJobSummary extends ApiJobSummary {
+  _path: string;
+}
+
+export type ApiJobMetric = ResultCounts & {
+  timestamp: string;
+  stage: ApiPipelineStage;
+  elapsed_seconds: number;
+  qwen_raw: number;
+  qwen_valid: number;
+  total_files: number;
+  trace_hits: number;
+  gpu?: BackendRecord;
+};
+
+export interface ApiResultFile {
+  name: string;
+  path: string;
+  size_bytes: number;
+  source_excerpt: string;
+  recommended: boolean;
+}
+
+export interface ApiJobPayload {
+  job_id: string;
+  out: string;
+  status: ApiJobStatus;
+  summary: Partial<ApiJobSummary>;
+  metrics: ApiJobMetric[];
+  environment: Partial<EnvironmentPayload>;
+  result_files: Record<ResultCategory, ApiResultFile[]>;
+  logs: Record<string, string>;
+}
+
+export type CandidateCategory = Exclude<ResultCategory, "seed">;
+export type CandidateStatus = "pending_review" | "reproduced" | "needs_review" | "rejected" | "promoted";
+export type CandidateUpdateStatus = Exclude<CandidateStatus, "promoted">;
+
+export interface CandidateRecord {
+  id: string;
+  job_id: string;
+  lib: Library;
+  api: string;
+  category: CandidateCategory;
+  source_path: string;
+  source_sha256: string;
+  status: CandidateStatus;
+  recommended: boolean;
+  error_summary: string;
+  note: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CandidateDetail extends CandidateRecord {
+  source_exists: boolean;
+  source_code: string;
+}
+
+export interface CandidateCreateInput {
+  job_id: string;
+  lib: Library;
+  api: string;
+  category: CandidateCategory;
+  source_path: string;
+  note?: string;
+}
+
+export interface CandidateUpdateInput {
+  status: CandidateUpdateStatus;
+  note?: string;
+}
+
+export type ConfirmedBugFramework = "PyTorch" | "TensorFlow";
+
+export interface ConfirmedBugSource {
+  document: string;
+  section: string;
+  paper_case?: string;
+}
+
+export interface ConfirmedBugFiles {
+  repro: string;
+  report: string;
+}
+
+export interface ConfirmedBugMeta {
+  id: string;
+  title: string;
+  framework: ConfirmedBugFramework;
+  api: string;
+  related_apis: string[];
+  bug_type: string;
+  status: "confirmed";
+  source: ConfirmedBugSource;
+  trigger: string;
+  expected: string;
+  observed: string;
+  reproducible: boolean;
+  minimized: boolean;
+  files: ConfirmedBugFiles;
+  tags: string[];
+}
+
+export interface ConfirmedBugSummary extends ConfirmedBugMeta {
+  path: string;
+  meta_path: string;
+  display_id: string;
+}
+
+export interface ConfirmedBugDetail {
+  index: ConfirmedBugSummary;
+  meta: ConfirmedBugMeta;
+  display_id: string;
+  bug_dir: string;
+  repro_path: string;
+  report_path: string;
+  repro_code: string;
+  report_markdown: string;
+}
+
+export type ExecutionMode = "cpu" | `gpu:${number}`;
+export type ExecutionProfile = "cuda_hidden" | `visible_gpu_${number}`;
+export type ExecutionVerdict = "reproduced" | "not_reproduced" | "timeout" | "needs_review";
+export type ReproJobStatusValue = "pending" | "running" | "finished";
+export type ReproExecutionStatus = "pending" | "running" | "finished" | "timeout" | "failed";
+
+export interface ExecutionEvidence {
+  verdict: ExecutionVerdict;
+  outcome: string;
+  reason: string;
+  signal: string | null;
+  signal_number: number | null;
+}
+
+export interface ReproExecution {
+  status: ReproExecutionStatus;
+  returncode: number | null;
+  timed_out: boolean;
+  log: string;
+  started_at: string | null;
+  finished_at: string | null;
+  execution_profile: ExecutionProfile;
+  actual_device: string;
+  evidence: ExecutionEvidence | null;
+  verdict?: ExecutionVerdict;
+  elapsed_seconds?: number;
+  error?: string;
+}
+
+export interface ReproJobMeta {
+  title: string;
+  framework: string;
+  api: string;
+  bug_type: string;
+}
+
+export interface ReproJobStatus {
+  job_id: string;
+  bug_id: string;
+  status: ReproJobStatusValue;
+  started_at: string;
+  updated_at: string;
+  out: string;
+  timeout_seconds: number;
+  modes: Partial<Record<ExecutionMode, ReproExecution>>;
+  report: string;
+  error: string | null;
+  meta?: ReproJobMeta;
+  environment?: string;
+  report_id?: string;
+}
+
+export interface LatestReproJobSummary extends ReproJobStatus {
+  _path: string;
+}
+
+export interface ReplayStartInput {
+  modes: readonly ExecutionMode[];
+  timeout?: number;
+}
+
+export interface ReproJobPayload {
+  job_id: string;
+  out: string;
+  status: ReproJobStatus;
+  logs: Record<string, string>;
+  environment: Partial<EnvironmentPayload>;
+  report_exists: boolean;
+  report_path: string;
+  report_markdown: string;
+}
+
+export interface ReproReportPayload {
+  job_id: string;
+  report_path: string;
+  report_markdown: string;
+  immutable: boolean;
+}
