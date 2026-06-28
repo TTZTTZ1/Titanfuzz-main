@@ -39,7 +39,7 @@ const torchTotal = computed(() => props.overview?.api_by_lib?.torch ?? 0);
 const tfTotal = computed(() => props.overview?.api_by_lib?.tf ?? 0);
 const promptReadyTotal = computed(() => props.overview?.prompt_ready_total ?? 0);
 const paperBugTotal = computed(() => props.overview?.paper_bug_total ?? 0);
-const frameworkCount = computed(() => Object.keys(props.overview?.paper_bug_by_framework ?? {}).length);
+const frameworkCount = computed(() => Object.keys(props.overview?.api_by_lib ?? {}).length);
 
 const apiByLibRows = computed(() => [
   { label: "Torch", count: torchTotal.value },
@@ -200,14 +200,17 @@ const apiByLibRows = computed(() => [
   margin: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  gap: 0;
+  border-top: 1px solid var(--tg-border);
+  border-left: 1px solid var(--tg-border);
 }
 
 .coverage-baseline__stat {
-  border-radius: var(--tg-radius-sm);
-  border: 1px solid var(--tg-border);
-  background: var(--tg-surface-muted);
-  padding: 0.8rem 0.85rem;
+  padding: 0.85rem 0.9rem;
+  border-right: 1px solid var(--tg-border);
+  border-bottom: 1px solid var(--tg-border);
+  background: transparent;
+  border-radius: 0;
 }
 
 .coverage-baseline__stat-label {

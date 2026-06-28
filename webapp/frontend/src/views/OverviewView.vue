@@ -87,7 +87,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="overview-view" aria-labelledby="overview-view-title">
+  <section class="overview-view" aria-labelledby="overview-view-title">
     <header class="overview-view__hero">
       <p class="overview-view__eyebrow">TensorGuard</p>
       <h1 id="overview-view-title" class="overview-view__title">框架安全检测概览</h1>
@@ -121,7 +121,7 @@ onMounted(() => {
         />
       </div>
     </div>
-  </main>
+  </section>
 </template>
 
 <style scoped>

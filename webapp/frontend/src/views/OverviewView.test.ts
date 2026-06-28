@@ -84,6 +84,17 @@ describe("OverviewView", () => {
     expect(wrapper.text()).not.toContain("PAPER-PT-004");
   });
 
+  it("renders the overview root as a labeled section instead of a main landmark", async () => {
+    getOverview.mockResolvedValueOnce(overviewPayload);
+    getConfirmedBugs.mockResolvedValueOnce([]);
+
+    const wrapper = mount(OverviewView);
+    await flushPromises();
+
+    expect(wrapper.find("main").exists()).toBe(false);
+    expect(wrapper.find("section[aria-labelledby='overview-view-title']").exists()).toBe(true);
+  });
+
   it("renders zero-total coverage as 0% without infinities", () => {
     const wrapper = mount(CoverageBaseline, {
       props: {
@@ -131,6 +142,53 @@ describe("OverviewView", () => {
     expect(wrapper.text()).toContain("0%");
     expect(wrapper.text()).not.toContain("NaN");
     expect(wrapper.text()).not.toContain("Infinity");
+  });
+
+  it("derives framework count from supported API libraries, not bug distribution", () => {
+    const wrapper = mount(CoverageBaseline, {
+      props: {
+        overview: {
+          api_total: 4608,
+          api_by_lib: { torch: 1568, tf: 3040 },
+          prompt_ready_total: 0,
+          prompt_ready_by_lib: { torch: 0, tf: 0 },
+          paper_bug_total: 1,
+          paper_bug_by_framework: { TensorFlow: 1 },
+          results: {
+            torch: {
+              path: "",
+              exists: false,
+              api_count: 0,
+              counts: { seed: 0, valid: 0, exception: 0, crash: 0, notarget: 0, hangs: 0, flaky: 0 },
+              trace_path: "",
+              trace_exists: false,
+              trace_hits: 0,
+            },
+            tf: {
+              path: "",
+              exists: false,
+              api_count: 0,
+              counts: { seed: 0, valid: 0, exception: 0, crash: 0, notarget: 0, hangs: 0, flaky: 0 },
+              trace_path: "",
+              trace_exists: false,
+              trace_hits: 0,
+            },
+          } satisfies Record<Library, OverviewResultSummary>,
+          latest_api_jobs: [],
+          latest_repro_jobs: [],
+          sources: {
+            torch_api_list: "",
+            tf_api_list: "",
+            prompt_library: "",
+            api_jobs: "",
+            repro_jobs: "",
+          } satisfies OverviewSources,
+        } satisfies OverviewPayload,
+        environmentSummary: "环境信息暂不可用",
+      },
+    });
+
+    expect(wrapper.findAll(".coverage-baseline__stat-value")[3].text()).toBe("2");
   });
 
   it("suppresses raw PAPER ids and fake severity labels in confirmed evidence rows", () => {
