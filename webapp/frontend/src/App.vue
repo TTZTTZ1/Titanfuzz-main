@@ -5,17 +5,15 @@ import AppHeader from "./components/AppHeader.vue";
 import EnvironmentDrawer from "./components/EnvironmentDrawer.vue";
 import { useEnvironment } from "./composables/useEnvironment";
 import { type ViewKey, useHashNavigation } from "./composables/useHashNavigation";
+import OverviewView from "./views/OverviewView.vue";
 
 const { activeKey, selectKey } = useHashNavigation();
 const { environment, loading, error, environmentLabel, refresh } = useEnvironment();
 const environmentOpen = ref(false);
 
-const viewContent: Record<ViewKey, { title: string; summary: string; lines: string[] }> = {
-  overview: {
-    title: "系统总览",
-    summary: "查看当前采集到的整体状态、近况和环境信息。",
-    lines: ["这里会放总体运行概况与关键指标。", "当前版本先保留清晰的占位结构，方便后续接入真实数据。"],
-  },
+type SecondaryViewKey = Exclude<ViewKey, "overview">;
+
+const viewContent: Record<SecondaryViewKey, { title: string; summary: string; lines: string[] }> = {
   "api-run": {
     title: "单 API 运行",
     summary: "围绕一个 API 的选择、执行与结果确认展开。",
@@ -28,7 +26,7 @@ const viewContent: Record<ViewKey, { title: string; summary: string; lines: stri
   },
 };
 
-const currentView = computed(() => viewContent[activeKey.value]);
+const currentView = computed(() => viewContent[activeKey.value as SecondaryViewKey] ?? viewContent["api-run"]);
 
 function toggleEnvironment() {
   environmentOpen.value = !environmentOpen.value;
@@ -55,7 +53,14 @@ function handleRefresh() {
 
     <div class="app-shell__frame">
       <main class="app-shell__main">
-        <section class="view-shell">
+        <OverviewView
+          v-if="activeKey === 'overview'"
+          :environment="environment"
+          :environment-loading="loading"
+          :environment-error="error"
+        />
+
+        <section v-else class="view-shell">
           <p class="view-shell__eyebrow">TensorGuard</p>
           <h1 class="view-shell__title">{{ currentView.title }}</h1>
           <p class="view-shell__summary">{{ currentView.summary }}</p>

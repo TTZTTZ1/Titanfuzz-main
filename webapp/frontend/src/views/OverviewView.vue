@@ -1,0 +1,173 @@
+<script setup lang="ts">
+import { computed, onMounted, ref } from "vue";
+
+import { getConfirmedBugs, getOverview } from "../services/tensorguard";
+import type { EnvironmentPayload, OverviewPayload } from "../types/tensorguard";
+import CoverageBaseline from "../components/overview/CoverageBaseline.vue";
+import ConfirmedEvidenceList from "../components/overview/ConfirmedEvidenceList.vue";
+import DetectionPipeline from "../components/overview/DetectionPipeline.vue";
+
+const props = withDefaults(
+  defineProps<{
+    environment?: EnvironmentPayload | null;
+    environmentLoading?: boolean;
+    environmentError?: string | null;
+  }>(),
+  {
+    environment: null,
+    environmentLoading: false,
+    environmentError: null,
+  },
+);
+
+const overview = ref<OverviewPayload | null>(null);
+const overviewLoading = ref(true);
+const overviewError = ref<string | null>(null);
+
+const confirmedBugs = ref<Array<{ display_id: string; api: string; bug_type: string; status: "confirmed" }> | null>(null);
+const confirmedBugsLoading = ref(true);
+const confirmedBugsError = ref<string | null>(null);
+
+function describeError(value: unknown, fallback: string): string {
+  if (value instanceof Error) {
+    return value.message;
+  }
+
+  return fallback;
+}
+
+async function loadOverview() {
+  overviewLoading.value = true;
+  overviewError.value = null;
+
+  try {
+    overview.value = await getOverview();
+  } catch (error) {
+    overviewError.value = describeError(error, "总览数据加载失败");
+  } finally {
+    overviewLoading.value = false;
+  }
+}
+
+async function loadConfirmedBugs() {
+  confirmedBugsLoading.value = true;
+  confirmedBugsError.value = null;
+
+  try {
+    confirmedBugs.value = await getConfirmedBugs();
+  } catch (error) {
+    confirmedBugsError.value = describeError(error, "已确认证据加载失败");
+  } finally {
+    confirmedBugsLoading.value = false;
+  }
+}
+
+const environmentSummary = computed(() => {
+  if (props.environment !== null) {
+    const gpuSummary = props.environment.gpus.length === 0 ? "无 GPU" : `${props.environment.gpus.length} GPU`;
+    const cudaSummary = props.environment.cuda.available ? "CUDA 可用" : "CUDA 不可用";
+    return `Python ${props.environment.python.version} · ${cudaSummary} · ${gpuSummary}`;
+  }
+
+  if (props.environmentLoading) {
+    return "环境信息加载中";
+  }
+
+  if (props.environmentError !== null && props.environmentError !== undefined) {
+    return "环境信息异常";
+  }
+
+  return "环境信息暂不可用";
+});
+
+onMounted(() => {
+  void loadOverview();
+  void loadConfirmedBugs();
+});
+</script>
+
+<template>
+  <main class="overview-view" aria-labelledby="overview-view-title">
+    <header class="overview-view__hero">
+      <p class="overview-view__eyebrow">TensorGuard</p>
+      <h1 id="overview-view-title" class="overview-view__title">框架安全检测概览</h1>
+      <p class="overview-view__summary">
+        用一屏查看覆盖基线、检测链路、约束库状态和已确认证据。
+      </p>
+    </header>
+
+    <div class="overview-view__grid">
+      <CoverageBaseline
+        :overview="overview"
+        :environment-summary="environmentSummary"
+        :loading="overviewLoading"
+        :error="overviewError"
+        @retry="loadOverview"
+      />
+
+      <div class="overview-view__stack">
+        <DetectionPipeline
+          :overview="overview"
+          :loading="overviewLoading"
+          :error="overviewError"
+          @retry="loadOverview"
+        />
+
+        <ConfirmedEvidenceList
+          :bugs="confirmedBugs"
+          :loading="confirmedBugsLoading"
+          :error="confirmedBugsError"
+          @retry="loadConfirmedBugs"
+        />
+      </div>
+    </div>
+  </main>
+</template>
+
+<style scoped>
+.overview-view {
+  display: grid;
+  gap: 1rem;
+}
+
+.overview-view__hero {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.overview-view__eyebrow {
+  margin: 0;
+  color: var(--tg-text-soft);
+  font-size: 0.82rem;
+}
+
+.overview-view__title {
+  margin: 0;
+  font-size: 1.8rem;
+  line-height: 1.15;
+  color: var(--tg-text-strong);
+}
+
+.overview-view__summary {
+  margin: 0;
+  max-width: 44rem;
+  color: var(--tg-text-muted);
+}
+
+.overview-view__grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.overview-view__stack {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 720px) {
+  .overview-view__grid {
+    grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+    align-items: start;
+  }
+}
+</style>

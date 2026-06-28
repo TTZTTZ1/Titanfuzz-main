@@ -8,7 +8,7 @@ describe("App", () => {
     const text = mount(App).text();
 
     expect(text).toContain("TensorGuard");
-    expect(text).toContain("系统总览");
+    expect(text).toContain("框架安全检测概览");
     expect(text).toContain("单 API 运行");
     expect(text).toContain("Bug 复现");
   });
