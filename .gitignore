@@ -18,3 +18,4 @@ logs/
 *.zip
 
 .superpowers/
+.worktrees/
