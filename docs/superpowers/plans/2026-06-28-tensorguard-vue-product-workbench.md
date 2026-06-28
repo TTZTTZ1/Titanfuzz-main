@@ -6,7 +6,7 @@
 
 **Architecture:** Vue source lives under `webapp/frontend/` and builds into the existing `webapp/static/` directory, so `webapp/server.py` and its launch command remain unchanged. Typed service and composable layers reproduce the current `app.js` state machine; view components only render state and emit user intent. The migration is performed in an isolated worktree and switches production static assets only after all three views are connected.
 
-**Tech Stack:** Vue 3, TypeScript, Vite, Arco Design Vue, Apache ECharts, Lucide Vue Next, Vitest, Vue Test Utils, existing Python `unittest`/`pytest` tests.
+**Tech Stack:** Vue 3, TypeScript, Vite, Arco Design Vue, Apache ECharts, `@lucide/vue`, Vitest, Vue Test Utils, existing Python `unittest`/`pytest` tests.
 
 ---
 
@@ -107,7 +107,7 @@ FRONTEND = ROOT / "webapp" / "frontend"
 def test_vue_frontend_has_build_contract():
     package = (FRONTEND / "package.json").read_text(encoding="utf-8")
     vite = (FRONTEND / "vite.config.ts").read_text(encoding="utf-8")
-    assert '"build": "vite build"' in package
+    assert '"build": "vue-tsc --noEmit && vite build"' in package
     assert 'outDir: "../static"' in vite
     assert 'base: command === "build" ? "/static/" : "/"' in vite
 
@@ -218,7 +218,7 @@ Run:
 
 ```bash
 cd webapp/frontend
-npm install vue@3 @arco-design/web-vue echarts lucide-vue-next
+npm install vue@3 @arco-design/web-vue echarts @lucide/vue
 npm install --save-dev vite @vitejs/plugin-vue @vue/test-utils jsdom typescript vitest vue-tsc
 ```
 

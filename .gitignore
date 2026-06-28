@@ -19,3 +19,7 @@ logs/
 
 .superpowers/
 .worktrees/
+
+webapp/frontend/node_modules/
+webapp/frontend/.vite/
+webapp/frontend/coverage/

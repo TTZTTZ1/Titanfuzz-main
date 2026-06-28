@@ -30,7 +30,7 @@
 - Vite 负责开发、测试和生产构建。
 - Arco Design Vue 仅用于选择器、搜索、表格、抽屉、提示和对话框等基础交互控件；三个页面的主布局与品牌视觉使用自定义组件。
 - Apache ECharts 负责 Qwen、InCoder、Driver 和 GPU 采样曲线。
-- Lucide Vue Next 负责导航、状态和操作图标。
+- `@lucide/vue` 负责导航、状态和操作图标。
 
 ### 3.2 目录与构建
 
