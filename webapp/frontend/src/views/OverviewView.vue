@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import { getConfirmedBugs, getOverview } from "../services/tensorguard";
 import type { EnvironmentPayload, OverviewPayload } from "../types/tensorguard";
@@ -27,6 +27,9 @@ const overviewError = ref<string | null>(null);
 const confirmedBugs = ref<Array<{ display_id: string; api: string; bug_type: string; status: "confirmed" }> | null>(null);
 const confirmedBugsLoading = ref(true);
 const confirmedBugsError = ref<string | null>(null);
+let overviewRequestToken = 0;
+let confirmedBugsRequestToken = 0;
+let isMounted = false;
 
 function describeError(value: unknown, fallback: string): string {
   if (value instanceof Error) {
@@ -37,28 +40,44 @@ function describeError(value: unknown, fallback: string): string {
 }
 
 async function loadOverview() {
+  const token = ++overviewRequestToken;
   overviewLoading.value = true;
   overviewError.value = null;
 
   try {
-    overview.value = await getOverview();
+    const payload = await getOverview();
+    if (isMounted && token === overviewRequestToken) {
+      overview.value = payload;
+    }
   } catch (error) {
-    overviewError.value = describeError(error, "总览数据加载失败");
+    if (isMounted && token === overviewRequestToken) {
+      overviewError.value = describeError(error, "总览数据加载失败");
+    }
   } finally {
-    overviewLoading.value = false;
+    if (isMounted && token === overviewRequestToken) {
+      overviewLoading.value = false;
+    }
   }
 }
 
 async function loadConfirmedBugs() {
+  const token = ++confirmedBugsRequestToken;
   confirmedBugsLoading.value = true;
   confirmedBugsError.value = null;
 
   try {
-    confirmedBugs.value = await getConfirmedBugs();
+    const payload = await getConfirmedBugs();
+    if (isMounted && token === confirmedBugsRequestToken) {
+      confirmedBugs.value = payload;
+    }
   } catch (error) {
-    confirmedBugsError.value = describeError(error, "已确认证据加载失败");
+    if (isMounted && token === confirmedBugsRequestToken) {
+      confirmedBugsError.value = describeError(error, "已确认证据加载失败");
+    }
   } finally {
-    confirmedBugsLoading.value = false;
+    if (isMounted && token === confirmedBugsRequestToken) {
+      confirmedBugsLoading.value = false;
+    }
   }
 }
 
@@ -81,8 +100,15 @@ const environmentSummary = computed(() => {
 });
 
 onMounted(() => {
+  isMounted = true;
   void loadOverview();
   void loadConfirmedBugs();
+});
+
+onUnmounted(() => {
+  isMounted = false;
+  overviewRequestToken += 1;
+  confirmedBugsRequestToken += 1;
 });
 </script>
 

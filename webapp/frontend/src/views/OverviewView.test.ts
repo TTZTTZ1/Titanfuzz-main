@@ -60,6 +60,17 @@ afterEach(() => {
   getConfirmedBugs.mockReset();
 });
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return { promise, resolve, reject };
+}
+
 describe("OverviewView", () => {
   it("renders live overview payload and confirmed bugs", async () => {
     getOverview.mockResolvedValueOnce(overviewPayload);
@@ -93,6 +104,76 @@ describe("OverviewView", () => {
 
     expect(wrapper.find("main").exists()).toBe(false);
     expect(wrapper.find("section[aria-labelledby='overview-view-title']").exists()).toBe(true);
+  });
+
+  it("keeps the newest overview response when overlapping loads resolve out of order", async () => {
+    const first = deferred<OverviewPayload>();
+    const second = deferred<OverviewPayload>();
+
+    getOverview.mockImplementationOnce(() => first.promise);
+    getOverview.mockImplementationOnce(() => second.promise);
+    getConfirmedBugs.mockResolvedValueOnce([]);
+
+    const wrapper = mount(OverviewView);
+    wrapper.findComponent(CoverageBaseline).vm.$emit("retry");
+
+    await flushPromises();
+
+    first.resolve(overviewPayload);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("正在读取总览数据");
+
+    second.resolve({
+      ...overviewPayload,
+      api_total: 9999,
+      api_by_lib: { torch: 1111, tf: 8888 },
+    });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("9,999");
+    expect(wrapper.text()).toContain("1,111");
+    expect(wrapper.text()).toContain("8,888");
+    expect(wrapper.text()).not.toContain("4,608");
+  });
+
+  it("keeps the newest confirmed bug response when overlapping loads resolve out of order", async () => {
+    const first = deferred<Array<{ display_id: string; api: string; bug_type: string; status: "confirmed" }>>();
+    const second = deferred<Array<{ display_id: string; api: string; bug_type: string; status: "confirmed" }>>();
+
+    getOverview.mockResolvedValueOnce(overviewPayload);
+    getConfirmedBugs.mockImplementationOnce(() => first.promise);
+    getConfirmedBugs.mockImplementationOnce(() => second.promise);
+
+    const wrapper = mount(OverviewView);
+    wrapper.findComponent(ConfirmedEvidenceList).vm.$emit("retry");
+
+    await flushPromises();
+
+    first.resolve([
+      {
+        display_id: "PT-001",
+        api: "torch.mul",
+        bug_type: "Hang / timeout",
+        status: "confirmed",
+      },
+    ]);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("正在读取已确认证据");
+
+    second.resolve([
+      {
+        display_id: "PT-999",
+        api: "torch.add",
+        bug_type: "Crash / allocator corruption",
+        status: "confirmed",
+      },
+    ]);
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("PT-999");
+    expect(wrapper.text()).not.toContain("PT-001");
   });
 
   it("renders zero-total coverage as 0% without infinities", () => {
