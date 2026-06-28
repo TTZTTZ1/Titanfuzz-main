@@ -44,10 +44,9 @@ function formatMemory(memoryTotalMiB: number | null | undefined): string {
 
 <template>
   <aside
+    v-if="open"
     id="environment-drawer"
     class="environment-drawer"
-    :class="{ 'environment-drawer--open': open }"
-    :aria-hidden="!open"
   >
     <div class="environment-drawer__panel">
       <header class="environment-drawer__header">
@@ -186,14 +185,6 @@ function formatMemory(memoryTotalMiB: number | null | undefined): string {
   position: fixed;
   inset: 0 0 0 auto;
   width: min(100vw, 27rem);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.16s ease;
-}
-
-.environment-drawer--open {
-  pointer-events: auto;
-  opacity: 1;
 }
 
 .environment-drawer__panel {

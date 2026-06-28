@@ -56,7 +56,7 @@ function select(key: ViewKey) {
       <button
         type="button"
         class="app-header__environment"
-        aria-label="环境信息"
+        :aria-label="`环境信息：${environmentLabel}`"
         :aria-expanded="environmentOpen"
         aria-controls="environment-drawer"
         @click="$emit('toggleEnvironment')"
