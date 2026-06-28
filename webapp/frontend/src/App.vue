@@ -6,6 +6,7 @@ import EnvironmentDrawer from "./components/EnvironmentDrawer.vue";
 import { useEnvironment } from "./composables/useEnvironment";
 import { type ViewKey, useHashNavigation } from "./composables/useHashNavigation";
 import OverviewView from "./views/OverviewView.vue";
+import ApiRunView from "./views/ApiRunView.vue";
 
 const { activeKey, selectKey } = useHashNavigation();
 const { environment, loading, error, environmentLabel, refresh } = useEnvironment();
@@ -59,6 +60,8 @@ function handleRefresh() {
           :environment-loading="loading"
           :environment-error="error"
         />
+
+        <ApiRunView v-else-if="activeKey === 'api-run'" />
 
         <section v-else class="view-shell">
           <p class="view-shell__eyebrow">TensorGuard</p>
