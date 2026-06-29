@@ -260,4 +260,68 @@ describe("useApiRun", () => {
     expect(wrapper.get('[data-testid="job-id"]').text()).toBe("job-1");
     expect(wrapper.get('[data-testid="metric-stage"]').text()).toBe("qwen_seed");
   });
+
+  it("ignores a stale poll result after switching to a new API and hydrating the new job", async () => {
+    const stalePoll = deferred<ApiJobPayload>();
+
+    getApiDetail
+      .mockResolvedValueOnce({
+        ...detailItem("torch.add", "torch", "job-a", 1),
+        latest_job: {
+          job_id: "job-a",
+          out: "demo_runs/job-a",
+          status: "running",
+          stage: "ev_generation",
+          updated_at: "2026-06-28T17:00:00",
+          summary_status: null,
+          mutation_model: "facebook/incoder-1B",
+          error: null,
+        },
+      })
+      .mockResolvedValueOnce({
+        ...detailItem("torch.matmul", "torch", "job-b", 9),
+        latest_job: {
+          job_id: "job-b",
+          out: "demo_runs/job-b",
+          status: "success",
+          stage: "summary",
+          updated_at: "2026-06-28T17:00:00",
+          summary_status: "success",
+          mutation_model: "facebook/incoder-1B",
+          error: null,
+        },
+      });
+
+    getApiJob
+      .mockResolvedValueOnce(jobPayload("job-a", "torch.add", "torch", "running"))
+      .mockImplementationOnce(() => stalePoll.promise)
+      .mockResolvedValueOnce(jobPayload("job-b", "torch.matmul", "torch", "success"));
+
+    const wrapper = mount(Harness);
+
+    await wrapper.get('[data-testid="select-alpha"]').trigger("click");
+    await flushPromises();
+    await vi.runOnlyPendingTimersAsync();
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="selected"]').text()).toBe("torch.add");
+    expect(wrapper.get('[data-testid="job-id"]').text()).toBe("job-a");
+    expect(wrapper.get('[data-testid="metric-stage"]').text()).toBe("qwen_seed");
+
+    await wrapper.get('[data-testid="select-beta"]').trigger("click");
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="selected"]').text()).toBe("torch.matmul");
+    expect(wrapper.get('[data-testid="job-id"]').text()).toBe("job-b");
+    expect(wrapper.get('[data-testid="detail-valid"]').text()).toBe("9");
+    expect(wrapper.get('[data-testid="metric-stage"]').text()).toBe("driver");
+
+    stalePoll.resolve(jobPayload("job-a", "torch.add", "torch", "running"));
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="selected"]').text()).toBe("torch.matmul");
+    expect(wrapper.get('[data-testid="job-id"]').text()).toBe("job-b");
+    expect(wrapper.get('[data-testid="detail-valid"]').text()).toBe("9");
+    expect(wrapper.get('[data-testid="metric-stage"]').text()).toBe("driver");
+  });
 });

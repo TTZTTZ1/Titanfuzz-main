@@ -1,4 +1,4 @@
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 
 import { resolveLiveStageKey, stageDefinitions, timelineStages, type ApiRunJobLike, type ApiRunStageKey } from "../domain/apiRun";
 import { getApiDetail, getApiJob, startApiRun } from "../services/tensorguard";
@@ -101,7 +101,6 @@ export function useApiRun() {
     }
 
     const payload = await getApiJob(currentJobId.value);
-    selectedJob.value = payload;
     return {
       value: payload,
       continue: isJobActive(payload.status.status),
@@ -123,6 +122,17 @@ export function useApiRun() {
   const resultFiles = computed(() => selectedJob.value?.result_files ?? emptyResultFiles());
   const logs = computed(() => selectedJob.value?.logs ?? {});
   const summaryCounts = computed(() => selectedApiDetail.value?.result_counts ?? selectedApi.value?.result_counts ?? null);
+
+  watch(
+    () => polling.latest.value,
+    (payload) => {
+      if (payload === null || payload.job_id !== currentJobId.value) {
+        return;
+      }
+
+      applyJobPayload(payload, manualMetricStageKey.value);
+    },
+  );
 
   const canRun = computed(() => {
     if (selectedApi.value === null) {
