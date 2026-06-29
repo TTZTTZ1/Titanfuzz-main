@@ -133,4 +133,33 @@ describe("useApiCatalog", () => {
     wrapper.unmount();
     await flushPromises();
   });
+
+  it("invalidates an in-flight response immediately when the query or library changes during debounce", async () => {
+    const first = deferred<ApiListItem[]>();
+    const second = deferred<ApiListItem[]>();
+
+    getApis
+      .mockImplementationOnce(() => first.promise)
+      .mockImplementationOnce(() => second.promise);
+
+    const wrapper = mount(Harness);
+    await vi.runAllTimersAsync();
+    await flushPromises();
+
+    await wrapper.get('[data-testid="query"]').setValue("mat");
+    await wrapper.get('[data-testid="tf"]').trigger("click");
+
+    first.resolve(items);
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="items"]').text()).toBe("");
+
+    await vi.advanceTimersByTimeAsync(250);
+    await flushPromises();
+
+    second.resolve(tfItems);
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="items"]').text()).toBe("tf.add");
+  });
 });

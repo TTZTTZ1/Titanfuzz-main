@@ -151,23 +151,21 @@ watch(
 
 <template>
   <section class="api-selector" aria-label="API 搜索">
-    <div class="api-selector__toolbar" role="radiogroup" aria-label="API 库">
+    <div class="api-selector__toolbar" aria-label="API 库">
       <button
         type="button"
-        role="radio"
         class="api-selector__library"
         :class="{ 'api-selector__library--active': library === 'torch' }"
-        :aria-checked="library === 'torch'"
+        :aria-pressed="library === 'torch'"
         @click="handleLibraryChange('torch')"
       >
         torch
       </button>
       <button
         type="button"
-        role="radio"
         class="api-selector__library"
         :class="{ 'api-selector__library--active': library === 'tf' }"
-        :aria-checked="library === 'tf'"
+        :aria-pressed="library === 'tf'"
         @click="handleLibraryChange('tf')"
       >
         tf

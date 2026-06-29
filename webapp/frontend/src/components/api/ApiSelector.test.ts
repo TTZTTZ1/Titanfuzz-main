@@ -112,4 +112,21 @@ describe("ApiSelector", () => {
     await combobox.trigger("keydown", { key: "Escape" });
     expect(combobox.attributes("aria-expanded")).toBe("false");
   });
+
+  it("uses pressed segmented buttons for the library selector", async () => {
+    getApis.mockResolvedValue(fixtures);
+
+    const wrapper = mount(ApiSelector);
+    await vi.runAllTimersAsync();
+    await flushPromises();
+
+    const libraryButtons = wrapper.findAll('.api-selector__library');
+    expect(libraryButtons[0].attributes("role")).toBeUndefined();
+    expect(libraryButtons[0].attributes("aria-pressed")).toBe("true");
+    expect(libraryButtons[1].attributes("aria-pressed")).toBe("false");
+
+    await libraryButtons[1].trigger("click");
+
+    expect(wrapper.emitted("libraryChange")?.[0]).toEqual(["tf"]);
+  });
 });

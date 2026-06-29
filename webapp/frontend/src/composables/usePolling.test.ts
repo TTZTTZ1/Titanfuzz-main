@@ -87,6 +87,45 @@ describe("usePolling", () => {
     expect(task).toHaveBeenCalledTimes(1);
   });
 
+  it("retries after a transient rejection and clears the error on the next success", async () => {
+    const task = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("temporary network"))
+      .mockResolvedValueOnce({ value: "recovered", continue: false });
+
+    const Harness = defineComponent({
+      template: `
+        <div>
+          <span data-testid="latest">{{ latest ?? "" }}</span>
+          <span data-testid="running">{{ running }}</span>
+          <span data-testid="loading">{{ loading }}</span>
+          <span data-testid="error">{{ error ?? "" }}</span>
+          <button type="button" data-testid="start" @click="start">start</button>
+        </div>
+      `,
+      setup() {
+        return usePolling(task, 20);
+      },
+    });
+
+    const wrapper = mount(Harness);
+    await wrapper.get('[data-testid="start"]').trigger("click");
+    await vi.runOnlyPendingTimersAsync();
+    await flushPromises();
+
+    expect(task).toHaveBeenCalledTimes(1);
+    expect(wrapper.get('[data-testid="error"]').text()).toBe("temporary network");
+    expect(wrapper.get('[data-testid="running"]').text()).toBe("true");
+
+    await vi.advanceTimersByTimeAsync(20);
+    await flushPromises();
+
+    expect(task).toHaveBeenCalledTimes(2);
+    expect(wrapper.get('[data-testid="latest"]').text()).toBe("recovered");
+    expect(wrapper.get('[data-testid="error"]').text()).toBe("");
+    expect(wrapper.get('[data-testid="running"]').text()).toBe("false");
+  });
+
   it("restarts immediately after stop even if the prior request is still unresolved", async () => {
     const first = deferred<{ value: string; continue: boolean }>();
     const task = vi

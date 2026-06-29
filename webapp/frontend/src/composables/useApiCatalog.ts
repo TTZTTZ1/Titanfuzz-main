@@ -56,6 +56,13 @@ export function useApiCatalog() {
     }, DEBOUNCE_MS);
   }
 
+  function invalidateAndScheduleLoad() {
+    requestToken += 1;
+    items.value = [];
+    error.value = null;
+    scheduleLoad();
+  }
+
   function setLibrary(nextLibrary: Library) {
     library.value = nextLibrary;
   }
@@ -69,7 +76,7 @@ export function useApiCatalog() {
     return loadCatalog();
   }
 
-  watch([library, query], scheduleLoad, { immediate: true });
+  watch([library, query], invalidateAndScheduleLoad, { immediate: true, flush: "sync" });
 
   onBeforeUnmount(() => {
     if (timer !== null) {

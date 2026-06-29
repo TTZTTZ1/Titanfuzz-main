@@ -45,6 +45,16 @@ export function usePolling<T>(task: () => Promise<PollOutcome<T>>, intervalMs = 
     }, delay);
   }
 
+  function retryNow() {
+    if (!running.value) {
+      return;
+    }
+
+    clearTimer();
+    error.value = null;
+    schedule(0, generation);
+  }
+
   async function tick(nextGeneration: number) {
     if (!running.value || nextGeneration !== generation) {
       return;
@@ -72,9 +82,9 @@ export function usePolling<T>(task: () => Promise<PollOutcome<T>>, intervalMs = 
         stop();
       }
     } catch (cause) {
-      if (nextGeneration === generation) {
+      if (nextGeneration === generation && running.value) {
         error.value = describeError(cause);
-        stop();
+        schedule(intervalMs, nextGeneration);
       }
     } finally {
       if (inFlightGeneration === nextGeneration) {
@@ -107,5 +117,6 @@ export function usePolling<T>(task: () => Promise<PollOutcome<T>>, intervalMs = 
     error,
     start,
     stop,
+    retryNow,
   };
 }

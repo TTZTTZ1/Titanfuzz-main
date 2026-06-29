@@ -15,6 +15,7 @@ const {
   jobError,
   runLoading,
   runError,
+  pollError,
   mode,
   canRun,
   liveStageKey,
@@ -24,6 +25,7 @@ const {
   resultFiles,
   logs,
   summaryCounts,
+  retryPollingNow,
   selectApi,
   clearSelection,
   retrySelection,
@@ -112,6 +114,10 @@ function handleLibraryChange() {
         <div v-else-if="detailError || jobError || runError" class="api-run-view__state api-run-view__state--error">
           <p class="api-run-view__state-copy">{{ detailError ?? jobError ?? runError }}</p>
           <button type="button" class="api-run-view__retry" @click="retrySelection">重试</button>
+        </div>
+        <div v-else-if="pollError" class="api-run-view__sync-state" role="status" aria-live="polite">
+          <p class="api-run-view__sync-copy">同步作业状态遇到暂时错误，自动重试中。</p>
+          <button type="button" class="api-run-view__retry" @click="retryPollingNow">立即重试</button>
         </div>
         <dl v-else class="api-run-view__summary-list">
           <div class="api-run-view__summary-item">
@@ -247,7 +253,21 @@ function handleLibraryChange() {
   gap: 0.65rem;
 }
 
+.api-run-view__sync-state {
+  border: 1px solid rgba(25, 86, 209, 0.22);
+  border-radius: var(--tg-radius);
+  background: rgba(25, 86, 209, 0.08);
+  color: var(--tg-action);
+  padding: 0.85rem 0.9rem;
+  display: grid;
+  gap: 0.6rem;
+}
+
 .api-run-view__state-copy {
+  margin: 0;
+}
+
+.api-run-view__sync-copy {
   margin: 0;
 }
 

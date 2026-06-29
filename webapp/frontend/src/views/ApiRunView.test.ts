@@ -13,6 +13,7 @@ const jobLoading = ref(false);
 const jobError = ref<string | null>(null);
 const runLoading = ref(false);
 const runError = ref<string | null>(null);
+const pollError = ref<string | null>(null);
 const mode = ref<"demo" | "normal">("demo");
 const canRun = ref(false);
 const liveStageKey = ref<"qwen_seed" | "ev_generation" | "driver">("qwen_seed");
@@ -40,6 +41,7 @@ const logs = ref<Record<string, string>>({});
 const selectApi = vi.fn();
 const clearSelection = vi.fn();
 const retrySelection = vi.fn();
+const retryPollingNow = vi.fn();
 const setMode = vi.fn();
 const selectMetricStage = vi.fn();
 const startRun = vi.fn();
@@ -55,6 +57,7 @@ vi.mock("../composables/useApiRun", () => ({
     jobError,
     runLoading,
     runError,
+    pollError,
     mode,
     canRun,
     liveStageKey,
@@ -64,6 +67,7 @@ vi.mock("../composables/useApiRun", () => ({
     resultFiles,
     logs,
     summaryCounts,
+    retryPollingNow,
     selectApi,
     clearSelection,
     retrySelection,
@@ -101,6 +105,7 @@ afterEach(() => {
   jobError.value = null;
   runLoading.value = false;
   runError.value = null;
+  pollError.value = null;
   mode.value = "demo";
   canRun.value = false;
   liveStageKey.value = "qwen_seed";
@@ -165,6 +170,48 @@ describe("ApiRunView", () => {
     expect(wrapper.text()).toContain("API 详情加载失败");
     await wrapper.get(".api-run-view__retry").trigger("click");
     expect(retrySelection).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows a compact live-sync warning when polling is retrying after a transient error", async () => {
+    selectedApi.value = { api: "torch.add", lib: "torch" } as ApiListItem;
+    selectedApiDetail.value = {
+      api: "torch.add",
+      lib: "torch",
+      has_prompt: true,
+      prompt_path: "",
+      result_counts: { seed: 0, valid: 9, exception: 1, crash: 0, notarget: 0, hangs: 0, flaky: 0 },
+      has_results: true,
+      manifest_entry: {
+        api: "torch.add",
+        library: "torch",
+        structured_info: "",
+        structured_sha256: "a".repeat(64),
+        has_greedy_prompt: false,
+        greedy_prompt: null,
+        greedy_sha256: null,
+        updated_at: "2026-06-28T17:00:00",
+      },
+      api_list: "data/torch_apis.txt",
+      prompt_exists: true,
+      results_path: "Results/torch",
+      latest_job: null,
+    };
+    pollError.value = "暂时无法同步作业状态";
+
+    const wrapper = mount(ApiRunView, {
+      global: {
+        stubs: {
+          ApiSelector: selectorStub,
+          RunTimeline: timelineStub,
+        },
+      },
+    });
+
+    expect(wrapper.text()).toContain("同步作业状态");
+    expect(wrapper.text()).toContain("自动重试中");
+    expect(wrapper.text()).toContain("立即重试");
+    await wrapper.get(".api-run-view__retry").trigger("click");
+    expect(retryPollingNow).toHaveBeenCalledTimes(1);
   });
 
   it("shows the selected API summary and current counts once loaded", () => {

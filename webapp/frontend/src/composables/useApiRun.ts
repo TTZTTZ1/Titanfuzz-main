@@ -167,6 +167,7 @@ export function useApiRun() {
     runLoading.value = false;
     currentJobId.value = null;
     polling.stop();
+    polling.error.value = null;
     manualMetricStageKey.value = null;
   }
 
@@ -273,6 +274,7 @@ export function useApiRun() {
     runLoading.value = true;
     runError.value = null;
     polling.stop();
+    polling.error.value = null;
     currentJobId.value = null;
     manualMetricStageKey.value = null;
 
@@ -334,6 +336,8 @@ export function useApiRun() {
     resultFiles,
     logs,
     summaryCounts,
+    pollError: polling.error,
+    retryPollingNow: polling.retryNow,
     currentJobId,
     selectApi,
     clearSelection,
