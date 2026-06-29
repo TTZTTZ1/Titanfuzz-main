@@ -189,37 +189,6 @@ function handleTabKeydown(event: KeyboardEvent, index: number) {
       </button>
     </div>
 
-    <div class="run-timeline__panel">
-      <div v-if="latestMetric" class="run-timeline__metrics">
-        <div class="run-timeline__metrics-head">
-          <p class="run-timeline__metrics-title">{{ selectedDefinition.label }}</p>
-          <p class="run-timeline__metrics-stage">{{ latestMetric.stage }}</p>
-        </div>
-
-        <dl class="run-timeline__metric-grid">
-          <div v-for="[label, key] in selectedDefinition.metricKeys" :key="key" class="run-timeline__metric-item">
-            <dt class="run-timeline__metric-label">{{ label }}</dt>
-            <dd class="run-timeline__metric-value">{{ displayValue(key) }}</dd>
-          </div>
-        </dl>
-      </div>
-
-      <p v-else class="run-timeline__empty">暂无阶段指标</p>
-
-      <div v-if="visibleResultFiles.length > 0" class="run-timeline__result-files">
-        <div v-for="[category, files] in visibleResultFiles" :key="category" class="run-timeline__result-group">
-          <p class="run-timeline__result-label">{{ category }}</p>
-          <p class="run-timeline__result-value">{{ files.length }} 个文件</p>
-        </div>
-      </div>
-
-      <div v-if="logEntries.length > 0" class="run-timeline__logs">
-        <div v-for="[name, value] in logEntries" :key="name" class="run-timeline__log">
-          <p class="run-timeline__log-name">{{ name }}</p>
-          <pre class="run-timeline__log-body">{{ value }}</pre>
-        </div>
-      </div>
-    </div>
   </section>
 </template>
 

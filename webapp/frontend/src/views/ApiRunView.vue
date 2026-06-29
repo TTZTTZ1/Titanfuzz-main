@@ -2,7 +2,12 @@
 import { computed } from "vue";
 
 import ApiSelector from "../components/api/ApiSelector.vue";
+import GpuChart from "../components/api/GpuChart.vue";
+import LiveLog from "../components/api/LiveLog.vue";
+import ResultComposition from "../components/api/ResultComposition.vue";
+import RunSnapshot from "../components/api/RunSnapshot.vue";
 import RunTimeline from "../components/api/RunTimeline.vue";
+import StageChart from "../components/api/StageChart.vue";
 import { useApiRun } from "../composables/useApiRun";
 
 const {
@@ -35,22 +40,8 @@ const {
 } = useApiRun();
 
 const selectedApiLabel = computed(() => selectedApiDetail.value?.api ?? selectedApi.value?.api ?? "");
-const latestJobState = computed(() => selectedJob.value?.status.status ?? selectedApiDetail.value?.latest_job?.status ?? "无");
-const countsSummary = computed(() => {
-  const counts = summaryCounts.value;
-  if (counts === null) {
-    return "";
-  }
-
-  return [
-    `候选 ${counts.seed}`,
-    `有效 ${counts.valid}`,
-    `异常 ${counts.exception}`,
-    `崩溃 ${counts.crash}`,
-    `超时 ${counts.hangs}`,
-    `不稳定 ${counts.flaky}`,
-  ].join(" · ");
-});
+const selectedJobStatus = computed(() => selectedJob.value?.status ?? null);
+const latestMetric = computed(() => selectedJob.value?.metrics?.at(-1) ?? null);
 
 function handleLibraryChange() {
   clearSelection();
@@ -100,51 +91,54 @@ function handleLibraryChange() {
         </div>
       </section>
 
-      <aside class="api-run-view__summary-panel" aria-labelledby="api-run-summary-title">
-        <div class="api-run-view__section-head">
-          <h2 id="api-run-summary-title" class="api-run-view__section-title">当前状态</h2>
-        </div>
+      <RunTimeline
+        :stages="stageStates"
+        :metric-stage-key="metricStageKey"
+        :live-stage-key="liveStageKey"
+        :metrics="metrics"
+        :logs="logs"
+        :result-files="resultFiles"
+        @select-metric-stage="selectMetricStage"
+      />
 
-        <div v-if="selectedApi === null" class="api-run-view__state">
-          请选择一个 API 后查看最新结果。
+      <section class="api-run-view__visual-grid" aria-label="阶段图表与摘要">
+        <StageChart :metrics="metrics" :stage-key="metricStageKey" />
+        <div class="api-run-view__visual-stack">
+          <RunSnapshot
+            :api-label="selectedApiLabel"
+            :mode="mode"
+            :live-stage-key="liveStageKey"
+            :job-status="selectedJobStatus"
+            :latest-metric="latestMetric"
+          />
+          <ResultComposition :counts="summaryCounts" />
         </div>
-        <div v-else-if="detailLoading || jobLoading || runLoading" class="api-run-view__state">
-          正在读取 API 详情。
-        </div>
-        <div v-else-if="detailError || jobError || runError" class="api-run-view__state api-run-view__state--error">
-          <p class="api-run-view__state-copy">{{ detailError ?? jobError ?? runError }}</p>
+      </section>
+
+      <section class="api-run-view__visual-grid" aria-label="实时日志与 GPU 监控">
+        <LiveLog :stage-key="liveStageKey" :logs="logs" />
+        <GpuChart :metrics="metrics" />
+      </section>
+
+      <div
+        class="api-run-view__sync"
+        :class="{ 'api-run-view__sync--loading': selectedApi !== null && (detailLoading || jobLoading || runLoading) }"
+        aria-live="polite"
+      >
+        <p v-if="selectedApi === null" class="api-run-view__sync-copy">请选择一个 API 后查看实时图表与日志。</p>
+        <p v-else-if="detailLoading || jobLoading || runLoading" class="api-run-view__sync-copy">正在读取 API 详情。</p>
+        <div v-else-if="detailError || jobError || runError" class="api-run-view__sync-row">
+          <p class="api-run-view__sync-copy api-run-view__sync-copy--error">
+            {{ detailError ?? jobError ?? runError }}
+          </p>
           <button type="button" class="api-run-view__retry" @click="retrySelection">重试</button>
         </div>
-        <div v-else-if="pollError" class="api-run-view__sync-state" role="status" aria-live="polite">
+        <div v-else-if="pollError" class="api-run-view__sync-row">
           <p class="api-run-view__sync-copy">同步作业状态遇到暂时错误，自动重试中。</p>
           <button type="button" class="api-run-view__retry" @click="retryPollingNow">立即重试</button>
         </div>
-        <dl v-else class="api-run-view__summary-list">
-          <div class="api-run-view__summary-item">
-            <dt>API</dt>
-            <dd>{{ selectedApiLabel }}</dd>
-          </div>
-          <div class="api-run-view__summary-item">
-            <dt>结果</dt>
-            <dd>{{ countsSummary || "暂无结果" }}</dd>
-          </div>
-          <div class="api-run-view__summary-item">
-            <dt>最新作业</dt>
-            <dd>{{ latestJobState }}</dd>
-          </div>
-        </dl>
-      </aside>
+      </div>
     </div>
-
-    <RunTimeline
-      :stages="stageStates"
-      :metric-stage-key="metricStageKey"
-      :live-stage-key="liveStageKey"
-      :metrics="metrics"
-      :logs="logs"
-      :result-files="resultFiles"
-      @select-metric-stage="selectMetricStage"
-    />
   </section>
 </template>
 
@@ -183,8 +177,7 @@ function handleLibraryChange() {
   gap: 1rem;
 }
 
-.api-run-view__control-band,
-.api-run-view__summary-panel {
+.api-run-view__control-band {
   display: grid;
   gap: 0.85rem;
   border: 1px solid var(--tg-border);
@@ -237,73 +230,70 @@ function handleLibraryChange() {
   color: var(--tg-action);
 }
 
-.api-run-view__state {
+.api-run-view__visual-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(18rem, 0.95fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.api-run-view__visual-stack {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.api-run-view__sync {
+  display: grid;
+  gap: 0.75rem;
   border: 1px solid var(--tg-border);
   border-radius: var(--tg-radius);
+  background: var(--tg-surface);
+  padding: 0.95rem 1rem;
+}
+
+.api-run-view__sync--loading {
   background: var(--tg-surface-muted);
-  color: var(--tg-text-muted);
-  padding: 0.95rem;
 }
 
-.api-run-view__state--error {
-  background: var(--tg-red-bg);
-  border-color: var(--tg-red-border);
-  color: var(--tg-red-text);
-  display: grid;
-  gap: 0.65rem;
-}
-
-.api-run-view__sync-state {
-  border: 1px solid rgba(25, 86, 209, 0.22);
-  border-radius: var(--tg-radius);
-  background: rgba(25, 86, 209, 0.08);
-  color: var(--tg-action);
-  padding: 0.85rem 0.9rem;
-  display: grid;
-  gap: 0.6rem;
-}
-
-.api-run-view__state-copy {
-  margin: 0;
+.api-run-view__sync-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .api-run-view__sync-copy {
   margin: 0;
+  color: var(--tg-text-muted);
+}
+
+.api-run-view__sync-copy--error {
+  color: var(--tg-red-text);
 }
 
 .api-run-view__retry {
-  justify-self: start;
-  border: 1px solid currentColor;
+  border: 1px solid var(--tg-border);
   border-radius: 999px;
   background: #ffffff;
-  color: inherit;
-  padding: 0.45rem 0.85rem;
+  color: var(--tg-action);
+  padding: 0.48rem 0.82rem;
 }
 
-.api-run-view__summary-list {
-  display: grid;
-  gap: 0.65rem;
-  margin: 0;
+@media (max-width: 1000px) {
+  .api-run-view__visual-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.api-run-view__summary-item {
-  display: grid;
-  gap: 0.2rem;
-}
+@media (max-width: 720px) {
+  .api-run-view__mode {
+    flex-wrap: wrap;
+  }
 
-.api-run-view__summary-item dt {
-  color: var(--tg-text-soft);
-  font-size: 0.82rem;
-}
-
-.api-run-view__summary-item dd {
-  margin: 0;
-  color: var(--tg-text-strong);
-}
-
-@media (min-width: 960px) {
-  .api-run-view__body {
-    grid-template-columns: minmax(0, 1.02fr) minmax(22rem, 0.98fr);
+  .api-run-view__section-head,
+  .api-run-view__sync-row {
+    flex-direction: column;
     align-items: start;
   }
 }
