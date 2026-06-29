@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed, ref, watch } from "vue";
+
 import type { ApiListItem, Library } from "../../types/tensorguard";
 import { useApiCatalog } from "../../composables/useApiCatalog";
 
@@ -17,19 +19,134 @@ const emit = defineEmits<{
 }>();
 
 const { library, query, items, loading, error, setLibrary, refresh } = useApiCatalog();
+const isOpen = ref(true);
+const activeIndex = ref(-1);
+const listboxId = "api-selector-listbox";
 
 function isSelected(item: ApiListItem): boolean {
   return props.selected !== null && props.selected.api === item.api && props.selected.lib === item.lib;
 }
 
+const activeDescendantId = computed(() =>
+  isOpen.value && activeIndex.value >= 0 && activeIndex.value < items.value.length
+    ? `api-selector-option-${activeIndex.value}`
+    : undefined,
+);
+
 function handleInput(event: Event) {
   query.value = (event.target as HTMLInputElement).value;
+  isOpen.value = true;
+  activeIndex.value = -1;
 }
 
 function handleLibraryChange(nextLibrary: Library) {
   setLibrary(nextLibrary);
   emit("libraryChange", nextLibrary);
+  isOpen.value = true;
+  activeIndex.value = -1;
 }
+
+function setActiveIndex(nextIndex: number) {
+  activeIndex.value = nextIndex;
+}
+
+function selectItem(item: ApiListItem, index: number) {
+  setActiveIndex(index);
+  emit("select", item);
+  isOpen.value = false;
+}
+
+function getNextEnabledIndex(step: 1 | -1) {
+  if (items.value.length === 0) {
+    return -1;
+  }
+
+  if (activeIndex.value < 0) {
+    return step > 0 ? 0 : items.value.length - 1;
+  }
+
+  return (activeIndex.value + step + items.value.length) % items.value.length;
+}
+
+function moveActive(step: 1 | -1) {
+  const nextIndex = getNextEnabledIndex(step);
+  if (nextIndex < 0) {
+    return;
+  }
+
+  isOpen.value = true;
+  setActiveIndex(nextIndex);
+}
+
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+    moveActive(1);
+    return;
+  }
+
+  if (event.key === "ArrowUp") {
+    event.preventDefault();
+    moveActive(-1);
+    return;
+  }
+
+  if (event.key === "Home") {
+    if (items.value.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+    isOpen.value = true;
+    setActiveIndex(0);
+    return;
+  }
+
+  if (event.key === "End") {
+    if (items.value.length === 0) {
+      return;
+    }
+
+    event.preventDefault();
+    isOpen.value = true;
+    setActiveIndex(items.value.length - 1);
+    return;
+  }
+
+  if (event.key === "Enter") {
+    if (activeIndex.value < 0 || activeIndex.value >= items.value.length) {
+      return;
+    }
+
+    event.preventDefault();
+    selectItem(items.value[activeIndex.value], activeIndex.value);
+    return;
+  }
+
+  if (event.key === "Escape") {
+    if (!isOpen.value) {
+      return;
+    }
+
+    event.preventDefault();
+    isOpen.value = false;
+  }
+}
+
+watch(
+  items,
+  (nextItems) => {
+    if (nextItems.length === 0) {
+      activeIndex.value = -1;
+      return;
+    }
+
+    if (activeIndex.value >= nextItems.length) {
+      activeIndex.value = -1;
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -63,9 +180,13 @@ function handleLibraryChange(nextLibrary: Library) {
           type="search"
           role="combobox"
           aria-autocomplete="list"
-          aria-controls="api-selector-listbox"
+          :aria-expanded="isOpen"
+          :aria-controls="listboxId"
+          :aria-activedescendant="activeDescendantId"
           :value="query"
           @input="handleInput"
+          @keydown="handleKeydown"
+          @focus="isOpen = true"
         />
       </label>
     </div>
@@ -77,15 +198,20 @@ function handleLibraryChange(nextLibrary: Library) {
       <button type="button" class="api-selector__retry" @click="refresh">重试</button>
     </div>
 
-    <ul v-else id="api-selector-listbox" class="api-selector__list" role="listbox" aria-label="API 结果">
-      <li v-for="item in items" :key="`${item.lib}:${item.api}`" class="api-selector__item">
+    <ul v-else-if="isOpen" :id="listboxId" class="api-selector__list" role="listbox" aria-label="API 结果">
+      <li v-for="(item, index) in items" :key="`${item.lib}:${item.api}`" class="api-selector__item">
         <button
+          :id="`api-selector-option-${index}`"
           type="button"
           role="option"
           class="api-selector__option"
-          :class="{ 'api-selector__option--selected': isSelected(item) }"
+          :class="{
+            'api-selector__option--selected': isSelected(item),
+            'api-selector__option--active': activeIndex === index,
+          }"
           :aria-selected="isSelected(item)"
-          @click="emit('select', item)"
+          tabindex="-1"
+          @click="selectItem(item, index)"
         >
           <span class="api-selector__option-api">{{ item.api }}</span>
           <span class="api-selector__option-lib">{{ item.lib }}</span>
@@ -93,7 +219,7 @@ function handleLibraryChange(nextLibrary: Library) {
       </li>
     </ul>
 
-    <div v-if="!loading && !error && items.length === 0" class="api-selector__state">未找到 API</div>
+    <div v-if="!loading && !error && isOpen && items.length === 0" class="api-selector__state">未找到 API</div>
   </section>
 </template>
 
@@ -170,6 +296,10 @@ function handleLibraryChange(nextLibrary: Library) {
   border-color: rgba(25, 86, 209, 0.35);
   background: var(--tg-action-soft);
   color: var(--tg-action);
+}
+
+.api-selector__option--active {
+  box-shadow: inset 0 0 0 1px rgba(25, 86, 209, 0.18);
 }
 
 .api-selector__option-api {

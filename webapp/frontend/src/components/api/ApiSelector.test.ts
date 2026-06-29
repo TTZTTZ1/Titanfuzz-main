@@ -84,4 +84,32 @@ describe("ApiSelector", () => {
     expect(wrapper.emitted("select")).toHaveLength(1);
     expect(wrapper.emitted("select")?.[0]).toEqual([fixtures[0]]);
   });
+
+  it("supports keyboard navigation, escape, and exact selection from the combobox", async () => {
+    getApis.mockImplementation(async (_lib: string, query: string) => filteredApis(query));
+
+    const wrapper = mount(ApiSelector);
+
+    await vi.runAllTimersAsync();
+    await flushPromises();
+
+    const combobox = wrapper.get('[role="combobox"]');
+    expect(combobox.attributes("aria-expanded")).toBe("true");
+
+    await combobox.trigger("keydown", { key: "ArrowDown" });
+    expect(combobox.attributes("aria-activedescendant")).toBe("api-selector-option-0");
+    expect(wrapper.get("#api-selector-option-0").classes()).toContain("api-selector__option--active");
+
+    await combobox.trigger("keydown", { key: "ArrowDown" });
+    expect(combobox.attributes("aria-activedescendant")).toBe("api-selector-option-1");
+
+    await combobox.trigger("keydown", { key: "Enter" });
+
+    expect(wrapper.emitted("select")).toHaveLength(1);
+    expect(wrapper.emitted("select")?.[0]).toEqual([fixtures[1]]);
+    expect(combobox.attributes("aria-expanded")).toBe("false");
+
+    await combobox.trigger("keydown", { key: "Escape" });
+    expect(combobox.attributes("aria-expanded")).toBe("false");
+  });
 });

@@ -61,7 +61,13 @@ function detailItem(api: string, lib: "torch" | "tf", jobId: string | null, vali
   };
 }
 
-function jobPayload(jobId: string, api: string, lib: "torch" | "tf", status: "success" | "running" | "pending"): ApiJobPayload {
+function jobPayload(
+  jobId: string,
+  api: string,
+  lib: "torch" | "tf",
+  status: "success" | "running" | "pending" | "failed",
+  summaryCounts: ApiJobPayload["summary"] = {},
+): ApiJobPayload {
   return {
     job_id: jobId,
     out: `demo_runs/${jobId}`,
@@ -85,7 +91,7 @@ function jobPayload(jobId: string, api: string, lib: "torch" | "tf", status: "su
       error: null,
       updated_at: "2026-06-28T17:00:00",
     },
-    summary: {},
+    summary: summaryCounts,
     metrics: [],
     environment: {},
     result_files: {
@@ -117,10 +123,12 @@ const Harness = defineComponent({
     <div>
       <span data-testid="selected">{{ selectedApi?.api ?? "" }}</span>
       <span data-testid="detail-valid">{{ selectedApiDetail?.result_counts.valid ?? "" }}</span>
+      <span data-testid="summary-valid">{{ summaryCounts?.valid ?? "" }}</span>
       <span data-testid="metric-stage">{{ metricStageKey }}</span>
       <span data-testid="detail-loading">{{ detailLoading }}</span>
       <span data-testid="detail-error">{{ detailError ?? "" }}</span>
       <span data-testid="job-id">{{ selectedJob?.job_id ?? "" }}</span>
+      <span data-testid="current-job-id">{{ currentJobId ?? "" }}</span>
       <span data-testid="job-status">{{ selectedJob?.status.status ?? "" }}</span>
       <span data-testid="mode">{{ mode }}</span>
       <span data-testid="can-run">{{ canRun }}</span>
@@ -196,7 +204,118 @@ describe("useApiRun", () => {
     expect(getApiJob).toHaveBeenCalledWith("job-run");
     expect(wrapper.get('[data-testid="job-id"]').text()).toBe("job-run");
     expect(wrapper.get('[data-testid="job-status"]').text()).toBe("success");
-    expect(wrapper.get('[data-testid="can-run"]').text()).toBe("false");
+    expect(wrapper.get('[data-testid="can-run"]').text()).toBe("true");
+  });
+
+  it("allows launching a new run after the latest job has completed", async () => {
+    getApiDetail.mockResolvedValue(detailItem("torch.add", "torch", "job-old", 2));
+    getApiJob
+      .mockResolvedValueOnce(
+        jobPayload("job-old", "torch.add", "torch", "success", {
+          result_counts: { seed: 0, valid: 3, exception: 0, crash: 0, notarget: 0, hangs: 0, flaky: 0 },
+        }),
+      )
+      .mockResolvedValueOnce(jobPayload("job-new", "torch.add", "torch", "success"));
+    startApiRun.mockResolvedValue({ job_id: "job-new", out: "demo_runs/job-new" });
+
+    const wrapper = mount(Harness);
+    await wrapper.get('[data-testid="select-alpha"]').trigger("click");
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="can-run"]').text()).toBe("true");
+
+    await wrapper.get('[data-testid="run"]').trigger("click");
+    await flushPromises();
+
+    expect(startApiRun).toHaveBeenCalledWith({ lib: "torch", api: "torch.add", mode: "demo" });
+    expect(getApiJob).toHaveBeenCalledWith("job-new");
+    expect(wrapper.get('[data-testid="job-id"]').text()).toBe("job-new");
+    expect(wrapper.get('[data-testid="job-status"]').text()).toBe("success");
+  });
+
+  it("prefers the selected job summary counts and refreshes them on hydration", async () => {
+    getApiDetail
+      .mockResolvedValueOnce(detailItem("torch.add", "torch", "job-1", 1))
+      .mockResolvedValueOnce(detailItem("torch.add", "torch", "job-1", 1));
+    getApiJob
+      .mockResolvedValueOnce(
+        jobPayload("job-1", "torch.add", "torch", "success", {
+          result_counts: { seed: 0, valid: 7, exception: 2, crash: 1, notarget: 0, hangs: 0, flaky: 0 },
+        }),
+      )
+      .mockResolvedValueOnce(
+        jobPayload("job-1", "torch.add", "torch", "success", {
+          result_counts: { seed: 0, valid: 12, exception: 1, crash: 0, notarget: 0, hangs: 0, flaky: 0 },
+        }),
+      );
+
+    const wrapper = mount(Harness);
+    await wrapper.get('[data-testid="select-alpha"]').trigger("click");
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="detail-valid"]').text()).toBe("1");
+    expect(wrapper.get('[data-testid="summary-valid"]').text()).toBe("7");
+
+    await wrapper.get('[data-testid="select-alpha"]').trigger("click");
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="summary-valid"]').text()).toBe("12");
+  });
+
+  it("keeps a stale selection response from rewriting the current job id", async () => {
+    const alphaJob = deferred<ApiJobPayload>();
+
+    getApiDetail
+      .mockResolvedValueOnce({
+        ...detailItem("torch.add", "torch", "job-a", 1),
+        latest_job: {
+          job_id: "job-a",
+          out: "demo_runs/job-a",
+          status: "running",
+          stage: "ev_generation",
+          updated_at: "2026-06-28T17:00:00",
+          summary_status: null,
+          mutation_model: "facebook/incoder-1B",
+          error: null,
+        },
+      })
+      .mockResolvedValueOnce({
+        ...detailItem("torch.matmul", "torch", "job-b", 9),
+        latest_job: {
+          job_id: "job-b",
+          out: "demo_runs/job-b",
+          status: "success",
+          stage: "summary",
+          updated_at: "2026-06-28T17:00:00",
+          summary_status: "success",
+          mutation_model: "facebook/incoder-1B",
+          error: null,
+        },
+      });
+
+    getApiJob
+      .mockImplementationOnce(() => alphaJob.promise)
+      .mockResolvedValueOnce(jobPayload("job-b", "torch.matmul", "torch", "success"));
+
+    const wrapper = mount(Harness);
+
+    await wrapper.get('[data-testid="select-alpha"]').trigger("click");
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="current-job-id"]').text()).toBe("");
+
+    await wrapper.get('[data-testid="select-beta"]').trigger("click");
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="current-job-id"]').text()).toBe("job-b");
+    expect(wrapper.get('[data-testid="job-id"]').text()).toBe("job-b");
+
+    alphaJob.resolve(jobPayload("job-a", "torch.add", "torch", "running"));
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="current-job-id"]').text()).toBe("job-b");
+    expect(wrapper.get('[data-testid="job-id"]').text()).toBe("job-b");
+    expect(wrapper.get('[data-testid="job-status"]').text()).toBe("success");
   });
 
   it("keeps a manually selected metric stage pinned when the same API refreshes with the same job", async () => {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, type ComponentPublicInstance } from "vue";
 
 import {
   stageDefinitions,
@@ -38,6 +38,7 @@ const emit = defineEmits<{
 }>();
 
 const stageDefinitionByKey = Object.fromEntries(stageDefinitions.map((definition) => [definition.key, definition]));
+const tabRefs = ref<Array<HTMLButtonElement | null>>([]);
 
 const selectedDefinition = computed(() => stageDefinitionByKey[props.metricStageKey]);
 const selectedMetrics = computed(() => props.metrics.filter((metric) => metric.stage === props.metricStageKey));
@@ -59,6 +60,86 @@ function displayValue(key: string): string {
 
   const value = latestMetric.value[key as keyof typeof latestMetric.value];
   return value === null || value === undefined ? "" : String(value);
+}
+
+function firstSelectableIndex(): number {
+  return stageDefinitions.findIndex((definition) => isSelectable(definition.key));
+}
+
+function lastSelectableIndex(): number {
+  for (let index = stageDefinitions.length - 1; index >= 0; index -= 1) {
+    if (isSelectable(stageDefinitions[index].key)) {
+      return index;
+    }
+  }
+
+  return -1;
+}
+
+function nextSelectableIndex(fromIndex: number, direction: 1 | -1): number {
+  for (let offset = 1; offset <= stageDefinitions.length; offset += 1) {
+    const index = (fromIndex + direction * offset + stageDefinitions.length) % stageDefinitions.length;
+    if (isSelectable(stageDefinitions[index].key)) {
+      return index;
+    }
+  }
+
+  return -1;
+}
+
+function focusTab(index: number) {
+  tabRefs.value[index]?.focus();
+}
+
+function setTabRef(index: number, element: Element | ComponentPublicInstance | null) {
+  tabRefs.value[index] = element instanceof HTMLButtonElement ? element : null;
+}
+
+function selectStage(index: number) {
+  const definition = stageDefinitions[index];
+  if (!definition || !isSelectable(definition.key)) {
+    return;
+  }
+
+  emit("selectMetricStage", definition.key);
+  focusTab(index);
+}
+
+function handleTabKeydown(event: KeyboardEvent, index: number) {
+  if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+    event.preventDefault();
+    const nextIndex = nextSelectableIndex(index, 1);
+    if (nextIndex >= 0) {
+      selectStage(nextIndex);
+    }
+    return;
+  }
+
+  if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+    event.preventDefault();
+    const nextIndex = nextSelectableIndex(index, -1);
+    if (nextIndex >= 0) {
+      selectStage(nextIndex);
+    }
+    return;
+  }
+
+  if (event.key === "Home") {
+    event.preventDefault();
+    const nextIndex = firstSelectableIndex();
+    if (nextIndex >= 0) {
+      selectStage(nextIndex);
+    }
+    return;
+  }
+
+  if (event.key === "End") {
+    event.preventDefault();
+    const nextIndex = lastSelectableIndex();
+    if (nextIndex >= 0) {
+      selectStage(nextIndex);
+    }
+  }
 }
 </script>
 
@@ -88,8 +169,9 @@ function displayValue(key: string): string {
 
     <div class="run-timeline__tabs" role="tablist" aria-label="指标阶段">
       <button
-        v-for="definition in stageDefinitions"
+        v-for="(definition, index) in stageDefinitions"
         :key="definition.key"
+        :ref="(el) => setTabRef(index, el)"
         type="button"
         role="tab"
         class="run-timeline__tab"
@@ -98,8 +180,10 @@ function displayValue(key: string): string {
           'run-timeline__tab--live': liveStageKey === definition.key,
         }"
         :aria-selected="metricStageKey === definition.key"
+        :tabindex="isSelectable(definition.key) && metricStageKey === definition.key ? 0 : -1"
         :disabled="!isSelectable(definition.key)"
-        @click="emit('selectMetricStage', definition.key)"
+        @click="selectStage(index)"
+        @keydown="handleTabKeydown($event, index)"
       >
         <span>{{ definition.label }}</span>
       </button>

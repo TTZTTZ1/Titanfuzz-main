@@ -14,7 +14,6 @@ import { usePolling } from "./usePolling";
 
 type TimelineStageKey = (typeof timelineStages)[number]["key"];
 
-const terminalRunStates = new Set(["success", "failed"] as const);
 const activeRunStates = new Set(["pending", "running"] as const);
 
 function describeError(value: unknown, fallback: string): string {
@@ -121,7 +120,9 @@ export function useApiRun() {
   const metrics = computed(() => selectedJob.value?.metrics ?? []);
   const resultFiles = computed(() => selectedJob.value?.result_files ?? emptyResultFiles());
   const logs = computed(() => selectedJob.value?.logs ?? {});
-  const summaryCounts = computed(() => selectedApiDetail.value?.result_counts ?? selectedApi.value?.result_counts ?? null);
+  const summaryCounts = computed(
+    () => selectedJob.value?.summary?.result_counts ?? selectedApiDetail.value?.result_counts ?? selectedApi.value?.result_counts ?? null,
+  );
 
   watch(
     () => polling.latest.value,
@@ -152,7 +153,7 @@ export function useApiRun() {
     }
 
     const status = selectedJob.value?.status.status ?? selectedApiDetail.value?.latest_job?.status ?? null;
-    return status === null || !terminalRunStates.has(status as "success" | "failed") && !activeRunStates.has(status as "pending" | "running");
+    return status === null || !activeRunStates.has(status as "pending" | "running");
   });
 
   function resetJobState() {
@@ -182,7 +183,6 @@ export function useApiRun() {
   }
 
   async function hydrateJob(jobId: string, revision: number, preservedMetricStageKey: ApiRunStageKey | null = null) {
-    currentJobId.value = jobId;
     jobLoading.value = true;
     jobError.value = null;
 
@@ -334,6 +334,7 @@ export function useApiRun() {
     resultFiles,
     logs,
     summaryCounts,
+    currentJobId,
     selectApi,
     clearSelection,
     retrySelection,
