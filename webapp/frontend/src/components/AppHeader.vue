@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { Bug, LayoutDashboard, PanelRightOpen, SquarePlay } from "@lucide/vue";
-import type { Component } from "vue";
-
 import type { ViewKey } from "../composables/useHashNavigation";
 
 withDefaults(
@@ -10,9 +7,7 @@ withDefaults(
     environmentLabel: string;
     environmentOpen?: boolean;
   }>(),
-  {
-    environmentOpen: false,
-  },
+  { environmentOpen: false },
 );
 
 const emit = defineEmits<{
@@ -20,21 +15,21 @@ const emit = defineEmits<{
   toggleEnvironment: [];
 }>();
 
-const navItems: Array<{ key: ViewKey; label: string; hash: string; icon: Component }> = [
-  { key: "overview", label: "系统总览", hash: "#overview", icon: LayoutDashboard },
-  { key: "api-run", label: "单 API 运行", hash: "#api-run", icon: SquarePlay },
-  { key: "bug-replay", label: "Bug 复现", hash: "#bug-replay", icon: Bug },
+const navItems: Array<{ key: ViewKey; label: string; hash: string }> = [
+  { key: "overview", label: "系统总览", hash: "#overview" },
+  { key: "api-run", label: "单 API 运行", hash: "#api-run" },
+  { key: "bug-replay", label: "Bug 复现", hash: "#bug-replay" },
 ];
-
-function select(key: ViewKey) {
-  emit("select", key);
-}
 </script>
 
 <template>
   <header class="app-header">
     <div class="app-header__brand">
-      <span class="app-header__name">TensorGuard</span>
+      <span class="app-header__mark" aria-hidden="true">TG</span>
+      <span class="app-header__brand-copy">
+        <strong class="app-header__name">TensorGuard</strong>
+        <small class="app-header__subtitle">深度学习框架缺陷检测平台</small>
+      </span>
     </div>
 
     <nav class="app-header__nav" aria-label="TensorGuard 主要视图">
@@ -45,24 +40,24 @@ function select(key: ViewKey) {
         :class="{ 'app-header__nav-item--active': activeKey === item.key }"
         :href="item.hash"
         :aria-current="activeKey === item.key ? 'page' : undefined"
-        @click.prevent="select(item.key)"
+        @click.prevent="emit('select', item.key)"
       >
-        <component :is="item.icon" class="app-header__nav-icon" aria-hidden="true" />
-        <span>{{ item.label }}</span>
+        {{ item.label }}
       </a>
     </nav>
 
-    <div class="app-header__actions">
+    <div class="app-header__actions shell-chrome">
       <button
         type="button"
         class="app-header__environment"
         :aria-label="`环境信息：${environmentLabel}`"
         :aria-expanded="environmentOpen"
         aria-controls="environment-drawer"
-        @click="$emit('toggleEnvironment')"
+        @click="emit('toggleEnvironment')"
       >
-        <PanelRightOpen class="app-header__environment-icon" aria-hidden="true" />
+        <span class="app-header__environment-dot" aria-hidden="true" />
         <span class="app-header__environment-label">{{ environmentLabel }}</span>
+        <span class="app-header__avatar" aria-hidden="true">0</span>
       </button>
     </div>
   </header>
@@ -72,116 +67,151 @@ function select(key: ViewKey) {
 .app-header {
   position: sticky;
   top: 0;
-  z-index: 20;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  z-index: 30;
+  display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.95rem 1.25rem;
-  background: rgba(255, 255, 255, 0.98);
+  justify-content: space-between;
+  gap: 1.25rem;
+  height: var(--tg-header-height);
+  padding: 0 2rem;
+  background: #ffffff;
   border-bottom: 1px solid var(--tg-border);
-  box-shadow: var(--tg-shadow);
 }
 
 .app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 13rem;
+}
+
+.app-header__mark {
+  width: 2.125rem;
+  height: 2.125rem;
   display: grid;
-  gap: 0.1rem;
+  place-items: center;
+  flex: none;
+  border-radius: 7px;
+  background: var(--tg-action);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 850;
+  box-shadow: 0 7px 16px rgba(37, 99, 235, 0.2);
+}
+
+.app-header__brand-copy {
+  display: grid;
+  gap: 0.05rem;
 }
 
 .app-header__name {
-  font-size: 1.02rem;
-  font-weight: 700;
   color: var(--tg-text-strong);
+  font-size: 0.94rem;
+  font-weight: 780;
+}
+
+.app-header__subtitle {
+  color: var(--tg-text-muted);
+  font-size: 0.58rem;
 }
 
 .app-header__nav {
+  align-self: stretch;
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  gap: 0.5rem;
-  min-width: 0;
-  flex-wrap: wrap;
+  flex: 1;
+  gap: 1.75rem;
 }
 
 .app-header__nav-item {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  border-radius: 999px;
-  padding: 0.62rem 0.85rem;
+  padding: 0 0.25rem;
   color: var(--tg-text-muted);
-  transition:
-    background-color 0.15s ease,
-    color 0.15s ease,
-    box-shadow 0.15s ease;
+  font-size: 0.75rem;
+  font-weight: 680;
   white-space: nowrap;
+  transition: color 0.15s ease;
 }
 
 .app-header__nav-item:hover {
-  background: var(--tg-surface-soft);
-  color: var(--tg-text);
+  color: var(--tg-action);
 }
 
 .app-header__nav-item--active {
-  background: var(--tg-action-soft);
-  color: var(--tg-action);
-  box-shadow: inset 0 0 0 1px rgba(25, 86, 209, 0.18);
+  color: var(--tg-text-strong);
 }
 
-.app-header__nav-icon {
-  width: 1rem;
-  height: 1rem;
-  flex: none;
+.app-header__nav-item--active::after {
+  content: "";
+  position: absolute;
+  left: 0.25rem;
+  right: 0.25rem;
+  bottom: 0;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--tg-action);
 }
 
 .app-header__actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  min-width: 13rem;
 }
 
 .app-header__environment {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  border: 1px solid var(--tg-border);
-  border-radius: 999px;
-  background: #ffffff;
-  color: var(--tg-action);
-  padding: 0.65rem 0.9rem;
-  box-shadow: var(--tg-shadow);
+  gap: 0.5rem;
+  border: 0;
+  background: transparent;
+  color: var(--tg-text-muted);
+  padding: 0.35rem 0;
+  font-size: 0.65rem;
 }
 
 .app-header__environment:hover {
-  border-color: rgba(25, 86, 209, 0.35);
-  box-shadow: var(--tg-shadow-raised);
+  color: var(--tg-action);
 }
 
-.app-header__environment-icon {
-  width: 1rem;
-  height: 1rem;
-  flex: none;
+.app-header__environment-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #22a878;
+  box-shadow: 0 0 0 4px #e8f7f1;
 }
 
-.app-header__environment-label {
-  max-width: 18rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.app-header__avatar {
+  width: 1.8rem;
+  height: 1.8rem;
+  display: grid;
+  place-items: center;
+  margin-left: 0.35rem;
+  border: 1px solid var(--tg-border);
+  border-radius: 50%;
+  background: #f4f7fc;
+  color: #4f5d75;
+  font-weight: 760;
 }
 
-@media (max-width: 720px) {
-  .app-header {
-    grid-template-columns: 1fr;
-    align-items: start;
-  }
+@media (max-width: 900px) {
+  .app-header { padding: 0 0.875rem; gap: 0.75rem; }
+  .app-header__brand { min-width: auto; }
+  .app-header__subtitle { display: none; }
+  .app-header__nav { gap: clamp(0.5rem, 3vw, 1.4rem); }
+  .app-header__actions { min-width: auto; }
+  .app-header__environment-label,
+  .app-header__avatar { display: none; }
+}
 
-  .app-header__nav {
-    justify-content: flex-start;
-  }
-
-  .app-header__actions {
-    justify-content: flex-start;
-  }
+@media (max-width: 560px) {
+  .app-header__name { display: none; }
+  .app-header__nav { gap: 0.5rem; }
+  .app-header__nav-item { font-size: 0.64rem; }
+  .app-header__actions { display: none; }
 }
 </style>

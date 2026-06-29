@@ -114,38 +114,34 @@ onUnmounted(() => {
 
 <template>
   <section class="overview-view" aria-labelledby="overview-view-title">
-    <header class="overview-view__hero">
-      <p class="overview-view__eyebrow">TensorGuard</p>
-      <h1 id="overview-view-title" class="overview-view__title">框架安全检测概览</h1>
-      <p class="overview-view__summary">
-        用一屏查看覆盖基线、检测链路、约束库状态和已确认证据。
-      </p>
+    <header class="overview-view__head">
+      <p class="overview-view__eyebrow">Coverage &amp; Evidence</p>
+      <h1 id="overview-view-title">框架安全检测概览</h1>
+      <p>基于实际 API 清单与已固化证据的当前快照</p>
     </header>
 
-    <div class="overview-view__grid">
-      <CoverageBaseline
+    <CoverageBaseline
+      :overview="overview"
+      :environment-summary="environmentSummary"
+      :loading="overviewLoading"
+      :error="overviewError"
+      @retry="loadOverview"
+    />
+
+    <div class="overview-view__lower-grid">
+      <DetectionPipeline
         :overview="overview"
-        :environment-summary="environmentSummary"
         :loading="overviewLoading"
         :error="overviewError"
         @retry="loadOverview"
       />
 
-      <div class="overview-view__stack">
-        <DetectionPipeline
-          :overview="overview"
-          :loading="overviewLoading"
-          :error="overviewError"
-          @retry="loadOverview"
-        />
-
-        <ConfirmedEvidenceList
-          :bugs="confirmedBugs"
-          :loading="confirmedBugsLoading"
-          :error="confirmedBugsError"
-          @retry="loadConfirmedBugs"
-        />
-      </div>
+      <ConfirmedEvidenceList
+        :bugs="confirmedBugs"
+        :loading="confirmedBugsLoading"
+        :error="confirmedBugsError"
+        @retry="loadConfirmedBugs"
+      />
     </div>
   </section>
 </template>
@@ -153,47 +149,40 @@ onUnmounted(() => {
 <style scoped>
 .overview-view {
   display: grid;
-  gap: 1rem;
+  gap: 0.875rem;
 }
 
-.overview-view__hero {
-  display: grid;
-  gap: 0.35rem;
+.overview-view__head {
+  margin-bottom: 0.25rem;
 }
 
 .overview-view__eyebrow {
-  margin: 0;
-  color: var(--tg-text-soft);
-  font-size: 0.82rem;
+  margin: 0 0 0.4rem;
+  color: var(--tg-action);
+  font: 760 0.58rem/1 ui-monospace, monospace;
+  text-transform: uppercase;
 }
 
-.overview-view__title {
+.overview-view h1 {
   margin: 0;
-  font-size: 1.8rem;
-  line-height: 1.15;
+  font-size: 1.65rem;
+  line-height: 1.2;
+  font-weight: 790;
   color: var(--tg-text-strong);
 }
 
-.overview-view__summary {
-  margin: 0;
-  max-width: 44rem;
+.overview-view__head > p:last-child {
+  margin: 0.38rem 0 0;
   color: var(--tg-text-muted);
+  font-size: 0.68rem;
 }
 
-.overview-view__grid {
+.overview-view__lower-grid {
   display: grid;
-  gap: 1rem;
+  grid-template-columns: minmax(0, 1.25fr) minmax(21.25rem, 0.75fr);
+  gap: 0.875rem;
+  align-items: start;
 }
 
-.overview-view__stack {
-  display: grid;
-  gap: 1rem;
-}
-
-@media (min-width: 720px) {
-  .overview-view__grid {
-    grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
-    align-items: start;
-  }
-}
+@media (max-width: 720px) { .overview-view__lower-grid { grid-template-columns: 1fr; } }
 </style>

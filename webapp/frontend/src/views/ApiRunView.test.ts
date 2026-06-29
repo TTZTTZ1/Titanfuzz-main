@@ -132,6 +132,22 @@ afterEach(() => {
 });
 
 describe("ApiRunView", () => {
+  it("uses the approved single-API workbench structure", () => {
+    const wrapper = mount(ApiRunView, {
+      global: {
+        stubs: {
+          ApiSelector: selectorStub,
+          RunTimeline: timelineStub,
+        },
+      },
+    });
+
+    expect(wrapper.get(".api-run-view__page-symbol").text()).toBe("API");
+    expect(wrapper.find(".api-run-view__orchestration").exists()).toBe(true);
+    expect(wrapper.find(".api-run-view__chart-layout").exists()).toBe(true);
+    expect(wrapper.find(".api-run-view__bottom-grid").exists()).toBe(true);
+  });
+
   it("renders the exact title, empty state, and a disabled run action before selection", () => {
     const wrapper = mount(ApiRunView, {
       global: {
@@ -299,6 +315,6 @@ describe("ApiRunView", () => {
     expect(wrapper.text()).toContain("torch.add");
     expect(wrapper.text()).toContain("9");
     expect(wrapper.text()).toContain("success");
-    expect(wrapper.get('button[type="button"]:not([disabled])').text()).toBe("运行");
+    expect(wrapper.get(".api-run-view__run").text()).toBe("运行");
   });
 });

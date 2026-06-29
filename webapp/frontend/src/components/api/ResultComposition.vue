@@ -24,23 +24,26 @@ const rows = computed(() => {
     value: props.counts?.[category] ?? 0,
   }));
 });
+const total = computed(() => rows.value.reduce((sum, row) => sum + row.value, 0));
+function widthFor(value: number) { return total.value > 0 ? `${(value / total.value) * 100}%` : "0%"; }
 </script>
 
 <template>
   <section class="result-composition" :aria-labelledby="headingId">
     <header class="result-composition__header">
-      <div class="result-composition__heading">
-        <p class="result-composition__eyebrow">结果构成</p>
-        <h2 :id="headingId" class="result-composition__title">七类结果</h2>
-      </div>
+      <span class="result-composition__icon">R</span>
+      <div class="result-composition__heading"><h2 :id="headingId" class="result-composition__title">Results 构成</h2><p>已归类程序</p></div>
     </header>
 
-    <div v-if="rows.length > 0" class="result-composition__grid">
+    <template v-if="rows.length > 0">
+      <div class="result-composition__bar" aria-hidden="true"><i v-for="row in rows" :key="row.category" :class="`result-composition__bar--${row.category}`" :style="{ width: widthFor(row.value) }" /></div>
+      <div class="result-composition__grid">
       <div v-for="row in rows" :key="row.category" class="result-composition__item">
         <span class="result-composition__category" data-testid="result-category">{{ row.category }}</span>
         <span class="result-composition__count">{{ row.value }}</span>
       </div>
-    </div>
+      </div>
+    </template>
     <p v-else class="result-composition__empty">暂无结果统计</p>
   </section>
 </template>
@@ -48,35 +51,36 @@ const rows = computed(() => {
 <style scoped>
 .result-composition {
   display: grid;
-  gap: 0.85rem;
+  gap: 0.65rem;
   border: 1px solid var(--tg-border);
   border-radius: var(--tg-radius);
   background: var(--tg-surface);
-  padding: 0.95rem;
+  padding: 0.85rem;
+  box-shadow: var(--tg-shadow);
   min-width: 0;
 }
 
+.result-composition__header { display: flex; align-items: center; gap: 0.55rem; }
 .result-composition__heading {
   display: grid;
   gap: 0.15rem;
 }
 
-.result-composition__eyebrow {
-  margin: 0;
-  font-size: 0.8rem;
-  color: var(--tg-text-soft);
-}
-
 .result-composition__title {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.72rem;
   color: var(--tg-text-strong);
 }
+.result-composition__heading p { margin: 0; color: var(--tg-text-muted); font-size: 0.48rem; }
+.result-composition__icon { width: 1.8rem; height: 1.8rem; display: grid; place-items: center; border-radius: 6px; background: var(--tg-action-soft); color: var(--tg-action-strong); box-shadow: inset 0 0 0 1px #d6e4ff; font: 800 0.5rem/1 ui-monospace, monospace; }
+.result-composition__bar { display: flex; height: 0.55rem; overflow: hidden; border-radius: 3px; background: #edf1f6; }
+.result-composition__bar i { min-width: 0; background: #8d9ab0; }
+.result-composition__bar--seed { background: #2563eb !important; }.result-composition__bar--valid { background: #178263 !important; }.result-composition__bar--exception { background: #d29a43 !important; }.result-composition__bar--crash { background: #c65362 !important; }
 
 .result-composition__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.6rem;
+  gap: 0.32rem 0.7rem;
 }
 
 .result-composition__item {
@@ -84,21 +88,20 @@ const rows = computed(() => {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  border: 1px solid var(--tg-border);
-  border-radius: var(--tg-radius-sm);
-  background: var(--tg-surface-muted);
-  padding: 0.7rem 0.8rem;
+  padding: 0;
   min-width: 0;
 }
 
 .result-composition__category {
   color: var(--tg-text-muted);
+  font-size: 0.52rem;
   word-break: break-word;
 }
 
 .result-composition__count {
   font-weight: 700;
   color: var(--tg-text-strong);
+  font-size: 0.56rem;
 }
 
 .result-composition__empty {

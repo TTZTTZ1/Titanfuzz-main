@@ -95,6 +95,29 @@ describe("OverviewView", () => {
     expect(wrapper.text()).not.toContain("PAPER-PT-004");
   });
 
+  it("matches the approved overview information architecture", async () => {
+    getOverview.mockResolvedValueOnce(overviewPayload);
+    getConfirmedBugs.mockResolvedValueOnce([
+      {
+        id: "PAPER-PT-004",
+        display_id: "PT-004",
+        api: "torch.sparse.mm",
+        bug_type: "Crash / allocator corruption",
+        status: "confirmed",
+      },
+    ]);
+
+    const wrapper = mount(OverviewView);
+    await flushPromises();
+
+    expect(wrapper.get(".overview-view__eyebrow").text()).toBe("Coverage & Evidence");
+    expect(wrapper.find(".coverage-baseline__coverage-shell").exists()).toBe(true);
+    expect(wrapper.find(".coverage-baseline__evidence-card").exists()).toBe(true);
+    expect(wrapper.findAll(".coverage-baseline__metric")).toHaveLength(3);
+    expect(wrapper.findAll(".detection-pipeline__flow-step")).toHaveLength(5);
+    expect(wrapper.findAll(".confirmed-evidence-list__row")).toHaveLength(1);
+  });
+
   it("renders the overview root as a labeled section instead of a main landmark", async () => {
     getOverview.mockResolvedValueOnce(overviewPayload);
     getConfirmedBugs.mockResolvedValueOnce([]);
@@ -269,7 +292,7 @@ describe("OverviewView", () => {
       },
     });
 
-    expect(wrapper.findAll(".coverage-baseline__stat-value")[3].text()).toBe("2");
+    expect(wrapper.get('[data-metric="frameworks"] .coverage-baseline__metric-value').text()).toBe("2");
   });
 
   it("suppresses raw PAPER ids and fake severity labels in confirmed evidence rows", () => {

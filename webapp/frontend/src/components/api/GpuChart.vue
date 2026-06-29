@@ -44,9 +44,10 @@ const summaryText = computed(() => {
 function buildOption() {
   return {
     animation: false,
-    grid: { left: 46, right: 46, top: 36, bottom: 36, containLabel: true },
-    legend: { top: 6, left: 0 },
-    tooltip: { trigger: "axis" },
+    color: ["#2563eb", "#168aa4"],
+    grid: { left: 14, right: 14, top: 12, bottom: 20, containLabel: true },
+    legend: { show: false },
+    tooltip: { trigger: "axis", backgroundColor: "#15213b", borderWidth: 0, textStyle: { color: "#fff" } },
     xAxis: {
       type: "value",
       name: "elapsed s",
@@ -59,6 +60,7 @@ function buildOption() {
         name: "utilization %",
         min: 0,
         max: 100,
+        splitLine: { lineStyle: { color: "#edf1f7" } },
       },
       {
         type: "value",
@@ -73,6 +75,8 @@ function buildOption() {
       yAxisIndex: index === 0 ? 0 : 1,
       showSymbol: false,
       smooth: 0.2,
+      lineStyle: { width: 2 },
+      areaStyle: { opacity: 0.07 },
       emphasis: { focus: "series" },
     })),
   };
@@ -118,10 +122,7 @@ onBeforeUnmount(() => {
 <template>
   <section class="gpu-chart" :aria-labelledby="headingId">
     <header class="gpu-chart__header">
-      <div class="gpu-chart__heading">
-        <p class="gpu-chart__eyebrow">GPU 监控</p>
-        <h2 :id="headingId" class="gpu-chart__title">{{ title }}</h2>
-      </div>
+      <h2 :id="headingId" class="gpu-chart__title">{{ title }}</h2>
       <p class="gpu-chart__summary">{{ summaryText }}</p>
     </header>
 
@@ -132,57 +133,51 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .gpu-chart {
-  display: grid;
-  gap: 0.85rem;
   border: 1px solid var(--tg-border);
   border-radius: var(--tg-radius);
   background: var(--tg-surface);
-  padding: 0.95rem;
   min-width: 0;
+  overflow: hidden;
+  box-shadow: var(--tg-shadow);
 }
 
 .gpu-chart__header {
   display: flex;
-  align-items: end;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
-}
-
-.gpu-chart__heading {
-  display: grid;
-  gap: 0.15rem;
-}
-
-.gpu-chart__eyebrow {
-  margin: 0;
-  font-size: 0.8rem;
-  color: var(--tg-text-soft);
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
+  border-bottom: 1px solid #293750;
+  background: var(--tg-navy);
 }
 
 .gpu-chart__title {
   margin: 0;
-  font-size: 1rem;
-  color: var(--tg-text-strong);
+  font-size: 0.61rem;
+  color: #fff;
 }
 
 .gpu-chart__summary {
   margin: 0;
-  color: var(--tg-text-muted);
-  font-size: 0.9rem;
+  color: #9cabca;
+  font-size: 0.5rem;
 }
 
 .gpu-chart__canvas {
   width: 100%;
-  height: 19rem;
-  min-height: 19rem;
+  height: 8rem;
+  min-height: 8rem;
 }
 
 .gpu-chart__empty {
   margin: 0;
-  border: 1px dashed var(--tg-border);
-  border-radius: var(--tg-radius-sm);
-  background: var(--tg-surface-muted);
+  height: 8rem;
+  display: grid;
+  place-items: center;
+  background: #fff;
   color: var(--tg-text-muted);
   padding: 1rem;
+  font-size: 0.58rem;
 }
 </style>

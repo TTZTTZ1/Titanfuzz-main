@@ -78,10 +78,7 @@ onBeforeUnmount(() => {
 <template>
   <section class="live-log" :aria-labelledby="headingId">
     <header class="live-log__header">
-      <div class="live-log__heading">
-        <p class="live-log__eyebrow">实时日志</p>
-        <h2 :id="headingId" class="live-log__title">{{ stageLabel }}</h2>
-      </div>
+      <h2 :id="headingId" class="live-log__title">实时日志 · {{ stageLabel }}</h2>
       <button
         type="button"
         class="live-log__toggle"
@@ -89,7 +86,7 @@ onBeforeUnmount(() => {
         :aria-pressed="autoScroll"
         @click="toggleAutoScroll"
       >
-        自动滚动
+        {{ autoScroll ? "自动跟随" : "已暂停" }}
       </button>
     </header>
 
@@ -108,13 +105,12 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .live-log {
-  display: grid;
-  gap: 0.85rem;
   border: 1px solid var(--tg-border);
   border-radius: var(--tg-radius);
-  background: var(--tg-surface);
-  padding: 0.95rem;
+  background: #111a2d;
   min-width: 0;
+  overflow: hidden;
+  box-shadow: var(--tg-shadow);
 }
 
 .live-log__header {
@@ -122,47 +118,36 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-}
-
-.live-log__heading {
-  display: grid;
-  gap: 0.15rem;
-}
-
-.live-log__eyebrow {
-  margin: 0;
-  font-size: 0.8rem;
-  color: var(--tg-text-soft);
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
+  border-bottom: 1px solid #293750;
+  background: var(--tg-navy);
 }
 
 .live-log__title {
   margin: 0;
-  font-size: 1rem;
-  color: var(--tg-text-strong);
+  font-size: 0.61rem;
+  color: #fff;
 }
 
 .live-log__toggle {
-  border: 1px solid var(--tg-border);
-  border-radius: 999px;
-  background: var(--tg-surface-soft);
-  color: var(--tg-text-muted);
-  padding: 0.5rem 0.8rem;
+  border: 0;
+  background: transparent;
+  color: #9cabca;
+  padding: 0.3rem;
+  font-size: 0.5rem;
 }
 
 .live-log__toggle[aria-pressed="true"] {
-  border-color: rgba(25, 86, 209, 0.32);
-  background: var(--tg-action-soft);
-  color: var(--tg-action);
+  color: #c8d5ed;
 }
 
 .live-log__body {
-  max-height: 21rem;
+  height: 8rem;
   overflow: auto;
-  border: 1px solid var(--tg-border);
-  border-radius: var(--tg-radius-sm);
-  background: #0b1726;
+  background: #111a2d;
   color: #eef4ff;
-  padding: 0.85rem;
+  padding: 0.65rem 0.85rem;
 }
 
 .live-log__text {
@@ -176,14 +161,18 @@ onBeforeUnmount(() => {
     Menlo,
     Consolas,
     monospace;
+  font-size: 0.54rem;
+  line-height: 1.65;
 }
 
 .live-log__empty {
   margin: 0;
-  border: 1px dashed var(--tg-border);
-  border-radius: var(--tg-radius-sm);
-  background: var(--tg-surface-muted);
-  color: var(--tg-text-muted);
+  height: 8rem;
+  display: grid;
+  place-items: center;
+  background: #111a2d;
+  color: #7888a4;
   padding: 1rem;
+  font-size: 0.58rem;
 }
 </style>

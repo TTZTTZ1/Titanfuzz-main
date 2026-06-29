@@ -64,6 +64,8 @@ describe("ApiSelector", () => {
     await flushPromises();
 
     expect(wrapper.find('[role="combobox"]').exists()).toBe(true);
+    expect(wrapper.find('[role="listbox"]').exists()).toBe(false);
+    await wrapper.get('[role="combobox"]').trigger("focus");
     expect(wrapper.find('[role="listbox"]').exists()).toBe(true);
     expect(wrapper.get('[role="option"][aria-selected="true"]').text()).toContain("torch.add");
     expect(wrapper.get('[role="option"][aria-selected="true"]').classes()).toContain("api-selector__option--selected");
@@ -94,6 +96,8 @@ describe("ApiSelector", () => {
     await flushPromises();
 
     const combobox = wrapper.get('[role="combobox"]');
+    expect(combobox.attributes("aria-expanded")).toBe("false");
+    await combobox.trigger("focus");
     expect(combobox.attributes("aria-expanded")).toBe("true");
 
     await combobox.trigger("keydown", { key: "ArrowDown" });

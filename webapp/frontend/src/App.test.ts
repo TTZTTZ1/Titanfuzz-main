@@ -23,4 +23,14 @@ describe("App", () => {
 
     expect(wrapper.findAll("main")).toHaveLength(1);
   });
+
+  it("uses the approved compact TensorGuard product header", async () => {
+    const wrapper = mount(App);
+    await flushPromises();
+
+    expect(wrapper.get(".app-header__mark").text()).toBe("TG");
+    expect(wrapper.get(".app-header__subtitle").text()).toBe("深度学习框架缺陷检测平台");
+    expect(wrapper.findAll(".app-header__nav-item")).toHaveLength(3);
+    expect(wrapper.get(".app-shell__main").classes()).not.toContain("app-shell__main--drawer-open");
+  });
 });

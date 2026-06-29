@@ -1,33 +1,17 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { ref } from "vue";
 
 import AppHeader from "./components/AppHeader.vue";
 import EnvironmentDrawer from "./components/EnvironmentDrawer.vue";
 import { useEnvironment } from "./composables/useEnvironment";
-import { type ViewKey, useHashNavigation } from "./composables/useHashNavigation";
+import { useHashNavigation } from "./composables/useHashNavigation";
 import OverviewView from "./views/OverviewView.vue";
 import ApiRunView from "./views/ApiRunView.vue";
+import BugReplayView from "./views/BugReplayView.vue";
 
 const { activeKey, selectKey } = useHashNavigation();
 const { environment, loading, error, environmentLabel, refresh } = useEnvironment();
 const environmentOpen = ref(false);
-
-type SecondaryViewKey = Exclude<ViewKey, "overview">;
-
-const viewContent: Record<SecondaryViewKey, { title: string; summary: string; lines: string[] }> = {
-  "api-run": {
-    title: "单 API 运行",
-    summary: "围绕一个 API 的选择、执行与结果确认展开。",
-    lines: ["这里会放 API 搜索、模式选择和运行状态。", "现在只保留足够清楚的布局骨架。"],
-  },
-  "bug-replay": {
-    title: "Bug 复现",
-    summary: "围绕已确认问题的复现与回放工作流展开。",
-    lines: ["这里会放复现任务、回放状态和结果摘要。", "当前页面仅展示稳定的入口与分区。"],
-  },
-};
-
-const currentView = computed(() => viewContent[activeKey.value as SecondaryViewKey] ?? viewContent["api-run"]);
 
 function toggleEnvironment() {
   environmentOpen.value = !environmentOpen.value;
@@ -53,7 +37,7 @@ function handleRefresh() {
     />
 
     <div class="app-shell__frame">
-      <main class="app-shell__main">
+      <main class="app-shell__main" :class="{ 'app-shell__main--drawer-open': environmentOpen }">
         <OverviewView
           v-if="activeKey === 'overview'"
           :environment="environment"
@@ -63,17 +47,7 @@ function handleRefresh() {
 
         <ApiRunView v-else-if="activeKey === 'api-run'" />
 
-        <section v-else class="view-shell">
-          <p class="view-shell__eyebrow">TensorGuard</p>
-          <h1 class="view-shell__title">{{ currentView.title }}</h1>
-          <p class="view-shell__summary">{{ currentView.summary }}</p>
-
-          <div class="view-shell__panel">
-            <p v-for="line in currentView.lines" :key="line" class="view-shell__line">
-              {{ line }}
-            </p>
-          </div>
-        </section>
+        <BugReplayView v-else />
       </main>
 
       <EnvironmentDrawer
@@ -98,53 +72,18 @@ function handleRefresh() {
 .app-shell__frame {
   position: relative;
   min-height: calc(100vh - var(--tg-header-height));
-  padding: 1.25rem;
+  padding: 1.25rem 1.5rem 2.25rem;
 }
 
 .app-shell__main {
+  width: 100%;
   max-width: var(--tg-content-width);
   margin: 0 auto;
-  padding-right: min(29rem, 42vw);
+  transition: padding-right 0.18s ease;
 }
 
-.view-shell {
-  border: 1px solid var(--tg-border);
-  border-radius: var(--tg-radius);
-  background: var(--tg-surface);
-  box-shadow: var(--tg-shadow);
-  padding: 1.4rem 1.5rem;
-}
-
-.view-shell__eyebrow {
-  margin: 0;
-  color: var(--tg-text-soft);
-  font-size: 0.82rem;
-}
-
-.view-shell__title {
-  margin: 0.4rem 0 0;
-  font-size: 1.75rem;
-  line-height: 1.2;
-  color: var(--tg-text-strong);
-}
-
-.view-shell__summary {
-  margin: 0.65rem 0 0;
-  max-width: 42rem;
-  color: var(--tg-text-muted);
-}
-
-.view-shell__panel {
-  margin-top: 1.1rem;
-  display: grid;
-  gap: 0.75rem;
-  border-top: 1px solid var(--tg-border);
-  padding-top: 1rem;
-}
-
-.view-shell__line {
-  margin: 0;
-  color: var(--tg-text);
+.app-shell__main--drawer-open {
+  padding-right: min(28rem, 42vw);
 }
 
 @media (max-width: 720px) {
@@ -152,12 +91,10 @@ function handleRefresh() {
     padding: 0.75rem;
   }
 
-  .app-shell__main {
+  .app-shell__main,
+  .app-shell__main--drawer-open {
     padding-right: 0;
   }
 
-  .view-shell__title {
-    font-size: 1.4rem;
-  }
 }
 </style>

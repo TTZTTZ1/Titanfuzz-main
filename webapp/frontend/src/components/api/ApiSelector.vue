@@ -19,7 +19,7 @@ const emit = defineEmits<{
 }>();
 
 const { library, query, items, loading, error, setLibrary, refresh } = useApiCatalog();
-const isOpen = ref(true);
+const isOpen = ref(false);
 const activeIndex = ref(-1);
 const listboxId = "api-selector-listbox";
 
@@ -152,41 +152,52 @@ watch(
 <template>
   <section class="api-selector" aria-label="API 搜索">
     <div class="api-selector__toolbar" aria-label="API 库">
-      <button
-        type="button"
-        class="api-selector__library"
-        :class="{ 'api-selector__library--active': library === 'torch' }"
-        :aria-pressed="library === 'torch'"
-        @click="handleLibraryChange('torch')"
-      >
-        torch
-      </button>
-      <button
-        type="button"
-        class="api-selector__library"
-        :class="{ 'api-selector__library--active': library === 'tf' }"
-        :aria-pressed="library === 'tf'"
-        @click="handleLibraryChange('tf')"
-      >
-        tf
-      </button>
+      <div class="api-selector__field">
+        <span class="api-selector__field-label">框架</span>
+        <div class="api-selector__libraries" role="group" aria-label="选择框架">
+          <button
+            type="button"
+            class="api-selector__library"
+            :class="{ 'api-selector__library--active': library === 'torch' }"
+            :aria-pressed="library === 'torch'"
+            @click="handleLibraryChange('torch')"
+          >
+            PyTorch
+          </button>
+          <button
+            type="button"
+            class="api-selector__library"
+            :class="{ 'api-selector__library--active': library === 'tf' }"
+            :aria-pressed="library === 'tf'"
+            @click="handleLibraryChange('tf')"
+          >
+            TensorFlow
+          </button>
+        </div>
+      </div>
 
-      <label class="api-selector__search">
-        <span class="api-selector__search-label">搜索 API</span>
-        <input
-          class="api-selector__search-input"
-          type="search"
-          role="combobox"
-          aria-autocomplete="list"
-          :aria-expanded="isOpen"
-          :aria-controls="listboxId"
-          :aria-activedescendant="activeDescendantId"
-          :value="query"
-          @input="handleInput"
-          @keydown="handleKeydown"
-          @focus="isOpen = true"
-        />
-      </label>
+      <div class="api-selector__field api-selector__field--search">
+        <label class="api-selector__field-label" for="api-selector-search">当前 API</label>
+        <div class="api-selector__search-control">
+          <span aria-hidden="true">⌕</span>
+          <input
+            id="api-selector-search"
+            class="api-selector__search-input"
+            type="search"
+            role="combobox"
+            aria-autocomplete="list"
+            :aria-expanded="isOpen"
+            :aria-controls="listboxId"
+            :aria-activedescendant="activeDescendantId"
+            :placeholder="selected?.api ?? '输入关键字或展开选择'"
+            :value="query"
+            @input="handleInput"
+            @keydown="handleKeydown"
+            @focus="isOpen = true"
+          />
+          <span class="api-selector__chevron" aria-hidden="true">⌄</span>
+        </div>
+      </div>
     </div>
 
     <div v-if="loading" class="api-selector__state" role="status" aria-live="polite">正在加载 API 列表</div>
@@ -223,57 +234,104 @@ watch(
 
 <style scoped>
 .api-selector {
-  display: grid;
-  gap: 0.85rem;
+  position: relative;
+  min-width: 0;
 }
 
 .api-selector__toolbar {
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
-  gap: 0.5rem;
-  align-items: center;
+  grid-template-columns: minmax(12rem, 0.7fr) minmax(18rem, 1.7fr);
+  gap: 0.65rem;
+  align-items: end;
 }
 
-.api-selector__library {
-  border: 1px solid var(--tg-border);
-  border-radius: 999px;
-  background: #ffffff;
-  color: var(--tg-text-muted);
-  padding: 0.5rem 0.8rem;
-}
-
-.api-selector__library--active {
-  border-color: rgba(25, 86, 209, 0.28);
-  color: var(--tg-action);
-  background: var(--tg-action-soft);
-}
-
-.api-selector__search {
+.api-selector__field {
   display: grid;
-  gap: 0.35rem;
+  gap: 0.3rem;
   min-width: 0;
 }
 
-.api-selector__search-label {
-  font-size: 0.82rem;
-  color: var(--tg-text-soft);
+.api-selector__field-label {
+  color: var(--tg-text-muted);
+  font-size: 0.56rem;
+  font-weight: 720;
+}
+
+.api-selector__libraries {
+  height: 2.2rem;
+  display: flex;
+  padding: 3px;
+  border: 1px solid #d6deeb;
+  border-radius: 5px;
+  background: #f5f7fb;
+}
+
+.api-selector__library {
+  flex: 1;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--tg-text-muted);
+  padding: 0 0.55rem;
+  font-size: 0.62rem;
+}
+
+.api-selector__library--active {
+  color: var(--tg-action-strong);
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(36, 58, 98, 0.08);
+}
+
+.api-selector__search-control {
+  height: 2.2rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid #d6deeb;
+  border-radius: 5px;
+  background: #f8fbff;
+  padding: 0 0.65rem;
+  color: #7890b6;
 }
 
 .api-selector__search-input {
   width: 100%;
-  border: 1px solid var(--tg-border);
-  border-radius: var(--tg-radius);
-  background: #ffffff;
-  padding: 0.6rem 0.75rem;
-  color: var(--tg-text-strong);
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  padding: 0;
+  color: #1a3f8b;
+  font: 0.66rem/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.api-selector__search-input::placeholder {
+  color: #7890b6;
+  opacity: 1;
+}
+
+.api-selector__chevron {
+  color: var(--tg-text-muted);
 }
 
 .api-selector__list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  width: min(36rem, 72%);
+  max-height: 17rem;
+  overflow: auto;
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0.35rem;
   display: grid;
-  gap: 0.45rem;
+  gap: 0.2rem;
+  border: 1px solid var(--tg-border);
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 16px 34px rgba(31, 48, 87, 0.15);
 }
 
 .api-selector__option {
@@ -282,22 +340,23 @@ watch(
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  border: 1px solid var(--tg-border);
-  border-radius: var(--tg-radius);
-  background: var(--tg-surface);
-  padding: 0.7rem 0.85rem;
+  border: 0;
+  border-radius: 5px;
+  background: #fff;
+  padding: 0.58rem 0.68rem;
   color: var(--tg-text);
   text-align: left;
+  font-size: 0.65rem;
 }
 
 .api-selector__option--selected {
-  border-color: rgba(25, 86, 209, 0.35);
   background: var(--tg-action-soft);
-  color: var(--tg-action);
+  color: var(--tg-action-strong);
+  font-weight: 720;
 }
 
 .api-selector__option--active {
-  box-shadow: inset 0 0 0 1px rgba(25, 86, 209, 0.18);
+  background: #f3f7fe;
 }
 
 .api-selector__option-api {
@@ -315,18 +374,30 @@ watch(
 }
 
 .api-selector__state {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  width: min(36rem, 72%);
   border: 1px solid var(--tg-border);
-  border-radius: var(--tg-radius);
-  background: var(--tg-surface-muted);
+  border-radius: 7px;
+  background: #fff;
   color: var(--tg-text-muted);
-  padding: 0.9rem;
+  padding: 0.7rem;
+  font-size: 0.65rem;
+  box-shadow: 0 16px 34px rgba(31, 48, 87, 0.12);
 }
 
 .api-selector__state--error {
+  position: static;
+  width: 100%;
+  margin-top: 0.35rem;
   background: var(--tg-red-bg);
   border-color: var(--tg-red-border);
   color: var(--tg-red-text);
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 0.65rem;
 }
 
@@ -341,5 +412,16 @@ watch(
   background: #ffffff;
   color: inherit;
   padding: 0.45rem 0.85rem;
+}
+
+@media (max-width: 720px) {
+  .api-selector__toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .api-selector__list,
+  .api-selector__state {
+    width: 100%;
+  }
 }
 </style>
