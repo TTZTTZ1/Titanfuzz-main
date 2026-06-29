@@ -12,8 +12,8 @@ export function usePolling<T>(task: () => Promise<PollOutcome<T>>, intervalMs = 
   const error = ref<string | null>(null);
 
   let timer: ReturnType<typeof setTimeout> | null = null;
-  let requestToken = 0;
-  let inFlight = false;
+  let generation = 0;
+  let inFlightGeneration: number | null = null;
 
   function describeError(value: unknown): string {
     if (value instanceof Error) {
@@ -33,30 +33,33 @@ export function usePolling<T>(task: () => Promise<PollOutcome<T>>, intervalMs = 
   function stop() {
     running.value = false;
     loading.value = false;
-    requestToken += 1;
+    generation += 1;
     clearTimer();
   }
 
-  function schedule(delay: number) {
+  function schedule(delay: number, nextGeneration: number) {
     clearTimer();
     timer = setTimeout(() => {
       timer = null;
-      void tick();
+      void tick(nextGeneration);
     }, delay);
   }
 
-  async function tick() {
-    if (!running.value || inFlight) {
+  async function tick(nextGeneration: number) {
+    if (!running.value || nextGeneration !== generation) {
       return;
     }
 
-    const token = requestToken;
-    inFlight = true;
+    if (inFlightGeneration === nextGeneration) {
+      return;
+    }
+
+    inFlightGeneration = nextGeneration;
     loading.value = true;
 
     try {
       const outcome = await task();
-      if (token !== requestToken || !running.value) {
+      if (nextGeneration !== generation || !running.value) {
         return;
       }
 
@@ -64,20 +67,18 @@ export function usePolling<T>(task: () => Promise<PollOutcome<T>>, intervalMs = 
       error.value = null;
 
       if (outcome.continue) {
-        schedule(intervalMs);
+        schedule(intervalMs, nextGeneration);
       } else {
         stop();
       }
     } catch (cause) {
-      if (token === requestToken) {
+      if (nextGeneration === generation) {
         error.value = describeError(cause);
         stop();
       }
     } finally {
-      inFlight = false;
-      if (token === requestToken && !running.value) {
-        loading.value = false;
-      } else if (token === requestToken) {
+      if (inFlightGeneration === nextGeneration) {
+        inFlightGeneration = null;
         loading.value = false;
       }
     }
@@ -88,10 +89,11 @@ export function usePolling<T>(task: () => Promise<PollOutcome<T>>, intervalMs = 
       return;
     }
 
-    requestToken += 1;
+    generation += 1;
+    const nextGeneration = generation;
     running.value = true;
     error.value = null;
-    schedule(0);
+    schedule(0, nextGeneration);
   }
 
   onBeforeUnmount(() => {

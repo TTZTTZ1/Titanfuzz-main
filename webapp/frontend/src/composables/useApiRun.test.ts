@@ -117,6 +117,7 @@ const Harness = defineComponent({
     <div>
       <span data-testid="selected">{{ selectedApi?.api ?? "" }}</span>
       <span data-testid="detail-valid">{{ selectedApiDetail?.result_counts.valid ?? "" }}</span>
+      <span data-testid="metric-stage">{{ metricStageKey }}</span>
       <span data-testid="detail-loading">{{ detailLoading }}</span>
       <span data-testid="detail-error">{{ detailError ?? "" }}</span>
       <span data-testid="job-id">{{ selectedJob?.job_id ?? "" }}</span>
@@ -125,6 +126,7 @@ const Harness = defineComponent({
       <span data-testid="can-run">{{ canRun }}</span>
       <button type="button" data-testid="select-alpha" @click="selectApi(alpha)">alpha</button>
       <button type="button" data-testid="select-beta" @click="selectApi(beta)">beta</button>
+      <button type="button" data-testid="pin-qwen" @click="selectMetricStage('qwen_seed')">pin</button>
       <button type="button" data-testid="mode-normal" @click="setMode('normal')">normal</button>
       <button type="button" data-testid="run" @click="startRun">run</button>
     </div>
@@ -195,5 +197,67 @@ describe("useApiRun", () => {
     expect(wrapper.get('[data-testid="job-id"]').text()).toBe("job-run");
     expect(wrapper.get('[data-testid="job-status"]').text()).toBe("success");
     expect(wrapper.get('[data-testid="can-run"]').text()).toBe("false");
+  });
+
+  it("keeps a manually selected metric stage pinned when the same API refreshes with the same job", async () => {
+    const runningJob = {
+      ...jobPayload("job-1", "torch.add", "torch", "running"),
+      status: {
+        ...jobPayload("job-1", "torch.add", "torch", "running").status,
+        stage: "ev_generation",
+        stages: {
+          prompt_check: "success",
+          qwen_seed: "success",
+          ev_generation: "running",
+          driver: "pending",
+          summary: "pending",
+        },
+      },
+    };
+
+    getApiDetail
+      .mockResolvedValueOnce({
+        ...detailItem("torch.add", "torch", "job-1", 1),
+        latest_job: {
+          job_id: "job-1",
+          out: "demo_runs/job-1",
+          status: "running",
+          stage: "ev_generation",
+          updated_at: "2026-06-28T17:00:00",
+          summary_status: null,
+          mutation_model: "facebook/incoder-1B",
+          error: null,
+        },
+      })
+      .mockResolvedValueOnce({
+        ...detailItem("torch.add", "torch", "job-1", 1),
+        latest_job: {
+          job_id: "job-1",
+          out: "demo_runs/job-1",
+          status: "running",
+          stage: "ev_generation",
+          updated_at: "2026-06-28T17:00:00",
+          summary_status: null,
+          mutation_model: "facebook/incoder-1B",
+          error: null,
+        },
+      });
+
+    getApiJob.mockResolvedValue(runningJob);
+
+    const wrapper = mount(Harness);
+    await wrapper.get('[data-testid="select-alpha"]').trigger("click");
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="selected"]').text()).toBe("torch.add");
+
+    await wrapper.get('[data-testid="pin-qwen"]').trigger("click");
+    expect(wrapper.get('[data-testid="metric-stage"]').text()).toBe("qwen_seed");
+
+    await wrapper.get('[data-testid="select-alpha"]').trigger("click");
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="job-id"]').text()).toBe("job-1");
+    expect(wrapper.get('[data-testid="metric-stage"]').text()).toBe("qwen_seed");
   });
 });

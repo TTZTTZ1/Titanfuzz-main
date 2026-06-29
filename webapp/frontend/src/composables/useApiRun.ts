@@ -41,6 +41,10 @@ function isJobActive(status: ApiJobPayload["status"]["status"]): boolean {
   return activeRunStates.has(status as "pending" | "running");
 }
 
+function isStageSelectable(status: ApiStageStatus): boolean {
+  return status === "success" || status === "failed";
+}
+
 function buildTimelineStages(job: ApiJobPayload | null): Record<TimelineStageKey, ApiStageStatus> {
   if (job === null) {
     return {
@@ -155,14 +159,19 @@ export function useApiRun() {
     manualMetricStageKey.value = null;
   }
 
-  function applyJobPayload(payload: ApiJobPayload) {
+  function applyJobPayload(payload: ApiJobPayload, preservedMetricStageKey: ApiRunStageKey | null = null) {
     selectedJob.value = payload;
     currentJobId.value = payload.job_id;
     jobError.value = null;
+    if (preservedMetricStageKey !== null && isStageSelectable(payload.status.stages[preservedMetricStageKey])) {
+      manualMetricStageKey.value = preservedMetricStageKey;
+      return;
+    }
+
     manualMetricStageKey.value = null;
   }
 
-  async function hydrateJob(jobId: string, revision: number) {
+  async function hydrateJob(jobId: string, revision: number, preservedMetricStageKey: ApiRunStageKey | null = null) {
     currentJobId.value = jobId;
     jobLoading.value = true;
     jobError.value = null;
@@ -173,7 +182,7 @@ export function useApiRun() {
         return;
       }
 
-      applyJobPayload(payload);
+      applyJobPayload(payload, preservedMetricStageKey);
       if (isJobActive(payload.status.status)) {
         polling.start();
       } else {
@@ -193,6 +202,9 @@ export function useApiRun() {
   async function selectApi(item: ApiListItem) {
     selectedRevision.value += 1;
     const revision = selectedRevision.value;
+    const previousSelection = selectedApi.value;
+    const previousJobId = selectedJob.value?.job_id ?? selectedApiDetail.value?.latest_job?.job_id ?? null;
+    const preservedMetricStageKey = manualMetricStageKey.value;
 
     selectedApi.value = item;
     detailLoading.value = true;
@@ -210,8 +222,18 @@ export function useApiRun() {
       selectedApiDetail.value = payload;
       detailError.value = null;
 
+      const nextJobId = payload.latest_job?.job_id ?? null;
+      const shouldPreserveMetricStage =
+        previousSelection !== null &&
+        previousSelection.api === item.api &&
+        previousSelection.lib === item.lib &&
+        previousJobId === nextJobId;
+      const nextPreservedMetricStageKey = shouldPreserveMetricStage ? preservedMetricStageKey : null;
+
       if (payload.latest_job !== null) {
-        await hydrateJob(payload.latest_job.job_id, revision);
+        await hydrateJob(payload.latest_job.job_id, revision, nextPreservedMetricStageKey);
+      } else if (nextPreservedMetricStageKey !== null) {
+        manualMetricStageKey.value = nextPreservedMetricStageKey;
       }
     } catch (cause) {
       if (revision === selectedRevision.value) {
@@ -271,7 +293,7 @@ export function useApiRun() {
     mode.value = nextMode;
   }
 
-  function selectMetricStage(key: ApiRunStageKey) {
+  function selectMetricStage(key: ApiRunStageKey | null) {
     manualMetricStageKey.value = key;
   }
 

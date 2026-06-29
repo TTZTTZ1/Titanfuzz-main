@@ -43,6 +43,7 @@ describe("usePolling", () => {
           <span data-testid="running">{{ running }}</span>
           <span data-testid="loading">{{ loading }}</span>
           <button type="button" data-testid="start" @click="start">start</button>
+          <button type="button" data-testid="stop" @click="stop">stop</button>
         </div>
       `,
       setup() {
@@ -84,5 +85,48 @@ describe("usePolling", () => {
     await flushPromises();
 
     expect(task).toHaveBeenCalledTimes(1);
+  });
+
+  it("restarts immediately after stop even if the prior request is still unresolved", async () => {
+    const first = deferred<{ value: string; continue: boolean }>();
+    const task = vi
+      .fn()
+      .mockImplementationOnce(() => first.promise)
+      .mockResolvedValueOnce({ value: "fresh", continue: false });
+
+    const Harness = defineComponent({
+      template: `
+        <div>
+          <span data-testid="latest">{{ latest ?? "" }}</span>
+          <span data-testid="running">{{ running }}</span>
+          <button type="button" data-testid="start" @click="start">start</button>
+          <button type="button" data-testid="stop" @click="stop">stop</button>
+        </div>
+      `,
+      setup() {
+        return usePolling(task, 20);
+      },
+    });
+
+    const wrapper = mount(Harness);
+    await wrapper.get('[data-testid="start"]').trigger("click");
+    await vi.runOnlyPendingTimersAsync();
+    await flushPromises();
+
+    expect(task).toHaveBeenCalledTimes(1);
+
+    await wrapper.get('[data-testid="stop"]').trigger("click");
+    await wrapper.get('[data-testid="start"]').trigger("click");
+    await vi.runOnlyPendingTimersAsync();
+    await flushPromises();
+
+    expect(task).toHaveBeenCalledTimes(2);
+    expect(wrapper.get('[data-testid="latest"]').text()).toBe("fresh");
+
+    first.resolve({ value: "stale", continue: false });
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="latest"]').text()).toBe("fresh");
+    expect(wrapper.get('[data-testid="running"]').text()).toBe("false");
   });
 });
