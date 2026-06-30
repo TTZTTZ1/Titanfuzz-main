@@ -85,6 +85,7 @@ describe("ApiSelector", () => {
 
     expect(wrapper.emitted("select")).toHaveLength(1);
     expect(wrapper.emitted("select")?.[0]).toEqual([fixtures[0]]);
+    expect((wrapper.get('[role="combobox"]').element as HTMLInputElement).value).toBe("torch.add");
   });
 
   it("supports keyboard navigation, escape, and exact selection from the combobox", async () => {

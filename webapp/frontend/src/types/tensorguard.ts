@@ -231,6 +231,7 @@ export type ApiJobMetric = ResultCounts & {
   elapsed_seconds: number;
   qwen_raw: number;
   qwen_valid: number;
+  tested_cases?: number;
   total_files: number;
   trace_hits: number;
   gpu?: GpuMetricSample;

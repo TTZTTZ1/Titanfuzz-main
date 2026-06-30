@@ -17,9 +17,14 @@ const headingId = `live-log-${Math.random().toString(36).slice(2, 10)}`;
 const bodyRef = ref<HTMLDivElement | null>(null);
 const autoScroll = ref(true);
 const stageLabelByKey = Object.fromEntries(stageDefinitions.map((definition) => [definition.key, definition.label]));
+const stageLogFileByKey: Record<ApiRunStageKey, string> = {
+  qwen_seed: "01_qwen_seed.log",
+  ev_generation: "02_ev_generation.log",
+  driver: "03_driver.log",
+};
 
 const stageLabel = computed(() => stageLabelByKey[props.stageKey] || props.stageKey);
-const currentLog = computed(() => props.logs[props.stageKey] ?? "");
+const currentLog = computed(() => props.logs[stageLogFileByKey[props.stageKey]] ?? props.logs[props.stageKey] ?? "");
 const hasLog = computed(() => currentLog.value.trim().length > 0);
 
 function isAtBottom() {

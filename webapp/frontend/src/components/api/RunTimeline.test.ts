@@ -56,6 +56,23 @@ const Harness = defineComponent({
 });
 
 describe("RunTimeline", () => {
+  it("keeps completed stages marked as successful after the pipeline advances", () => {
+    const wrapper = mount(RunTimeline, {
+      props: {
+        stages: stageState("success", "running", "pending"),
+        metricStageKey: "qwen_seed",
+        liveStageKey: "ev_generation",
+      },
+    });
+
+    const railItems = wrapper.findAll(".run-timeline__rail-item");
+    expect(railItems[0].classes()).toContain("run-timeline__rail-item--success");
+    expect(railItems[0].get(".run-timeline__rail-index").text()).toBe("✓");
+    expect(railItems[0].get(".run-timeline__rail-status").text()).toBe("已完成");
+    expect(railItems[1].classes()).toContain("run-timeline__rail-item--success");
+    expect(railItems[2].classes()).toContain("run-timeline__rail-item--running");
+  });
+
   it("navigates enabled metric tabs with keyboard shortcuts and skips disabled stages", async () => {
     const wrapper = mount(Harness, { attachTo: document.body });
 

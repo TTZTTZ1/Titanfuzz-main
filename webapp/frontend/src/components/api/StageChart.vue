@@ -55,20 +55,47 @@ function buildOption() {
   return {
     animation: false,
     color: ["#2563eb", "#178263", "#d29a43", "#c65362"],
-    grid: { left: 22, right: 20, top: 18, bottom: 28, containLabel: true },
+    grid: { left: 16, right: 18, top: 20, bottom: 20, containLabel: true },
     legend: { show: false },
-    tooltip: { trigger: "axis", backgroundColor: "#15213b", borderWidth: 0, textStyle: { color: "#fff" } },
+    tooltip: {
+      trigger: "axis",
+      backgroundColor: "#15213b",
+      borderWidth: 0,
+      padding: [8, 10],
+      textStyle: { color: "#fff", fontSize: 11 },
+      axisPointer: { type: "line", lineStyle: { color: "#9fb2d0", type: "dashed" } },
+      formatter: (params: Array<{ seriesName: string; value: [number, number | null]; color: string }>) => {
+        const seconds = Math.round(params[0]?.value?.[0] ?? 0);
+        const rows = params.map((item) => `${item.seriesName}：${item.value?.[1] ?? "-"}`).join("<br>");
+        return `<b>第 ${seconds} 秒</b><br>${rows}`;
+      },
+    },
     xAxis: {
       type: "value",
-      name: "elapsed s",
-      nameLocation: "end",
+      name: "阶段运行时间（秒）",
+      nameLocation: "middle",
+      nameGap: 24,
+      nameTextStyle: { color: "#718096", fontSize: 10 },
       boundaryGap: false,
+      axisLine: { lineStyle: { color: "#bcc8d8" } },
+      axisTick: { show: false },
+      axisLabel: { color: "#7d899d", fontSize: 10, margin: 9 },
+      splitLine: { show: false },
+      splitNumber: 4,
     },
     yAxis: {
       type: "value",
-      scale: true,
+      name: "累计数量",
+      nameLocation: "middle",
+      nameGap: 38,
+      nameRotate: 90,
+      nameTextStyle: { color: "#718096", fontSize: 10 },
+      min: 0,
+      axisLine: { show: true, lineStyle: { color: "#bcc8d8" } },
+      axisTick: { show: false },
+      axisLabel: { color: "#7d899d", fontSize: 10, margin: 9 },
       splitLine: { lineStyle: { color: "#edf1f7" } },
-      min: "dataMin",
+      splitNumber: 4,
     },
     series: selectedSeries.value.map((series) => ({
       name: series.name,
@@ -223,8 +250,8 @@ onBeforeUnmount(() => {
 
 .stage-chart__canvas {
   width: 100%;
-  height: 12.2rem;
-  min-height: 12.2rem;
+  height: 13rem;
+  min-height: 13rem;
   border: 1px solid #dce4f0;
   border-radius: 5px;
   background: #fbfdff;
@@ -238,7 +265,7 @@ onBeforeUnmount(() => {
     linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(20, 127, 153, 0.08) 54%, rgba(255, 255, 255, 0.78)),
     #f7fbff;
   color: var(--tg-text-muted);
-  min-height: 12.2rem;
+  min-height: 13rem;
   display: grid;
   place-items: center;
   gap: 0.75rem;

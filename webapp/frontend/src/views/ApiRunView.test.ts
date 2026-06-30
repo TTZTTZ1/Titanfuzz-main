@@ -145,8 +145,13 @@ describe("ApiRunView", () => {
     expect(wrapper.get(".api-run-view__page-symbol").text()).toBe("API");
     expect(wrapper.find(".api-run-view__orchestration").exists()).toBe(true);
     expect(wrapper.find(".api-run-view__control-card--device").exists()).toBe(true);
-    expect(wrapper.find(".api-run-view__chart-layout").exists()).toBe(true);
-    expect(wrapper.find(".api-run-view__bottom-grid").exists()).toBe(true);
+    expect(wrapper.find(".api-run-view__dashboard").exists()).toBe(true);
+    expect(wrapper.find(".api-run-view__primary").exists()).toBe(true);
+    expect(wrapper.find(".api-run-view__telemetry-strip").exists()).toBe(true);
+    expect(wrapper.find(".api-run-view__log-column").exists()).toBe(true);
+    expect(wrapper.find(".api-run-view__primary > .stage-chart").exists()).toBe(true);
+    expect(wrapper.find(".api-run-view__telemetry-strip > .gpu-chart").exists()).toBe(true);
+    expect(wrapper.find(".api-run-view__log-column > .live-log").exists()).toBe(true);
   });
 
   it("renders the exact title, empty state, and a disabled run action before selection", () => {

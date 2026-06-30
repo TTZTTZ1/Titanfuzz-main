@@ -121,6 +121,53 @@ describe("chartOptions", () => {
     ]);
   });
 
+  it("uses incremental tested cases instead of the fixed generated-file total for driver progress", () => {
+    const metrics: ApiJobMetric[] = [
+      {
+        timestamp: "2026-06-28T17:00:00",
+        stage: "driver",
+        elapsed_seconds: 1,
+        qwen_raw: 0,
+        qwen_valid: 0,
+        tested_cases: 2,
+        total_files: 20,
+        trace_hits: 0,
+        seed: 0,
+        valid: 12,
+        exception: 8,
+        crash: 0,
+        notarget: 0,
+        hangs: 0,
+        flaky: 0,
+      },
+      {
+        timestamp: "2026-06-28T17:00:01",
+        stage: "driver",
+        elapsed_seconds: 2,
+        qwen_raw: 0,
+        qwen_valid: 0,
+        tested_cases: 6,
+        total_files: 20,
+        trace_hits: 1,
+        seed: 0,
+        valid: 12,
+        exception: 8,
+        crash: 0,
+        notarget: 0,
+        hangs: 0,
+        flaky: 0,
+      },
+    ];
+
+    const series = stageSeries(metrics, "driver");
+
+    expect(series.map((item) => item.name)).toEqual(["已检测程序", "差异 Catch"]);
+    expect(series[0].data).toEqual([
+      [1, 2],
+      [2, 6],
+    ]);
+  });
+
   it("keeps the result categories in the required stable order", () => {
     expect(resultCategoryOrder).toEqual(["seed", "valid", "exception", "crash", "notarget", "hangs", "flaky"]);
   });

@@ -35,6 +35,21 @@ def test_snapshot_counts_driver_trace_evidence():
         assert sample["trace_hits"] == 2
 
 
+def test_snapshot_counts_completed_driver_testcases():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "trace.txt").write_text(
+            "Results/torch 3\n"
+            "TitanFuzzTestcase 0 torch.add torch.add_1 NoProblem 420\n"
+            "diagnostic output\n"
+            "TitanFuzzTestcase 1 torch.add torch.add_2 ComparisonFail 420\n"
+            "TitanFuzzTestcase malformed\n",
+            encoding="utf-8",
+        )
+        sample = snapshot_results(root)
+        assert sample["tested_cases"] == 2
+
+
 def test_snapshot_qwen_counts_raw_and_fixed_programs():
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -60,6 +75,7 @@ def test_append_metric_writes_one_json_object_per_line():
 if __name__ == "__main__":
     test_snapshot_counts_job_results()
     test_snapshot_counts_driver_trace_evidence()
+    test_snapshot_counts_completed_driver_testcases()
     test_snapshot_qwen_counts_raw_and_fixed_programs()
     test_append_metric_writes_one_json_object_per_line()
     print("ok")

@@ -10,9 +10,9 @@ describe("LiveLog", () => {
       props: {
         stageKey: "qwen_seed",
         logs: {
-          qwen_seed: "seed <strong>safe</strong>",
-          ev_generation: "ev_generation log",
-          driver: "driver log",
+          "01_qwen_seed.log": "seed <strong>safe</strong>",
+          "02_ev_generation.log": "ev_generation log",
+          "03_driver.log": "driver log",
           extra: "hidden",
         },
       },
@@ -37,7 +37,7 @@ describe("LiveLog", () => {
 
     await wrapper.setProps({
       logs: {
-        qwen_seed: "seed <strong>safe</strong>\nmore",
+        "01_qwen_seed.log": "seed <strong>safe</strong>\nmore",
       },
     });
     await flushPromises();

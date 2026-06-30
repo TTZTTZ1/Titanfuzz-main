@@ -110,6 +110,12 @@ def test_finish_collects_review_candidates_without_gpu_or_models():
             "TitanFuzzTestcase 0 torch.add torch.add_1 ComparisonFail 420 output mismatch\n",
             encoding="utf-8",
         )
+        old_job = root / "demo_runs" / "api_jobs" / "job-old"
+        old_job.mkdir(parents=True)
+        (old_job / "status.json").write_text(
+            json.dumps({"job_id": "job-old", "lib": "torch", "api": "torch.add", "status": "success"}),
+            encoding="utf-8",
+        )
 
         run.finish("success")
 
@@ -120,6 +126,41 @@ def test_finish_collects_review_candidates_without_gpu_or_models():
         assert collection["candidate_ids"] == ["CAND-0001"]
         assert status["candidate_collection"]["registered"] == 1
         assert index[0]["api"] == "torch.add"
+        assert not old_job.exists()
+
+
+def test_prune_superseded_jobs_keeps_active_other_api_and_candidate_evidence():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        run = demo.DemoRun(make_args(out="demo_runs/api_jobs/job-new"), root)
+        run.out.mkdir(parents=True)
+        jobs_root = root / "demo_runs" / "api_jobs"
+
+        def add_job(job_id: str, api: str, status: str) -> Path:
+            job = jobs_root / job_id
+            job.mkdir(parents=True, exist_ok=True)
+            (job / "status.json").write_text(
+                json.dumps({"job_id": job_id, "lib": "torch", "api": api, "status": status}),
+                encoding="utf-8",
+            )
+            return job
+
+        old = add_job("job-old", "torch.add", "success")
+        active = add_job("job-active", "torch.add", "running")
+        other_api = add_job("job-other", "torch.mean", "success")
+        evidence = add_job("job-evidence", "torch.add", "failed")
+        candidate_index = root / "demo_runs" / "candidates" / "index.json"
+        candidate_index.parent.mkdir(parents=True)
+        candidate_index.write_text(json.dumps([{"id": "CAND-0001", "job_id": "job-evidence"}]), encoding="utf-8")
+
+        removed = run.prune_superseded_jobs()
+
+        assert removed == ["job-old"]
+        assert not old.exists()
+        assert active.is_dir()
+        assert other_api.is_dir()
+        assert evidence.is_dir()
+        assert run.out.is_dir()
 
 
 if __name__ == "__main__":
@@ -129,4 +170,5 @@ if __name__ == "__main__":
     test_failed_stage_marks_later_execution_stages_skipped()
     test_publish_results_replaces_only_selected_api_files()
     test_finish_collects_review_candidates_without_gpu_or_models()
+    test_prune_superseded_jobs_keeps_active_other_api_and_candidate_evidence()
     print("ok")

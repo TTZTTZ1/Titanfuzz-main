@@ -52,6 +52,7 @@ function setActiveIndex(nextIndex: number) {
 
 function selectItem(item: ApiListItem, index: number) {
   setActiveIndex(index);
+  query.value = item.api;
   emit("select", item);
   isOpen.value = false;
 }

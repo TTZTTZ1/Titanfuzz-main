@@ -197,7 +197,42 @@ class DemoRun:
                 "registered": 0,
                 "error": str(exc),
             }
+        try:
+            self.status["retention"] = {"removed_job_ids": self.prune_superseded_jobs()}
+        except Exception as exc:
+            self.status["retention"] = {"removed_job_ids": [], "error": str(exc)}
         write_json(self.status_path, self.status)
+
+    def prune_superseded_jobs(self) -> List[str]:
+        jobs_root = self.repo_root / "demo_runs" / "api_jobs"
+        if not jobs_root.is_dir():
+            return []
+
+        protected_job_ids = {
+            str(record.get("job_id", ""))
+            for record in CandidateStore(self.repo_root).list()
+            if record.get("job_id")
+        }
+        removed = []
+        current_out = self.out.resolve()
+        for status_path in sorted(jobs_root.glob("*/status.json")):
+            job_dir = status_path.parent
+            if job_dir.resolve() == current_out:
+                continue
+            try:
+                status = json.loads(status_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if status.get("lib") != self.args.lib or status.get("api") != self.args.api:
+                continue
+            if status.get("status") not in {"success", "failed"}:
+                continue
+            job_id = str(status.get("job_id") or job_dir.name)
+            if job_id in protected_job_ids:
+                continue
+            shutil.rmtree(job_dir)
+            removed.append(job_id)
+        return removed
 
     def mark_remaining_skipped(self, failed_stage: str) -> None:
         execution_stages = STAGE_ORDER[:-1]

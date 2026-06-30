@@ -135,23 +135,24 @@ function handleLibraryChange() {
       @select-metric-stage="selectMetricStage"
     />
 
-    <section class="api-run-view__chart-layout" aria-label="阶段图表与摘要">
-      <StageChart :metrics="metrics" :stage-key="metricStageKey" />
-      <aside class="api-run-view__side">
-        <RunSnapshot
-          :api-label="selectedApiLabel"
-          :mode="mode"
-          :live-stage-key="liveStageKey"
-          :job-status="selectedJobStatus"
-          :latest-metric="latestMetric"
-        />
-        <ResultComposition :counts="summaryCounts" />
+    <section class="api-run-view__dashboard" aria-label="阶段图表、实时摘要与日志">
+      <div class="api-run-view__primary">
+        <StageChart :metrics="metrics" :stage-key="metricStageKey" />
+        <div class="api-run-view__telemetry-strip">
+          <GpuChart :metrics="metrics" :environment="selectedJob?.environment" />
+          <RunSnapshot
+            :api-label="selectedApiLabel"
+            :mode="mode"
+            :live-stage-key="liveStageKey"
+            :job-status="selectedJobStatus"
+            :latest-metric="latestMetric"
+          />
+          <ResultComposition :counts="summaryCounts" />
+        </div>
+      </div>
+      <aside class="api-run-view__log-column">
+        <LiveLog :stage-key="liveStageKey" :logs="logs" />
       </aside>
-    </section>
-
-    <section class="api-run-view__bottom-grid" aria-label="实时日志与 GPU 监控">
-      <LiveLog :stage-key="liveStageKey" :logs="logs" />
-      <GpuChart :metrics="metrics" :environment="selectedJob?.environment" />
     </section>
 
     <div class="api-run-view__sync" aria-live="polite">
@@ -200,13 +201,24 @@ function handleLibraryChange() {
 .api-run-view__run small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,.78); font-size: 0.46rem; }
 .api-run-view__run:disabled { border-color: var(--tg-border); background: #eef1f6; color: #99a3b4; box-shadow: none; }
 .api-run-view__run:disabled small { color: #a3adbd; }
-.api-run-view__chart-layout, .api-run-view__bottom-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(17.5rem, 0.62fr); gap: 0.75rem; align-items: stretch; }
-.api-run-view__side { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 0.75rem; min-height: 0; }
+.api-run-view__dashboard { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(21rem, 0.8fr); gap: 0.75rem; align-items: stretch; }
+.api-run-view__primary { display: grid; grid-template-rows: auto minmax(10.5rem, auto); gap: 0.75rem; min-width: 0; }
+.api-run-view__telemetry-strip { display: grid; grid-template-columns: minmax(9rem, 0.78fr) minmax(12rem, 0.9fr) minmax(15rem, 1.32fr); gap: 0.75rem; align-items: stretch; min-width: 0; }
+.api-run-view__log-column { min-width: 0; }
+.api-run-view__log-column :deep(.live-log__body), .api-run-view__log-column :deep(.live-log__empty) { height: 100%; min-height: 25rem; }
+.api-run-view__telemetry-strip :deep(.gpu-chart__body) { height: calc(100% - 2.25rem); grid-template-columns: 1fr; }
+.api-run-view__telemetry-strip :deep(.gpu-chart__body article) { padding: 0.7rem 0.75rem; }
+.api-run-view__telemetry-strip :deep(.gpu-chart__body b) { margin-top: 0.25rem; font-size: 0.9rem; }
+.api-run-view__telemetry-strip :deep(.gpu-chart__track) { margin-top: 0.42rem; }
+.api-run-view__telemetry-strip :deep(.run-snapshot), .api-run-view__telemetry-strip :deep(.result-composition) { padding: 0.7rem; gap: 0.5rem; }
+.api-run-view__telemetry-strip :deep(.run-snapshot__item) { padding: 0.45rem; }
+.api-run-view__telemetry-strip :deep(.run-snapshot__models span) { padding: 0.3rem 0.4rem; grid-template-columns: 3.6rem minmax(0, 1fr); }
 .api-run-view__sync { min-height: 1.8rem; display: grid; align-items: center; color: var(--tg-text-muted); font-size: 0.62rem; }
 .api-run-view__sync p { margin: 0; }
 .api-run-view__sync-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
 .api-run-view__sync-error { color: var(--tg-red-text); }
 .api-run-view__retry { height: 1.8rem; border: 1px solid var(--tg-border); border-radius: 5px; background: #fff; color: var(--tg-action); padding: 0 0.65rem; font-size: 0.6rem; }
-@media (max-width: 900px) { .api-run-view__orchestration { grid-template-columns: 1fr; } .api-run-view__run-controls { justify-self: end; width: min(24rem, 100%); } .api-run-view__chart-layout, .api-run-view__bottom-grid { grid-template-columns: minmax(0, 1.4fr) minmax(15rem, 0.6fr); } }
-@media (max-width: 720px) { .api-run-view__page-head { align-items: flex-start; } .api-run-view__status-stack { display: none; } .api-run-view__run-controls { grid-template-columns: 1fr; justify-self: stretch; width: 100%; } .api-run-view__chart-layout, .api-run-view__bottom-grid { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .api-run-view__dashboard { grid-template-columns: 1fr; } .api-run-view__log-column :deep(.live-log__body), .api-run-view__log-column :deep(.live-log__empty) { min-height: 14rem; } }
+@media (max-width: 900px) { .api-run-view__orchestration { grid-template-columns: 1fr; } .api-run-view__run-controls { justify-self: end; width: min(24rem, 100%); } .api-run-view__telemetry-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 720px) { .api-run-view__page-head { align-items: flex-start; } .api-run-view__status-stack { display: none; } .api-run-view__run-controls { grid-template-columns: 1fr; justify-self: stretch; width: 100%; } .api-run-view__telemetry-strip { grid-template-columns: 1fr; } }
 </style>

@@ -27,9 +27,19 @@ def snapshot_results(root: Path) -> dict:
     counts["total_files"] = sum(counts.values())
     trace_path = root / "trace.txt"
     trace_hits = 0
+    tested_case_ids: set[int] = set()
     if trace_path.is_file():
         with trace_path.open("r", encoding="utf-8", errors="replace") as stream:
-            trace_hits = sum(1 for line in stream if any(pattern in line for pattern in TRACE_PATTERNS))
+            for line in stream:
+                if any(pattern in line for pattern in TRACE_PATTERNS):
+                    trace_hits += 1
+                parts = line.split()
+                if len(parts) >= 5 and parts[0] == "TitanFuzzTestcase":
+                    try:
+                        tested_case_ids.add(int(parts[1]))
+                    except ValueError:
+                        pass
+    counts["tested_cases"] = len(tested_case_ids)
     counts["trace_hits"] = trace_hits
     return counts
 

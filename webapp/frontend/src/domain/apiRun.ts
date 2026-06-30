@@ -24,10 +24,8 @@ export const stageDefinitions = [
     key: "driver",
     label: "差异检测",
     metricKeys: [
-      ["已检查程序", "total_files"],
+      ["已检测程序", "tested_cases"],
       ["差异 Catch", "trace_hits"],
-      ["崩溃", "crash"],
-      ["不稳定", "flaky"],
     ],
   },
 ] as const;

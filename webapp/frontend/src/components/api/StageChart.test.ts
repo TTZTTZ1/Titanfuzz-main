@@ -93,6 +93,10 @@ describe("StageChart", () => {
       [1, 4],
       [3, 8],
     ]);
+    expect(setOption.mock.calls[0][0].xAxis.name).toBe("阶段运行时间（秒）");
+    expect(setOption.mock.calls[0][0].yAxis.name).toBe("累计数量");
+    expect(setOption.mock.calls[0][0].xAxis.axisTick.show).toBe(false);
+    expect(setOption.mock.calls[0][0].yAxis.axisTick.show).toBe(false);
 
     await wrapper.setProps({ stageKey: "ev_generation" });
     await flushPromises();
