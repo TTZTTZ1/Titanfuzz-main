@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
-import { timelineStages, type ApiRunStageKey } from "../../domain/apiRun";
+import { jobElapsedSeconds, timelineStages, type ApiRunStageKey } from "../../domain/apiRun";
 import type { ApiJobMetric, ApiJobStatus, ApiRunMode } from "../../types/tensorguard";
 
 const props = withDefaults(
@@ -19,7 +19,12 @@ const props = withDefaults(
 );
 
 const headingId = `run-snapshot-${Math.random().toString(36).slice(2, 10)}`;
+const currentTimeMilliseconds = ref(Date.now());
+let clockTimer: ReturnType<typeof setInterval> | null = null;
 const elapsedText = computed(() => {
+  if (props.jobStatus?.started_at) {
+    return formatDuration(jobElapsedSeconds(props.jobStatus, currentTimeMilliseconds.value));
+  }
   if (props.latestMetric === null) {
     return "暂无";
   }
@@ -93,6 +98,16 @@ function formatDuration(seconds: number): string {
   const rest = safeSeconds % 60;
   return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
 }
+
+onMounted(() => {
+  clockTimer = setInterval(() => {
+    currentTimeMilliseconds.value = Date.now();
+  }, 1000);
+});
+
+onBeforeUnmount(() => {
+  if (clockTimer !== null) clearInterval(clockTimer);
+});
 </script>
 
 <template>

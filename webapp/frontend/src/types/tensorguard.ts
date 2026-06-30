@@ -156,6 +156,20 @@ export interface ApiJobParameters {
   random_seed: number;
 }
 
+export interface CandidateCollectionSummary {
+  job_id?: string;
+  lib?: Library;
+  api?: string;
+  scanned?: number;
+  registered?: number;
+  deduplicated?: number;
+  excluded_noise?: number;
+  skipped_low_signal?: number;
+  candidate_ids?: string[];
+  path?: string;
+  error?: string;
+}
+
 export interface ApiJobStatus {
   job_id: string;
   lib: Library;
@@ -175,6 +189,7 @@ export interface ApiJobStatus {
   environment_path?: string;
   started_at?: string;
   logs?: Record<string, string>;
+  candidate_collection?: CandidateCollectionSummary;
 }
 
 export interface ApiJobSummary {
@@ -373,6 +388,7 @@ export interface ConfirmedBugDetail {
   report_path: string;
   repro_code: string;
   report_markdown: string;
+  latest_repro_job_id: string | null;
 }
 
 export type ExecutionMode = "cpu" | `gpu:${number}`;

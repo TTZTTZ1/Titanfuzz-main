@@ -287,6 +287,12 @@ describe("ApiRunView", () => {
         },
         error: null,
         updated_at: "2026-06-28T17:00:00",
+        candidate_collection: {
+          candidate_ids: ["CAND-0001"],
+          registered: 1,
+          excluded_noise: 2,
+          skipped_low_signal: 3,
+        },
       },
       summary: {},
       metrics: [],
@@ -317,6 +323,7 @@ describe("ApiRunView", () => {
     expect(wrapper.text()).toContain("torch.add");
     expect(wrapper.text()).toContain("9");
     expect(wrapper.text()).toContain("任务完成");
+    expect(wrapper.text()).toContain("已进入候选 · 1 条");
     expect(wrapper.get(".api-run-view__run").text()).toContain("运行");
   });
 });

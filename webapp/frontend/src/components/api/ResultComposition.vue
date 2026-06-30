@@ -33,13 +33,14 @@ function widthFor(value: number) { return total.value > 0 ? `${(value / total.va
     <header class="result-composition__header">
       <span class="result-composition__icon">R</span>
       <div class="result-composition__heading"><h2 :id="headingId" class="result-composition__title">Results 构成</h2><p>已归类程序</p></div>
+      <span v-if="rows.length" class="result-composition__total" data-testid="result-total">总计 {{ total }}</span>
     </header>
 
     <template v-if="rows.length > 0">
       <div class="result-composition__bar" aria-hidden="true"><i v-for="row in rows" :key="row.category" :class="`result-composition__bar--${row.category}`" :style="{ width: widthFor(row.value) }" /></div>
       <div class="result-composition__grid">
       <div v-for="row in rows" :key="row.category" class="result-composition__item">
-        <span class="result-composition__category" data-testid="result-category">{{ row.category }}</span>
+        <span class="result-composition__category" data-testid="result-category"><i data-testid="result-swatch" :class="`result-composition__swatch--${row.category}`" />{{ row.category }}</span>
         <span class="result-composition__count">{{ row.value }}</span>
       </div>
       </div>
@@ -63,6 +64,7 @@ function widthFor(value: number) { return total.value > 0 ? `${(value / total.va
 }
 
 .result-composition__header { display: flex; align-items: center; gap: 0.55rem; }
+.result-composition__total { margin-left: auto; padding: 0.25rem 0.4rem; border-radius: 4px; background: var(--tg-surface-soft); color: var(--tg-text-muted); font-size: 0.48rem; font-weight: 720; }
 .result-composition__heading {
   display: grid;
   gap: 0.15rem;
@@ -75,9 +77,9 @@ function widthFor(value: number) { return total.value > 0 ? `${(value / total.va
 }
 .result-composition__heading p { margin: 0; color: var(--tg-text-muted); font-size: 0.48rem; }
 .result-composition__icon { width: 1.8rem; height: 1.8rem; display: grid; place-items: center; border-radius: 6px; background: var(--tg-action-soft); color: var(--tg-action-strong); box-shadow: inset 0 0 0 1px #d6e4ff; font: 800 0.5rem/1 ui-monospace, monospace; }
-.result-composition__bar { display: flex; height: 0.55rem; overflow: hidden; border-radius: 3px; background: #edf1f6; }
+.result-composition__bar { display: flex; height: 0.7rem; overflow: hidden; border-radius: 3px; background: #edf1f6; }
 .result-composition__bar i { min-width: 0; background: #8d9ab0; }
-.result-composition__bar--seed { background: #2563eb !important; }.result-composition__bar--valid { background: #178263 !important; }.result-composition__bar--exception { background: #d29a43 !important; }.result-composition__bar--crash { background: #c65362 !important; }
+.result-composition__bar--seed,.result-composition__swatch--seed { background: #2563eb !important; }.result-composition__bar--valid,.result-composition__swatch--valid { background: #178263 !important; }.result-composition__bar--exception,.result-composition__swatch--exception { background: #d29a43 !important; }.result-composition__bar--crash,.result-composition__swatch--crash { background: #c65362 !important; }.result-composition__bar--notarget,.result-composition__swatch--notarget { background: #8b70c9 !important; }.result-composition__bar--hangs,.result-composition__swatch--hangs { background: #63738f !important; }.result-composition__bar--flaky,.result-composition__swatch--flaky { background: #168aa4 !important; }
 
 .result-composition__grid {
   display: grid;
@@ -95,15 +97,19 @@ function widthFor(value: number) { return total.value > 0 ? `${(value / total.va
 }
 
 .result-composition__category {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
   color: var(--tg-text-muted);
-  font-size: 0.52rem;
+  font-size: 0.56rem;
   word-break: break-word;
 }
+.result-composition__category i { width: 0.48rem; height: 0.48rem; flex: none; border-radius: 2px; }
 
 .result-composition__count {
   font-weight: 700;
   color: var(--tg-text-strong);
-  font-size: 0.56rem;
+  font-size: 0.68rem;
 }
 
 .result-composition__empty {

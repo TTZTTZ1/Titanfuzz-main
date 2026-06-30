@@ -7,6 +7,7 @@ const services = vi.hoisted(() => ({
   getCandidates: vi.fn(),
   getCandidateClusters: vi.fn(),
   getOverview: vi.fn(),
+  getEnvironment: vi.fn(),
   getCandidate: vi.fn(),
   getCandidateCluster: vi.fn(),
   updateCandidateClusterStatus: vi.fn(),
@@ -95,6 +96,18 @@ describe("BugReplayView", () => {
     services.getCandidates.mockResolvedValue([]);
     services.getCandidateClusters.mockResolvedValue([candidateCluster]);
     services.getOverview.mockResolvedValue({ latest_repro_jobs: [] });
+    services.getEnvironment.mockResolvedValue({
+      collected_at: "2026-06-30T10:00:00+08:00",
+      platform: { system: "Linux", release: "6.8", machine: "x86_64" },
+      python: { version: "3.10.20", executable: "/env/bin/python" },
+      frameworks: {
+        torch: { installed: true, version: "2.11.0+cu130" },
+        tensorflow: { installed: true, version: "2.21.0" },
+      },
+      cuda: { available: true, driver_version: "590.00" },
+      gpus: [{ index: 0, name: "NVIDIA GeForce RTX 5090", driver_version: "590.00", memory_total_mib: 32640 }],
+      warnings: [],
+    });
     services.getConfirmedBug.mockResolvedValue({
       index: summary,
       meta: summary,
@@ -104,9 +117,21 @@ describe("BugReplayView", () => {
       report_path: "reports/confirmed/PT-004/report.md",
       repro_code: "import torch\ntorch.sparse.mm(a, b)",
       report_markdown: "",
+      latest_repro_job_id: null,
     });
     services.getCandidateCluster.mockResolvedValue(candidateClusterDetail);
     services.updateCandidateClusterStatus.mockResolvedValue({ ...candidateCluster, cluster_status: "needs_minimize" });
+  });
+
+  it("shows current environment before any reproduction has run", async () => {
+    const wrapper = mount(BugReplayView);
+    await flushPromises();
+
+    expect(services.getEnvironment).toHaveBeenCalledTimes(1);
+    expect(wrapper.text()).toContain("当前环境");
+    expect(wrapper.text()).toContain("NVIDIA GeForce RTX 5090");
+    expect(wrapper.text()).toContain("3.10.20");
+    expect(wrapper.text()).toContain("等待当前环境复现");
   });
 
   it("renders the approved evidence workbench from live confirmed-bug data", async () => {
@@ -133,8 +158,16 @@ describe("BugReplayView", () => {
   });
 
   it("reuses an existing current-environment report instead of generating over it", async () => {
-    services.getOverview.mockResolvedValueOnce({
-      latest_repro_jobs: [{ job_id: "repro-1", bug_id: summary.id, status: "finished" }],
+    services.getConfirmedBug.mockResolvedValueOnce({
+      index: summary,
+      meta: summary,
+      display_id: "PT-004",
+      bug_dir: "reports/confirmed/PT-004",
+      repro_path: "reports/confirmed/PT-004/repro.py",
+      report_path: "reports/confirmed/PT-004/report.md",
+      repro_code: "import torch\ntorch.sparse.mm(a, b)",
+      report_markdown: "",
+      latest_repro_job_id: "repro-1",
     });
     services.getReproJob.mockResolvedValueOnce({
       job_id: "repro-1",
@@ -147,7 +180,25 @@ describe("BugReplayView", () => {
         updated_at: "2026-06-29T08:00:02",
         out: "demo_runs/repro-1",
         timeout_seconds: 60,
-        modes: {},
+        modes: {
+          "gpu:0": {
+            status: "finished",
+            returncode: -6,
+            timed_out: false,
+            log: "gpu:0.log",
+            started_at: "2026-06-29T08:00:00",
+            finished_at: "2026-06-29T08:00:02",
+            execution_profile: "visible_gpu_0",
+            actual_device: "cuda:0",
+            evidence: {
+              verdict: "reproduced",
+              outcome: "signal",
+              reason: "SIGABRT reproduced",
+              signal: "SIGABRT",
+              signal_number: 6,
+            },
+          },
+        },
         report: "report.md",
         error: null,
       },
@@ -168,6 +219,8 @@ describe("BugReplayView", () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain("报告已归档");
+    expect(wrapper.text()).toContain("当前环境复现成功");
+    expect(services.getReproJob).toHaveBeenCalledWith("repro-1");
     const reportButton = wrapper.findAll("button").find((button) => button.text() === "查看报告");
     expect(reportButton).toBeDefined();
     await reportButton?.trigger("click");

@@ -1,184 +1,66 @@
 <script setup lang="ts">
-import { LineChart } from "echarts/charts";
-import { GridComponent, LegendComponent, TooltipComponent } from "echarts/components";
-import { init, use } from "echarts/core";
-import { CanvasRenderer } from "echarts/renderers";
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed } from "vue";
 
-import { gpuSeries } from "../../domain/chartOptions";
-import type { ApiJobMetric } from "../../types/tensorguard";
-
-use([LineChart, GridComponent, LegendComponent, TooltipComponent, CanvasRenderer]);
+import type { ApiJobMetric, EnvironmentPayload } from "../../types/tensorguard";
 
 const props = withDefaults(
   defineProps<{
     metrics: ApiJobMetric[];
+    environment?: Partial<EnvironmentPayload>;
     title?: string;
   }>(),
   {
+    environment: () => ({}),
     title: "GPU 监控",
   },
 );
 
-type ChartInstance = {
-  setOption: (option: Record<string, unknown>, notMerge?: boolean) => void;
-  resize: () => void;
-  dispose: () => void;
-};
-
-const chartEl = ref<HTMLDivElement | null>(null);
-let chart: ChartInstance | null = null;
-
-const series = computed(() => gpuSeries(props.metrics));
-const hasData = computed(() => series.value.length > 0);
-const headingId = `gpu-chart-${Math.random().toString(36).slice(2, 10)}`;
-const summaryText = computed(() => {
-  if (!hasData.value) {
-    return "暂无 GPU 采样";
+const latestSample = computed(() => {
+  for (let index = props.metrics.length - 1; index >= 0; index -= 1) {
+    const sample = props.metrics[index]?.gpu;
+    if (sample) return sample;
   }
-
-  const pointCount = series.value[0]?.data.length ?? 0;
-  return `${pointCount} 个采样点`;
+  return null;
 });
-
-function buildOption() {
-  return {
-    animation: false,
-    color: ["#2563eb", "#168aa4"],
-    grid: { left: 14, right: 14, top: 12, bottom: 20, containLabel: true },
-    legend: { show: false },
-    tooltip: { trigger: "axis", backgroundColor: "#15213b", borderWidth: 0, textStyle: { color: "#fff" } },
-    xAxis: {
-      type: "value",
-      name: "elapsed s",
-      nameLocation: "end",
-      boundaryGap: false,
-    },
-    yAxis: [
-      {
-        type: "value",
-        name: "utilization %",
-        min: 0,
-        max: 100,
-        splitLine: { lineStyle: { color: "#edf1f7" } },
-      },
-      {
-        type: "value",
-        name: "memory MiB",
-        scale: true,
-      },
-    ],
-    series: series.value.map((item, index) => ({
-      name: item.name,
-      type: "line",
-      data: item.data,
-      yAxisIndex: index === 0 ? 0 : 1,
-      showSymbol: false,
-      smooth: 0.2,
-      lineStyle: { width: 2 },
-      areaStyle: { opacity: 0.07 },
-      emphasis: { focus: "series" },
-    })),
-  };
-}
-
-function syncChart() {
-  if (!hasData.value) {
-    chart?.dispose();
-    chart = null;
-    return;
-  }
-
-  if (chart === null) {
-    if (chartEl.value === null) {
-      return;
-    }
-
-    chart = init(chartEl.value) as unknown as ChartInstance;
-  }
-
-  chart.setOption(buildOption(), true);
-  chart.resize();
-}
-
-function handleResize() {
-  chart?.resize();
-}
-
-watch(series, syncChart, { deep: true, flush: "post" });
-
-onMounted(() => {
-  syncChart();
-  window.addEventListener("resize", handleResize);
+const gpuInfo = computed(() => {
+  const index = latestSample.value?.index ?? 0;
+  return props.environment?.gpus?.find((item) => item.index === index) ?? props.environment?.gpus?.[0] ?? null;
 });
-
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", handleResize);
-  chart?.dispose();
-  chart = null;
+const utilization = computed(() => latestSample.value?.utilization_percent ?? null);
+const memoryUsed = computed(() => latestSample.value?.memory_used_mib ?? null);
+const memoryTotal = computed(() => latestSample.value?.memory_total_mib ?? gpuInfo.value?.memory_total_mib ?? null);
+const memoryPercent = computed(() => {
+  if (memoryUsed.value === null || memoryTotal.value === null || memoryTotal.value <= 0) return null;
+  return Math.round(Math.min(100, (memoryUsed.value / memoryTotal.value) * 100) * 10) / 10;
 });
+const utilizationText = computed(() => utilization.value === null ? "暂无采样" : `${Math.round(utilization.value)}%`);
+const memoryText = computed(() => memoryUsed.value === null ? "暂无采样" : `${(memoryUsed.value / 1024).toFixed(1)} GB`);
+const deviceText = computed(() => gpuInfo.value?.name ?? (latestSample.value ? `GPU ${latestSample.value.index}` : "等待 GPU 采样"));
 </script>
 
 <template>
-  <section class="gpu-chart" :aria-labelledby="headingId">
+  <section class="gpu-chart">
     <header class="gpu-chart__header">
-      <h2 :id="headingId" class="gpu-chart__title">{{ title }}</h2>
-      <p class="gpu-chart__summary">{{ summaryText }}</p>
+      <h2>{{ title }}</h2>
+      <span>{{ deviceText }}</span>
     </header>
-
-    <div v-if="hasData" ref="chartEl" class="gpu-chart__canvas" :aria-label="`${title} 折线图`" role="img" />
-    <p v-else class="gpu-chart__empty">暂无 GPU 采样</p>
+    <div class="gpu-chart__body">
+      <article>
+        <span>GPU 利用率</span>
+        <b>{{ utilizationText }}</b>
+        <div class="gpu-chart__track"><i data-testid="gpu-utilization-bar" :style="{ width: `${utilization ?? 0}%` }" /></div>
+      </article>
+      <article>
+        <span>显存占用</span>
+        <b>{{ memoryText }}</b>
+        <div class="gpu-chart__track"><i data-testid="gpu-memory-bar" :style="{ width: `${memoryPercent ?? 0}%` }" /></div>
+      </article>
+    </div>
   </section>
 </template>
 
 <style scoped>
-.gpu-chart {
-  border: 1px solid var(--tg-border);
-  border-radius: var(--tg-radius);
-  background: var(--tg-surface);
-  min-width: 0;
-  overflow: hidden;
-  box-shadow: var(--tg-shadow);
-  height: 100%;
-}
-
-.gpu-chart__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  min-height: 2.25rem;
-  padding: 0 0.85rem;
-  border-bottom: 1px solid #293750;
-  background: var(--tg-navy);
-}
-
-.gpu-chart__title {
-  margin: 0;
-  font-size: 0.61rem;
-  color: #fff;
-}
-
-.gpu-chart__summary {
-  margin: 0;
-  color: #9cabca;
-  font-size: 0.5rem;
-}
-
-.gpu-chart__canvas {
-  width: 100%;
-  height: 8rem;
-  min-height: 8rem;
-}
-
-.gpu-chart__empty {
-  margin: 0;
-  height: 8rem;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, #ffffff, #f3f7ff);
-  color: var(--tg-text-muted);
-  padding: 1rem;
-  font-size: 0.58rem;
-}
+.gpu-chart{height:100%;overflow:hidden;border:1px solid var(--tg-border);border-radius:var(--tg-radius);background:#fff;box-shadow:var(--tg-shadow)}
+.gpu-chart__header{min-height:2.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:0 .85rem;border-bottom:1px solid #293750;background:var(--tg-navy);color:#fff}.gpu-chart__header h2{margin:0;font-size:.61rem}.gpu-chart__header span{max-width:13rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#9cabca;font-size:.48rem}
+.gpu-chart__body{height:8rem;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--tg-border)}.gpu-chart__body article{display:grid;align-content:center;padding:1rem;background:#fff}.gpu-chart__body span{color:var(--tg-text-muted);font-size:.5rem}.gpu-chart__body b{margin-top:.38rem;color:var(--tg-text-strong);font-size:1.15rem;font-variant-numeric:tabular-nums}.gpu-chart__track{height:.42rem;margin-top:.65rem;overflow:hidden;border-radius:2px;background:#e9eef6}.gpu-chart__track i{display:block;height:100%;border-radius:inherit;background:var(--tg-action);transition:width .25s ease}.gpu-chart__body article:last-child .gpu-chart__track i{background:#168aa4}
 </style>

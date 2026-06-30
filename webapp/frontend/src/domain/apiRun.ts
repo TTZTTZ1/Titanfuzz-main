@@ -1,4 +1,12 @@
-import type { ApiJobPayload, ApiJobStatus, ApiPipelineStage, ApiStage, ApiStageStatus } from "../types/tensorguard";
+import type {
+  ApiJobPayload,
+  ApiJobStatus,
+  ApiPipelineStage,
+  ApiRunStatus,
+  ApiStage,
+  ApiStageStatus,
+  CandidateCollectionSummary,
+} from "../types/tensorguard";
 
 export const stageDefinitions = [
   { key: "qwen_seed", label: "Qwen 种子", metricKeys: [["候选", "qwen_raw"], ["有效种子", "qwen_valid"]] },
@@ -73,4 +81,44 @@ export function resolveLiveStageKey(job: ApiRunJobLike): ApiRunStageKey {
   }
 
   return "qwen_seed";
+}
+
+export function jobElapsedSeconds(
+  status: Pick<ApiJobStatus, "status" | "started_at" | "updated_at">,
+  nowMilliseconds = Date.now(),
+): number {
+  const started = Date.parse(status.started_at ?? "");
+  if (!Number.isFinite(started)) {
+    return 0;
+  }
+  const active = status.status === "pending" || status.status === "running";
+  const terminal = Date.parse(status.updated_at);
+  const ended = active || !Number.isFinite(terminal) ? nowMilliseconds : terminal;
+  return Math.max(0, Math.floor((ended - started) / 1000));
+}
+
+export type CandidateCollectionTone = "pending" | "running" | "success" | "muted" | "error";
+
+export function candidateCollectionPresentation(
+  collection: CandidateCollectionSummary | null | undefined,
+  status: ApiRunStatus | null | undefined,
+): { tone: CandidateCollectionTone; label: string } {
+  if (collection?.error) {
+    return { tone: "error", label: "归集失败" };
+  }
+  if (status === "pending" || status === "running") {
+    return { tone: "running", label: "检测中" };
+  }
+  if (collection === null || collection === undefined) {
+    return { tone: "pending", label: "待归集" };
+  }
+  const candidateCount = collection.candidate_ids?.length ?? 0;
+  if (candidateCount > 0) {
+    return { tone: "success", label: `已进入候选 · ${candidateCount} 条` };
+  }
+  const filtered = (collection.excluded_noise ?? 0) + (collection.skipped_low_signal ?? 0);
+  if (filtered > 0) {
+    return { tone: "muted", label: `未进入候选 · 已过滤 ${filtered} 条` };
+  }
+  return { tone: "muted", label: "未进入候选 · 无高信号异常" };
 }

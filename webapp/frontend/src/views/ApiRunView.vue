@@ -9,7 +9,7 @@ import RunSnapshot from "../components/api/RunSnapshot.vue";
 import RunTimeline from "../components/api/RunTimeline.vue";
 import StageChart from "../components/api/StageChart.vue";
 import { useApiRun } from "../composables/useApiRun";
-import { timelineStages } from "../domain/apiRun";
+import { candidateCollectionPresentation, timelineStages } from "../domain/apiRun";
 
 const {
   selectedApi,
@@ -45,6 +45,10 @@ const selectedJobStatus = computed(() => selectedJob.value?.status ?? null);
 const latestMetric = computed(() => selectedJob.value?.metrics?.at(-1) ?? null);
 const running = computed(() => selectedJob.value?.status.status === "running" || selectedJob.value?.status.status === "pending");
 const selectedDeviceLabel = computed(() => `GPU ${selectedJobStatus.value?.cuda_device ?? "0"}`);
+const candidateState = computed(() => candidateCollectionPresentation(
+  selectedJobStatus.value?.candidate_collection,
+  selectedJobStatus.value?.status,
+));
 const runButtonHint = computed(() => {
   if (running.value || runLoading.value) {
     return "后台任务执行中";
@@ -113,6 +117,10 @@ function handleLibraryChange() {
           <span class="api-run-view__control-label">计算设备</span>
           <b>{{ selectedDeviceLabel }}</b>
         </div>
+        <div class="api-run-view__control-card api-run-view__control-card--candidate">
+          <span class="api-run-view__control-label">候选状态</span>
+          <b :class="`api-run-view__candidate-state api-run-view__candidate-state--${candidateState.tone}`">{{ candidateState.label }}</b>
+        </div>
         <button type="button" class="api-run-view__run" :disabled="!canRun" @click="startRun">
           <span>{{ running || runLoading ? "任务运行中" : "运行" }}</span>
           <small>{{ runButtonHint }}</small>
@@ -143,7 +151,7 @@ function handleLibraryChange() {
 
     <section class="api-run-view__bottom-grid" aria-label="实时日志与 GPU 监控">
       <LiveLog :stage-key="liveStageKey" :logs="logs" />
-      <GpuChart :metrics="metrics" />
+      <GpuChart :metrics="metrics" :environment="selectedJob?.environment" />
     </section>
 
     <div class="api-run-view__sync" aria-live="polite">
@@ -177,12 +185,13 @@ function handleLibraryChange() {
 .api-run-view__run-state--active { background: var(--tg-amber-bg); color: var(--tg-amber-text); }
 .api-run-view__run-state--active i { background: #d18b2b; box-shadow: 0 0 0 3px #f8dfb7; }
 .api-run-view__panel { background: #fff; border: 1px solid var(--tg-border); border-radius: var(--tg-radius); box-shadow: var(--tg-shadow); }
-.api-run-view__orchestration { display: grid; grid-template-columns: minmax(0, 48rem) minmax(18rem, 24rem); justify-content: space-between; align-items: end; gap: 0.75rem; padding: 0.85rem 1rem; }
-.api-run-view__run-controls { display: grid; grid-template-columns: minmax(6.9rem, 1fr) minmax(5.4rem, 0.75fr) minmax(6.3rem, 0.9fr); align-items: end; gap: 0.5rem; padding: 0.45rem; border: 1px solid #dbe4f1; border-radius: 7px; background: linear-gradient(135deg, #f9fbff, #f3f7ff); box-shadow: inset 0 0 0 1px rgba(255,255,255,.68); }
+.api-run-view__orchestration { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(27rem, 1fr); justify-content: space-between; align-items: end; gap: 0.75rem; padding: 0.85rem 1rem; }
+.api-run-view__run-controls { display: grid; grid-template-columns: repeat(4,minmax(6.2rem,1fr)); align-items: end; gap: 0.5rem; }
 .api-run-view__control-card { display: grid; gap: 0.3rem; min-width: 0; }
 .api-run-view__control-label { color: var(--tg-text-muted); font-size: 0.5rem; font-weight: 720; }
 .api-run-view__control-card--device { min-height: 2.2rem; justify-content: center; align-content: center; padding: 0.35rem 0.5rem; border: 1px solid #d6deeb; border-radius: 5px; background: #fff; }
 .api-run-view__control-card--device b { color: var(--tg-text-strong); font: 780 0.62rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.api-run-view__control-card--candidate{min-height:2.2rem;justify-content:center;align-content:center;padding:.35rem .5rem;border:1px solid #d6deeb;border-radius:5px;background:#fff}.api-run-view__candidate-state{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tg-text-muted);font-size:.52rem}.api-run-view__candidate-state--running{color:var(--tg-action-strong)}.api-run-view__candidate-state--success{color:var(--tg-green-text)}.api-run-view__candidate-state--error{color:var(--tg-red-text)}
 .api-run-view__segmented { height: 2.2rem; display: flex; padding: 3px; border: 1px solid #d6deeb; border-radius: 5px; background: #f5f7fb; }
 .api-run-view__segmented button { min-width: 3.3rem; border: 0; border-radius: 3px; background: transparent; color: var(--tg-text-muted); font-size: 0.65rem; }
 .api-run-view__segmented button[aria-pressed="true"] { background: #fff; color: var(--tg-action-strong); box-shadow: 0 2px 8px rgba(36,58,98,.08); }

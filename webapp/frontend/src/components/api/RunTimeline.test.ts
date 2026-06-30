@@ -89,4 +89,20 @@ describe("RunTimeline", () => {
 
     expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toContain("Qwen 种子");
   });
+
+  it("allows switching back to the currently running stage", async () => {
+    const wrapper = mount(RunTimeline, {
+      attachTo: document.body,
+      props: {
+        stages: stageState("success", "running", "pending"),
+        metricStageKey: "qwen_seed",
+        liveStageKey: "ev_generation",
+      },
+    });
+
+    const tabs = wrapper.findAll('[role="tab"]');
+    expect(tabs[1].attributes("disabled")).toBeUndefined();
+    await tabs[1].trigger("click");
+    expect(wrapper.emitted("selectMetricStage")?.[0]).toEqual(["ev_generation"]);
+  });
 });

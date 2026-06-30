@@ -1,11 +1,15 @@
 import { mount } from "@vue/test-utils";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { ApiJobMetric, ApiJobStatus } from "../../types/tensorguard";
 
 import RunSnapshot from "./RunSnapshot.vue";
 
 describe("RunSnapshot", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("shows the live api, stage, status, stage sample, and returned model values", () => {
     const jobStatus: ApiJobStatus = {
       job_id: "job-1",
@@ -73,6 +77,39 @@ describe("RunSnapshot", () => {
     expect(wrapper.text()).toContain("运行时间00:12");
     expect(wrapper.text()).toContain("../Qwen2.5-Coder-7B-Instruct");
     expect(wrapper.text()).toContain("facebook/incoder-1B");
+  });
+
+  it("ticks cumulative job runtime once per second and freezes after completion", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-30T10:01:05+08:00"));
+    const status = {
+      job_id: "job-1",
+      lib: "torch",
+      api: "torch.add",
+      mode: "demo",
+      qwen_model: "qwen",
+      mutation_model: "incoder",
+      cuda_device: "0",
+      status: "running",
+      stage: "ev_generation",
+      stages: { prompt_check: "success", qwen_seed: "success", ev_generation: "running", driver: "pending", summary: "pending" },
+      error: null,
+      started_at: "2026-06-30T10:00:00+08:00",
+      updated_at: "2026-06-30T10:01:00+08:00",
+    } as ApiJobStatus;
+    const wrapper = mount(RunSnapshot, {
+      props: { apiLabel: "torch.add", mode: "demo", liveStageKey: "ev_generation", jobStatus: status, latestMetric: null },
+    });
+
+    expect(wrapper.text()).toContain("运行时间01:05");
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(wrapper.text()).toContain("运行时间01:06");
+
+    await wrapper.setProps({
+      jobStatus: { ...status, status: "success", updated_at: "2026-06-30T10:04:18+08:00" },
+    });
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(wrapper.text()).toContain("运行时间04:18");
   });
 
   it("shows only live job data instead of stale latest-job details", () => {

@@ -23,7 +23,7 @@ const tabRefs = ref<Array<HTMLButtonElement | null>>([]);
 
 function isSelectable(key: ApiRunStageKey): boolean {
   const state = props.stages[key];
-  return state === "success" || state === "failed";
+  return state === "running" || state === "success" || state === "failed";
 }
 
 function firstSelectableIndex(): number {
@@ -138,6 +138,8 @@ function handleTabKeydown(event: KeyboardEvent, index: number) {
         :class="{
           'run-timeline__tab--active': metricStageKey === definition.key,
           'run-timeline__tab--live': liveStageKey === definition.key,
+          'run-timeline__tab--done': stages[definition.key] === 'success',
+          'run-timeline__tab--failed': stages[definition.key] === 'failed',
         }"
         :aria-selected="metricStageKey === definition.key"
         :tabindex="isSelectable(definition.key) && metricStageKey === definition.key ? 0 : -1"
@@ -145,7 +147,7 @@ function handleTabKeydown(event: KeyboardEvent, index: number) {
         @click="selectStage(index)"
         @keydown="handleTabKeydown($event, index)"
       >
-        <span>{{ definition.label }}</span>
+        <span>{{ definition.label }}<b v-if="stages[definition.key] === 'success'"> ✓</b></span>
       </button>
     </div>
 
@@ -278,6 +280,18 @@ function handleTabKeydown(event: KeyboardEvent, index: number) {
 
 .run-timeline__tab--live {
   color: var(--tg-action-strong);
+}
+
+.run-timeline__tab--done {
+  color: var(--tg-green-text);
+}
+
+.run-timeline__tab--done b {
+  color: var(--tg-green);
+}
+
+.run-timeline__tab--failed {
+  color: var(--tg-red-text);
 }
 
 .run-timeline__tab:disabled {

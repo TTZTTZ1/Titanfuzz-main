@@ -24,6 +24,8 @@ describe("ResultComposition", () => {
 
     const labels = wrapper.findAll("[data-testid='result-category']").map((entry) => entry.text());
     expect(labels).toEqual(resultCategoryOrder);
+    expect(wrapper.findAll("[data-testid='result-swatch']")).toHaveLength(7);
+    expect(wrapper.get("[data-testid='result-total']").text()).toContain("17");
     expect(wrapper.text()).toContain("2");
     expect(wrapper.text()).toContain("7");
     expect(wrapper.text()).toContain("4");

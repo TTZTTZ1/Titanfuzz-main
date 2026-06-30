@@ -646,6 +646,7 @@ def paper_bug_detail(bug_id: str) -> tuple[int, dict]:
         bug_dir = meta_path.parent
         repro = bug_dir / meta.get("files", {}).get("repro", "repro.py")
         report = bug_dir / meta.get("files", {}).get("report", "report.md")
+        latest_repro = latest_repro_summary_for_bug(bug_id)
         return 200, {
             "index": item,
             "meta": meta,
@@ -655,6 +656,7 @@ def paper_bug_detail(bug_id: str) -> tuple[int, dict]:
             "report_path": rel(report),
             "repro_code": repro.read_text(encoding="utf-8", errors="replace") if repro.is_file() else "",
             "report_markdown": report.read_text(encoding="utf-8", errors="replace") if report.is_file() else "",
+            "latest_repro_job_id": latest_repro.get("job_id") if latest_repro else None,
         }
     return 404, {"error": "confirmed bug not found"}
 
@@ -881,6 +883,23 @@ def latest_repro_summaries(limit: int = 6) -> list[dict]:
             status["_path"] = rel(path)
             out.append(status)
     return out
+
+
+def latest_repro_summary_for_bug(bug_id: str, root: Optional[Path] = None) -> Optional[dict]:
+    repro_root = root or REPRO_JOB_ROOT
+    if not repro_root.is_dir():
+        return None
+    matches = []
+    for path in repro_root.glob("**/status.json"):
+        status = read_json(path, {})
+        if status.get("bug_id") == bug_id:
+            matches.append((path.stat().st_mtime, path, status))
+    if not matches:
+        return None
+    _, path, status = max(matches, key=lambda item: item[0])
+    status = dict(status)
+    status["_path"] = rel(path)
+    return status
 
 
 def repro_conclusion(status: dict) -> str:

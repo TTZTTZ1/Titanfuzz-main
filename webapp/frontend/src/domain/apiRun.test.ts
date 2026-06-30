@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { stageDefinitions, type ApiRunJobLike, resolveLiveStageKey } from "./apiRun";
+import {
+  candidateCollectionPresentation,
+  jobElapsedSeconds,
+  stageDefinitions,
+  type ApiRunJobLike,
+  resolveLiveStageKey,
+} from "./apiRun";
 
 describe("apiRun domain", () => {
   it("keeps the visible stage definitions in the expected order", () => {
@@ -44,5 +50,36 @@ describe("apiRun domain", () => {
     } satisfies ApiRunJobLike;
 
     expect(resolveLiveStageKey(job)).toBe("ev_generation");
+  });
+
+  it("derives cumulative wall-clock runtime and freezes it at the terminal update", () => {
+    const running = {
+      status: "running",
+      started_at: "2026-06-30T10:00:00+08:00",
+      updated_at: "2026-06-30T10:00:10+08:00",
+    } as const;
+    const finished = {
+      ...running,
+      status: "success",
+      updated_at: "2026-06-30T10:04:18+08:00",
+    } as const;
+
+    expect(jobElapsedSeconds(running, Date.parse("2026-06-30T10:01:05+08:00"))).toBe(65);
+    expect(jobElapsedSeconds(finished, Date.parse("2026-06-30T11:00:00+08:00"))).toBe(258);
+  });
+
+  it("describes automatic candidate collection without treating every result as a candidate", () => {
+    expect(candidateCollectionPresentation(null, "running")).toEqual({ tone: "running", label: "检测中" });
+    expect(candidateCollectionPresentation({ candidate_ids: ["CAND-1", "CAND-2"] }, "success")).toEqual({
+      tone: "success",
+      label: "已进入候选 · 2 条",
+    });
+    expect(
+      candidateCollectionPresentation({ candidate_ids: [], excluded_noise: 2, skipped_low_signal: 3 }, "success"),
+    ).toEqual({ tone: "muted", label: "未进入候选 · 已过滤 5 条" });
+    expect(candidateCollectionPresentation({ candidate_ids: [], error: "scan failed" }, "failed")).toEqual({
+      tone: "error",
+      label: "归集失败",
+    });
   });
 });
