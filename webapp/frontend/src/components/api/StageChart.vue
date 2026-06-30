@@ -136,20 +136,32 @@ onBeforeUnmount(() => {
     </header>
 
     <div v-if="hasData" ref="chartEl" class="stage-chart__canvas" :aria-label="`${titleText} 折线图`" role="img" />
-    <p v-else class="stage-chart__empty">暂无阶段采样</p>
+    <div v-else class="stage-chart__empty" role="status">
+      <span class="stage-chart__empty-rail" aria-hidden="true">
+        <i class="stage-chart__empty-dot" />
+        <i class="stage-chart__empty-dot" />
+        <i class="stage-chart__empty-dot" />
+      </span>
+      <span class="stage-chart__empty-copy">
+        <b>等待阶段采样</b>
+        <small>运行后会实时绘制当前阶段的候选、有效种子或差异数量</small>
+      </span>
+    </div>
   </section>
 </template>
 
 <style scoped>
 .stage-chart {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 0.85rem;
   border: 1px solid var(--tg-border);
   border-radius: var(--tg-radius);
-  background: var(--tg-surface);
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
   padding: 0.85rem 1rem 0.75rem;
   box-shadow: var(--tg-shadow);
   min-width: 0;
+  height: 100%;
 }
 
 .stage-chart__header {
@@ -220,14 +232,74 @@ onBeforeUnmount(() => {
 
 .stage-chart__empty {
   margin: 0;
-  border: 1px dashed var(--tg-border);
+  border: 1px dashed #c8d8f2;
   border-radius: var(--tg-radius-sm);
-  background: var(--tg-surface-muted);
+  background:
+    linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(20, 127, 153, 0.08) 54%, rgba(255, 255, 255, 0.78)),
+    #f7fbff;
   color: var(--tg-text-muted);
   min-height: 12.2rem;
   display: grid;
   place-items: center;
+  gap: 0.75rem;
   padding: 1rem;
-  font-size: 0.62rem;
+  text-align: center;
+}
+
+.stage-chart__empty-rail {
+  position: relative;
+  width: min(15rem, 72%);
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stage-chart__empty-rail::before {
+  content: "";
+  position: absolute;
+  left: 0.4rem;
+  right: 0.4rem;
+  height: 2px;
+  background: linear-gradient(90deg, #2563eb, #168263, #d29a43);
+  opacity: 0.68;
+}
+
+.stage-chart__empty-dot {
+  position: relative;
+  z-index: 1;
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #2563eb;
+  box-shadow: 0 6px 12px rgba(37, 99, 235, 0.2);
+}
+
+.stage-chart__empty-dot:nth-child(2) {
+  background: #168263;
+  box-shadow: 0 6px 12px rgba(22, 130, 99, 0.18);
+}
+
+.stage-chart__empty-dot:nth-child(3) {
+  background: #d29a43;
+  box-shadow: 0 6px 12px rgba(210, 154, 67, 0.18);
+}
+
+.stage-chart__empty-copy {
+  display: grid;
+  gap: 0.3rem;
+  max-width: 24rem;
+}
+
+.stage-chart__empty-copy b {
+  color: var(--tg-text-strong);
+  font-size: 0.72rem;
+}
+
+.stage-chart__empty-copy small {
+  color: var(--tg-text-muted);
+  font-size: 0.58rem;
+  line-height: 1.5;
 }
 </style>

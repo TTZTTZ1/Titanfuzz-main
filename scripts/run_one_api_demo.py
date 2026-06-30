@@ -28,6 +28,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.demo_metrics import append_metric, build_metric  # noqa: E402
+from webapp.candidates import CandidateStore  # noqa: E402
 from webapp.runtime_data import collect_environment, collect_gpu_sample  # noqa: E402
 
 
@@ -128,6 +129,7 @@ class DemoRun:
         self.summary_md_path = self.out / "summary.md"
         self.metrics_path = self.out / "metrics.jsonl"
         self.environment_path = self.out / "environment.json"
+        self.candidate_collection_path = self.out / "candidate_collection.json"
         self.qwen_out = self.out / "qwen_seed"
         self.results_root = self.out / "Results" / args.lib
         self.canonical_results_root = repo_root / "Results" / args.lib
@@ -178,6 +180,23 @@ class DemoRun:
         self.status["updated_at"] = now()
         if error:
             self.status["error"] = error
+        try:
+            collection = CandidateStore(self.repo_root).collect_job_results(
+                job_id=self.args.job_id,
+                lib=self.args.lib,
+                api=self.args.api,
+            )
+            write_json(self.candidate_collection_path, collection)
+            self.status["candidate_collection"] = {
+                **collection,
+                "path": rel(self.candidate_collection_path, self.repo_root),
+            }
+        except Exception as exc:
+            self.status["candidate_collection"] = {
+                "job_id": self.args.job_id,
+                "registered": 0,
+                "error": str(exc),
+            }
         write_json(self.status_path, self.status)
 
     def mark_remaining_skipped(self, failed_stage: str) -> None:

@@ -6,7 +6,7 @@ import type { ApiJobMetric, ApiJobStatus } from "../../types/tensorguard";
 import RunSnapshot from "./RunSnapshot.vue";
 
 describe("RunSnapshot", () => {
-  it("shows the live api, mode, stage, status, elapsed, and returned model values", () => {
+  it("shows the live api, stage, status, stage sample, and returned model values", () => {
     const jobStatus: ApiJobStatus = {
       job_id: "job-1",
       lib: "torch",
@@ -23,6 +23,18 @@ describe("RunSnapshot", () => {
         ev_generation: "running",
         driver: "pending",
         summary: "pending",
+      },
+      parameters: {
+        qwen_n_samples: 5,
+        qwen_min_valid: 2,
+        qwen_max_rounds: 1,
+        qwen_per_api_budget: 300,
+        qwen_validate_timeout: 30,
+        ev_max_valid: 40,
+        ev_batch_size: 5,
+        ev_timeout: 300,
+        seed_pool_size: 10,
+        random_seed: 420,
       },
       error: null,
       updated_at: "2026-06-28T17:00:00",
@@ -55,10 +67,10 @@ describe("RunSnapshot", () => {
     });
 
     expect(wrapper.text()).toContain("torch.add");
-    expect(wrapper.text()).toContain("demo");
-    expect(wrapper.text()).toContain("InCoder 变异");
-    expect(wrapper.text()).toContain("running");
-    expect(wrapper.text()).toContain("12");
+    expect(wrapper.text()).toContain("生成候选9");
+    expect(wrapper.text()).toContain("有效程序7");
+    expect(wrapper.text()).toContain("当前批次2 / 8");
+    expect(wrapper.text()).toContain("运行时间00:12");
     expect(wrapper.text()).toContain("../Qwen2.5-Coder-7B-Instruct");
     expect(wrapper.text()).toContain("facebook/incoder-1B");
   });
@@ -74,10 +86,11 @@ describe("RunSnapshot", () => {
       },
     });
 
-    expect(wrapper.text()).toContain("当前阶段暂无");
-    expect(wrapper.text()).toContain("当前状态无");
-    expect(wrapper.text()).toContain("最新耗时暂无");
+    expect(wrapper.text()).toContain("生成候选暂无");
+    expect(wrapper.text()).toContain("有效程序暂无");
+    expect(wrapper.text()).toContain("当前批次暂无");
+    expect(wrapper.text()).toContain("运行时间暂无");
+    expect(wrapper.text()).toContain("按后端配置");
     expect(wrapper.text()).not.toContain("Qwen 模型");
-    expect(wrapper.text()).not.toContain("变异模型");
   });
 });

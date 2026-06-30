@@ -44,12 +44,32 @@ const selectedApiLabel = computed(() => selectedApiDetail.value?.api ?? selected
 const selectedJobStatus = computed(() => selectedJob.value?.status ?? null);
 const latestMetric = computed(() => selectedJob.value?.metrics?.at(-1) ?? null);
 const running = computed(() => selectedJob.value?.status.status === "running" || selectedJob.value?.status.status === "pending");
+const selectedDeviceLabel = computed(() => `GPU ${selectedJobStatus.value?.cuda_device ?? "0"}`);
+const runButtonHint = computed(() => {
+  if (running.value || runLoading.value) {
+    return "后台任务执行中";
+  }
+
+  if (!canRun.value) {
+    return selectedApi.value === null ? "先选择 API" : "等待就绪";
+  }
+
+  return mode.value === "demo" ? "启动演示链路" : "启动完整链路";
+});
 const activeStageIndex = computed(() => {
   const current = selectedJob.value?.status.stage;
   const index = timelineStages.findIndex((stage) => stage.key === current);
   return index >= 0 ? index + 1 : 0;
 });
 const activeStageLabel = computed(() => {
+  if (selectedJob.value?.status.status === "success") {
+    return "任务完成";
+  }
+
+  if (selectedJob.value?.status.status === "failed") {
+    return "任务失败";
+  }
+
   const current = selectedJob.value?.status.stage;
   return timelineStages.find((stage) => stage.key === current)?.label ?? (selectedApi.value ? "任务已就绪" : "等待选择 API");
 });
@@ -81,16 +101,21 @@ function handleLibraryChange() {
     <section class="api-run-view__panel api-run-view__orchestration" aria-label="API 选择与运行">
       <ApiSelector :selected="selectedApi" @select="selectApi" @library-change="handleLibraryChange" />
 
-      <div class="api-run-view__run-controls">
-        <label>
-          <span>运行模式</span>
+      <div class="api-run-view__run-controls" aria-label="运行控制">
+        <div class="api-run-view__control-card api-run-view__control-card--mode">
+          <span class="api-run-view__control-label">运行模式</span>
           <span class="api-run-view__segmented" role="group" aria-label="运行模式">
             <button type="button" :aria-pressed="mode === 'demo'" @click="setMode('demo')">演示</button>
             <button type="button" :aria-pressed="mode === 'normal'" @click="setMode('normal')">完整</button>
           </span>
-        </label>
+        </div>
+        <div class="api-run-view__control-card api-run-view__control-card--device">
+          <span class="api-run-view__control-label">计算设备</span>
+          <b>{{ selectedDeviceLabel }}</b>
+        </div>
         <button type="button" class="api-run-view__run" :disabled="!canRun" @click="startRun">
-          {{ running || runLoading ? "任务运行中" : "运行" }}
+          <span>{{ running || runLoading ? "任务运行中" : "运行" }}</span>
+          <small>{{ runButtonHint }}</small>
         </button>
       </div>
     </section>
@@ -152,21 +177,27 @@ function handleLibraryChange() {
 .api-run-view__run-state--active { background: var(--tg-amber-bg); color: var(--tg-amber-text); }
 .api-run-view__run-state--active i { background: #d18b2b; box-shadow: 0 0 0 3px #f8dfb7; }
 .api-run-view__panel { background: #fff; border: 1px solid var(--tg-border); border-radius: var(--tg-radius); box-shadow: var(--tg-shadow); }
-.api-run-view__orchestration { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 0.75rem; padding: 0.85rem 1rem; }
-.api-run-view__run-controls { display: flex; align-items: end; gap: 0.65rem; }
-.api-run-view__run-controls label { display: grid; gap: 0.3rem; color: var(--tg-text-muted); font-size: 0.56rem; font-weight: 700; }
+.api-run-view__orchestration { display: grid; grid-template-columns: minmax(0, 48rem) minmax(18rem, 24rem); justify-content: space-between; align-items: end; gap: 0.75rem; padding: 0.85rem 1rem; }
+.api-run-view__run-controls { display: grid; grid-template-columns: minmax(6.9rem, 1fr) minmax(5.4rem, 0.75fr) minmax(6.3rem, 0.9fr); align-items: end; gap: 0.5rem; padding: 0.45rem; border: 1px solid #dbe4f1; border-radius: 7px; background: linear-gradient(135deg, #f9fbff, #f3f7ff); box-shadow: inset 0 0 0 1px rgba(255,255,255,.68); }
+.api-run-view__control-card { display: grid; gap: 0.3rem; min-width: 0; }
+.api-run-view__control-label { color: var(--tg-text-muted); font-size: 0.5rem; font-weight: 720; }
+.api-run-view__control-card--device { min-height: 2.2rem; justify-content: center; align-content: center; padding: 0.35rem 0.5rem; border: 1px solid #d6deeb; border-radius: 5px; background: #fff; }
+.api-run-view__control-card--device b { color: var(--tg-text-strong); font: 780 0.62rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
 .api-run-view__segmented { height: 2.2rem; display: flex; padding: 3px; border: 1px solid #d6deeb; border-radius: 5px; background: #f5f7fb; }
 .api-run-view__segmented button { min-width: 3.3rem; border: 0; border-radius: 3px; background: transparent; color: var(--tg-text-muted); font-size: 0.65rem; }
 .api-run-view__segmented button[aria-pressed="true"] { background: #fff; color: var(--tg-action-strong); box-shadow: 0 2px 8px rgba(36,58,98,.08); }
-.api-run-view__run { height: 2.2rem; border: 1px solid var(--tg-action); border-radius: 5px; background: var(--tg-action); color: #fff; padding: 0 0.9rem; font-size: 0.64rem; font-weight: 720; box-shadow: 0 6px 14px rgba(37,99,235,.16); }
+.api-run-view__run { height: 2.2rem; display: grid; align-content: center; gap: 0.1rem; border: 1px solid var(--tg-action); border-radius: 5px; background: var(--tg-action); color: #fff; padding: 0 0.75rem; text-align: left; box-shadow: 0 6px 14px rgba(37,99,235,.16); }
+.api-run-view__run span { font-size: 0.64rem; font-weight: 760; }
+.api-run-view__run small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,.78); font-size: 0.46rem; }
 .api-run-view__run:disabled { border-color: var(--tg-border); background: #eef1f6; color: #99a3b4; box-shadow: none; }
-.api-run-view__chart-layout, .api-run-view__bottom-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(17.5rem, 0.62fr); gap: 0.75rem; align-items: start; }
-.api-run-view__side { display: grid; gap: 0.75rem; }
+.api-run-view__run:disabled small { color: #a3adbd; }
+.api-run-view__chart-layout, .api-run-view__bottom-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(17.5rem, 0.62fr); gap: 0.75rem; align-items: stretch; }
+.api-run-view__side { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 0.75rem; min-height: 0; }
 .api-run-view__sync { min-height: 1.8rem; display: grid; align-items: center; color: var(--tg-text-muted); font-size: 0.62rem; }
 .api-run-view__sync p { margin: 0; }
 .api-run-view__sync-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
 .api-run-view__sync-error { color: var(--tg-red-text); }
 .api-run-view__retry { height: 1.8rem; border: 1px solid var(--tg-border); border-radius: 5px; background: #fff; color: var(--tg-action); padding: 0 0.65rem; font-size: 0.6rem; }
-@media (max-width: 900px) { .api-run-view__orchestration { grid-template-columns: 1fr; } .api-run-view__run-controls { justify-content: flex-end; } .api-run-view__chart-layout, .api-run-view__bottom-grid { grid-template-columns: minmax(0, 1.4fr) minmax(15rem, 0.6fr); } }
-@media (max-width: 720px) { .api-run-view__page-head { align-items: flex-start; } .api-run-view__status-stack { display: none; } .api-run-view__run-controls { justify-content: stretch; } .api-run-view__run { flex: 1; } .api-run-view__chart-layout, .api-run-view__bottom-grid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .api-run-view__orchestration { grid-template-columns: 1fr; } .api-run-view__run-controls { justify-self: end; width: min(24rem, 100%); } .api-run-view__chart-layout, .api-run-view__bottom-grid { grid-template-columns: minmax(0, 1.4fr) minmax(15rem, 0.6fr); } }
+@media (max-width: 720px) { .api-run-view__page-head { align-items: flex-start; } .api-run-view__status-stack { display: none; } .api-run-view__run-controls { grid-template-columns: 1fr; justify-self: stretch; width: 100%; } .api-run-view__chart-layout, .api-run-view__bottom-grid { grid-template-columns: 1fr; } }
 </style>

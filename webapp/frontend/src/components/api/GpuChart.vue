@@ -139,6 +139,7 @@ onBeforeUnmount(() => {
   min-width: 0;
   overflow: hidden;
   box-shadow: var(--tg-shadow);
+  height: 100%;
 }
 
 .gpu-chart__header {
@@ -175,7 +176,7 @@ onBeforeUnmount(() => {
   height: 8rem;
   display: grid;
   place-items: center;
-  background: #fff;
+  background: linear-gradient(135deg, #ffffff, #f3f7ff);
   color: var(--tg-text-muted);
   padding: 1rem;
   font-size: 0.58rem;

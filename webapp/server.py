@@ -564,6 +564,17 @@ def candidate_payload(candidate_id: str) -> tuple[int, dict]:
     return 200, payload
 
 
+def candidate_clusters_payload() -> tuple[int, list[dict]]:
+    return 200, CANDIDATE_STORE.list_clusters()
+
+
+def candidate_cluster_payload(cluster_id: str) -> tuple[int, dict]:
+    cluster = CANDIDATE_STORE.get_cluster(cluster_id)
+    if cluster is None:
+        return 404, {"error": "candidate cluster not found"}
+    return 200, cluster
+
+
 def create_candidate(payload: dict) -> tuple[int, dict]:
     required = ("job_id", "lib", "api", "category", "source_path")
     missing = [name for name in required if not payload.get(name)]
@@ -597,6 +608,19 @@ def update_candidate(candidate_id: str, payload: dict) -> tuple[int, dict]:
     except ValueError as exc:
         return 400, {"error": str(exc)}
     return 200, record
+
+
+def update_candidate_cluster(cluster_id: str, payload: dict) -> tuple[int, dict]:
+    status = str(payload.get("status", ""))
+    if status not in {"pending_review", "reproduced", "needs_review", "rejected"}:
+        return 400, {"error": "unsupported web candidate status"}
+    try:
+        cluster = CANDIDATE_STORE.update_cluster_status(cluster_id, status, payload.get("note"))
+    except KeyError:
+        return 404, {"error": "candidate cluster not found"}
+    except ValueError as exc:
+        return 400, {"error": str(exc)}
+    return 200, cluster
 
 
 def load_paper_bugs() -> list[dict]:
@@ -1064,6 +1088,14 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/candidates":
             send_json(self, CANDIDATE_STORE.list())
             return
+        if path == "/api/candidate-clusters":
+            status, payload = candidate_clusters_payload()
+            send_json(self, payload, status=status)
+            return
+        if path.startswith("/api/candidate-clusters/"):
+            status, payload = candidate_cluster_payload(unquote(path.rsplit("/", 1)[-1]))
+            send_json(self, payload, status=status)
+            return
         if path.startswith("/api/candidates/"):
             status, payload = candidate_payload(unquote(path.rsplit("/", 1)[-1]))
             send_json(self, payload, status=status)
@@ -1105,6 +1137,11 @@ class Handler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/api/candidates":
             status, response = create_candidate(payload)
+            send_json(self, response, status=status)
+            return
+        if parsed.path.startswith("/api/candidate-clusters/") and parsed.path.endswith("/status"):
+            cluster_id = unquote(parsed.path.split("/")[-2])
+            status, response = update_candidate_cluster(cluster_id, payload)
             send_json(self, response, status=status)
             return
         if parsed.path.startswith("/api/candidates/") and parsed.path.endswith("/status"):

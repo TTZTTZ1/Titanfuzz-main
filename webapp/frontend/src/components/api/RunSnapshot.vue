@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-import { stageDefinitions, type ApiRunStageKey } from "../../domain/apiRun";
+import { timelineStages, type ApiRunStageKey } from "../../domain/apiRun";
 import type { ApiJobMetric, ApiJobStatus, ApiRunMode } from "../../types/tensorguard";
 
 const props = withDefaults(
@@ -19,46 +19,80 @@ const props = withDefaults(
 );
 
 const headingId = `run-snapshot-${Math.random().toString(36).slice(2, 10)}`;
-const stageLabelByKey = Object.fromEntries(stageDefinitions.map((definition) => [definition.key, definition.label]));
-
-const hasLiveData = computed(() => props.jobStatus !== null || props.latestMetric !== null);
-const liveStatus = computed(() => props.jobStatus?.status ?? "无");
-const stageLabel = computed(() => {
-  if (!hasLiveData.value) {
-    return "暂无";
-  }
-
-  if (props.latestMetric !== null) {
-    return stageLabelByKey[props.latestMetric.stage] || props.latestMetric.stage;
-  }
-
-  return stageLabelByKey[props.liveStageKey] || props.liveStageKey;
-});
 const elapsedText = computed(() => {
   if (props.latestMetric === null) {
     return "暂无";
   }
 
-  return `${props.latestMetric.elapsed_seconds}s`;
+  return formatDuration(props.latestMetric.elapsed_seconds);
 });
 const qwenModel = computed(() => props.jobStatus?.qwen_model?.trim() || "");
 const mutationModel = computed(() => props.jobStatus?.mutation_model?.trim() || "");
+const generatedText = computed(() => {
+  const metric = props.latestMetric;
+  if (metric === null) {
+    return "暂无";
+  }
+
+  if (metric.stage === "qwen_seed") {
+    return String(metric.qwen_raw);
+  }
+
+  return String(metric.total_files);
+});
+const validText = computed(() => {
+  const metric = props.latestMetric;
+  if (metric === null) {
+    return "暂无";
+  }
+
+  if (metric.stage === "qwen_seed") {
+    return String(metric.qwen_valid);
+  }
+
+  return String(metric.valid);
+});
+const batchText = computed(() => {
+  const metric = props.latestMetric;
+  const params = props.jobStatus?.parameters;
+  if (metric === null) {
+    return "暂无";
+  }
+
+  if (metric.stage === "qwen_seed" && params !== undefined) {
+    const perRound = Math.max(params.qwen_n_samples || 1, 1);
+    const total = Math.max(params.qwen_max_rounds || 1, 1);
+    const current = Math.min(total, Math.max(1, Math.ceil(Math.max(metric.qwen_raw, metric.qwen_valid) / perRound)));
+    return `${current} / ${total}`;
+  }
+
+  if (metric.stage === "ev_generation" && params !== undefined) {
+    const produced = Math.max(metric.total_files, metric.valid + metric.exception + metric.crash + metric.notarget + metric.hangs + metric.flaky);
+    const batchSize = Math.max(params.ev_batch_size || 1, 1);
+    const total = Math.max(1, Math.ceil(Math.max(params.ev_max_valid || produced, produced) / batchSize));
+    const current = Math.min(total, Math.max(1, Math.ceil(produced / batchSize)));
+    return `${current} / ${total}`;
+  }
+
+  const stageIndex = timelineStages.findIndex((stage) => stage.key === props.jobStatus?.stage);
+  return stageIndex >= 0 ? `${stageIndex + 1} / ${timelineStages.length}` : "暂无";
+});
 
 const rows = computed(() => {
-  const baseRows = [
-    ["当前阶段", stageLabel.value],
-    ["当前状态", liveStatus.value],
-    ["最新耗时", elapsedText.value],
-    ["运行模式", props.mode],
+  return [
+    ["生成候选", generatedText.value, "accent"],
+    ["有效程序", validText.value, ""],
+    ["当前批次", batchText.value, ""],
+    ["运行时间", elapsedText.value, ""],
   ] as const;
-
-  const extraRows = [
-    qwenModel.value ? (["Qwen 模型", qwenModel.value] as const) : null,
-    mutationModel.value ? (["变异模型", mutationModel.value] as const) : null,
-  ].filter(Boolean) as Array<readonly [string, string]>;
-
-  return [...baseRows, ...extraRows];
 });
+
+function formatDuration(seconds: number): string {
+  const safeSeconds = Math.max(0, Math.floor(seconds));
+  const minutes = Math.floor(safeSeconds / 60);
+  const rest = safeSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
+}
 </script>
 
 <template>
@@ -69,17 +103,23 @@ const rows = computed(() => {
     </header>
 
     <dl class="run-snapshot__grid">
-      <div v-for="[label, value] in rows" :key="label" class="run-snapshot__item">
+      <div v-for="[label, value, tone] in rows" :key="label" class="run-snapshot__item">
         <dt class="run-snapshot__label">{{ label }}</dt>
-        <dd class="run-snapshot__value">{{ value }}</dd>
+        <dd class="run-snapshot__value" :class="{ 'run-snapshot__value--accent': tone === 'accent' }">{{ value }}</dd>
       </div>
     </dl>
+
+    <div class="run-snapshot__models" aria-label="当前模型配置">
+      <span><b>Qwen</b>{{ qwenModel || "按后端配置" }}</span>
+      <span><b>变异模型</b>{{ mutationModel || "按后端配置" }}</span>
+    </div>
   </section>
 </template>
 
 <style scoped>
 .run-snapshot {
   display: grid;
+  grid-template-rows: auto auto minmax(0, auto);
   gap: 0.7rem;
   border: 1px solid var(--tg-border);
   border-radius: var(--tg-radius);
@@ -87,6 +127,7 @@ const rows = computed(() => {
   padding: 0.85rem;
   box-shadow: var(--tg-shadow);
   min-width: 0;
+  height: 100%;
 }
 
 .run-snapshot__header {
@@ -133,7 +174,7 @@ const rows = computed(() => {
 .run-snapshot__item {
   margin: 0;
   background: #fff;
-  padding: 0.55rem;
+  padding: 0.6rem 0.62rem;
   min-width: 0;
 }
 
@@ -147,8 +188,37 @@ const rows = computed(() => {
   margin: 0;
   color: var(--tg-text-strong);
   word-break: break-word;
-  font-size: 0.64rem;
-  font-weight: 720;
+  font-size: 0.9rem;
+  font-weight: 790;
+  font-variant-numeric: tabular-nums;
+}
+
+.run-snapshot__value--accent {
+  color: var(--tg-action);
+}
+
+.run-snapshot__models {
+  display: grid;
+  gap: 0.36rem;
+}
+
+.run-snapshot__models span {
+  display: grid;
+  grid-template-columns: 4.2rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 0;
+  border: 1px solid #d9e4f5;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #f9fbff, #f1f6ff);
+  padding: 0.4rem 0.48rem;
+  color: var(--tg-text-muted);
+  font: 0.52rem/1.25 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.run-snapshot__models b {
+  color: var(--tg-action-strong);
+  font: 760 0.5rem/1 ui-sans-serif, system-ui, sans-serif;
 }
 
 @media (max-width: 720px) {

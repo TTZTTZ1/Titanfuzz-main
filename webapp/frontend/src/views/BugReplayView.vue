@@ -3,18 +3,19 @@ import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 
 import {
   generateReproReport,
-  getCandidate,
-  getCandidates,
+  getCandidateCluster,
+  getCandidateClusters,
   getConfirmedBug,
   getConfirmedBugs,
   getOverview,
   getReproJob,
   getReproReport,
   reproduceConfirmedBug,
+  updateCandidateClusterStatus,
 } from "../services/tensorguard";
 import type {
-  CandidateDetail,
-  CandidateRecord,
+  CandidateClusterDetail,
+  CandidateClusterSummary,
   ConfirmedBugDetail,
   ConfirmedBugSummary,
   ExecutionMode,
@@ -28,11 +29,11 @@ type SourceKind = "confirmed" | "candidate";
 const sourceKind = ref<SourceKind>("confirmed");
 const query = ref("");
 const confirmed = ref<ConfirmedBugSummary[]>([]);
-const candidates = ref<CandidateRecord[]>([]);
+const candidateClusters = ref<CandidateClusterSummary[]>([]);
 const selectedConfirmedId = ref<string | null>(null);
-const selectedCandidateId = ref<string | null>(null);
+const selectedCandidateClusterId = ref<string | null>(null);
 const detail = ref<ConfirmedBugDetail | null>(null);
-const candidateDetail = ref<CandidateDetail | null>(null);
+const candidateClusterDetail = ref<CandidateClusterDetail | null>(null);
 const loading = ref(true);
 const detailLoading = ref(false);
 const error = ref<string | null>(null);
@@ -51,6 +52,18 @@ function describeError(value: unknown, fallback: string) {
   return value instanceof Error ? value.message : fallback;
 }
 
+function clusterStatusLabel(status: string) {
+  const labels: Record<string, string> = {
+    pending_review: "待审核",
+    needs_review: "待分析",
+    reproduced: "可复现",
+    needs_minimize: "待最小化",
+    rejected: "已忽略",
+    promoted: "已收录",
+  };
+  return labels[status] ?? status;
+}
+
 const filteredConfirmed = computed(() => {
   const needle = query.value.trim().toLowerCase();
   if (!needle) return confirmed.value;
@@ -59,12 +72,28 @@ const filteredConfirmed = computed(() => {
   );
 });
 
-const filteredCandidates = computed(() => {
+const filteredCandidateClusters = computed(() => {
   const needle = query.value.trim().toLowerCase();
-  if (!needle) return candidates.value;
-  return candidates.value.filter((item) =>
-    [item.id, item.api, item.category, item.error_summary].some((value) => value.toLowerCase().includes(needle)),
+  if (!needle) return candidateClusters.value;
+  return candidateClusters.value.filter((item) =>
+    [
+      item.cluster_id,
+      item.api,
+      item.lib,
+      item.category,
+      item.bug_pattern,
+      item.cluster_status,
+      item.confidence,
+      item.representative.source_name,
+      item.representative.error_summary,
+    ].some((value) => value.toLowerCase().includes(needle)),
   );
+});
+
+const candidateClusterStats = computed(() => {
+  const total = candidateClusters.value.length;
+  const needsMinimize = candidateClusters.value.filter((item) => item.cluster_status === "needs_minimize").length;
+  return { total, needsMinimize };
 });
 
 const activeExecution = computed<ReproExecution | null>(() => {
@@ -152,26 +181,44 @@ async function selectConfirmed(item: ConfirmedBugSummary) {
   }
 }
 
-async function selectCandidate(item: CandidateRecord) {
+async function selectCandidateCluster(item: CandidateClusterSummary) {
   selectionRevision += 1;
   const revision = selectionRevision;
-  selectedCandidateId.value = item.id;
+  selectedCandidateClusterId.value = item.cluster_id;
   detailLoading.value = true;
   actionError.value = null;
   try {
-    const payload = await getCandidate(item.id);
-    if (revision === selectionRevision) candidateDetail.value = payload;
+    const payload = await getCandidateCluster(item.cluster_id);
+    if (revision === selectionRevision) candidateClusterDetail.value = payload;
   } catch (cause) {
-    if (revision === selectionRevision) actionError.value = describeError(cause, "候选详情加载失败");
+    if (revision === selectionRevision) actionError.value = describeError(cause, "候选簇详情加载失败");
   } finally {
     if (revision === selectionRevision) detailLoading.value = false;
+  }
+}
+
+async function refreshCandidateCluster(clusterId: string) {
+  const [clusterList, payload] = await Promise.all([getCandidateClusters(), getCandidateCluster(clusterId)]);
+  candidateClusters.value = clusterList;
+  candidateClusterDetail.value = payload;
+}
+
+async function updateClusterReview(status: "pending_review" | "reproduced" | "needs_review" | "rejected", note: string) {
+  if (!candidateClusterDetail.value) return;
+  actionError.value = null;
+  try {
+    const clusterId = candidateClusterDetail.value.cluster_id;
+    await updateCandidateClusterStatus(clusterId, { status, note });
+    await refreshCandidateCluster(clusterId);
+  } catch (cause) {
+    actionError.value = describeError(cause, "候选簇状态更新失败");
   }
 }
 
 function switchSource(next: SourceKind) {
   sourceKind.value = next;
   query.value = "";
-  if (next === "candidate" && selectedCandidateId.value === null && candidates.value[0]) void selectCandidate(candidates.value[0]);
+  if (next === "candidate" && selectedCandidateClusterId.value === null && candidateClusters.value[0]) void selectCandidateCluster(candidateClusters.value[0]);
 }
 
 function toggleMode(mode: ExecutionMode) {
@@ -215,9 +262,9 @@ async function load() {
   loading.value = true;
   error.value = null;
   try {
-    const [bugList, candidateList, overview] = await Promise.all([getConfirmedBugs(), getCandidates(), getOverview()]);
+    const [bugList, clusterList, overview] = await Promise.all([getConfirmedBugs(), getCandidateClusters(), getOverview()]);
     confirmed.value = bugList;
-    candidates.value = candidateList;
+    candidateClusters.value = clusterList;
     latestReproJobs.value = overview.latest_repro_jobs;
     if (bugList[0]) await selectConfirmed(bugList[0]);
   } catch (cause) {
@@ -242,7 +289,11 @@ onBeforeUnmount(clearPoll);
           <p>在当前环境执行最小程序，核对框架行为并固化运行证据</p>
         </div>
       </div>
-      <div class="bug-replay-view__count"><span>已确认证据</span><b>{{ confirmed.length }}</b></div>
+      <div class="bug-replay-view__count">
+        <span>已确认 <b>{{ confirmed.length }}</b></span>
+        <span>候选簇 <b>{{ candidateClusterStats.total }}</b></span>
+        <span>待最小化 <b>{{ candidateClusterStats.needsMinimize }}</b></span>
+      </div>
     </header>
 
     <div v-if="loading" class="bug-replay-view__message">正在读取证据库</div>
@@ -252,9 +303,9 @@ onBeforeUnmount(clearPoll);
       <aside class="bug-replay-view__master">
         <div class="bug-replay-view__source-tabs" role="tablist" aria-label="证据来源">
           <button type="button" :class="{ active: sourceKind === 'confirmed' }" @click="switchSource('confirmed')">已确认</button>
-          <button type="button" :class="{ active: sourceKind === 'candidate' }" @click="switchSource('candidate')">候选</button>
+          <button type="button" :class="{ active: sourceKind === 'candidate' }" @click="switchSource('candidate')">候选审核</button>
         </div>
-        <input v-model="query" type="search" placeholder="搜索编号、API 或问题类型" aria-label="搜索证据" />
+        <input v-model="query" type="search" placeholder="搜索 API / 错误类型 / 状态" aria-label="搜索证据" />
 
         <div v-if="sourceKind === 'confirmed'" class="bug-replay-view__list">
           <button v-for="item in filteredConfirmed" :key="item.id" type="button" :class="{ active: selectedConfirmedId === item.id }" @click="selectConfirmed(item)">
@@ -264,11 +315,12 @@ onBeforeUnmount(clearPoll);
           <p v-if="filteredConfirmed.length === 0">未找到匹配证据</p>
         </div>
         <div v-else class="bug-replay-view__list">
-          <button v-for="item in filteredCandidates" :key="item.id" type="button" :class="{ active: selectedCandidateId === item.id }" @click="selectCandidate(item)">
-            <span><small>{{ item.id }}</small><em>{{ item.lib }}</em></span>
-            <b>{{ item.api }}</b><i>{{ item.category }} · {{ item.status }}</i>
+          <button v-for="item in filteredCandidateClusters" :key="item.cluster_id" type="button" :class="{ active: selectedCandidateClusterId === item.cluster_id }" @click="selectCandidateCluster(item)">
+            <span><small>{{ item.api }}</small><em>{{ item.member_count }} files</em></span>
+            <b>{{ item.bug_pattern }}</b><i>代表程序 {{ item.representative.source_name }}</i>
+            <strong :class="`bug-replay-view__cluster-badge bug-replay-view__cluster-badge--${item.cluster_status}`">{{ clusterStatusLabel(item.cluster_status) }}</strong>
           </button>
-          <p v-if="filteredCandidates.length === 0">暂无候选记录</p>
+          <p v-if="filteredCandidateClusters.length === 0">暂无候选簇</p>
         </div>
       </aside>
 
@@ -329,12 +381,64 @@ onBeforeUnmount(clearPoll);
           <p v-if="actionError" class="bug-replay-view__action-error">{{ actionError }}</p>
         </template>
 
-        <template v-else-if="sourceKind === 'candidate' && candidateDetail">
-          <section class="bug-replay-view__panel bug-replay-view__case-head">
-            <div class="bug-replay-view__case-title"><div><small>{{ candidateDetail.id }} · {{ candidateDetail.lib }}</small><h2>{{ candidateDetail.api }}</h2><code>{{ candidateDetail.category }} · {{ candidateDetail.status }}</code></div><div class="bug-replay-view__tags"><span>待审核候选</span></div></div>
-            <div class="bug-replay-view__candidate-note"><b>候选记录不会自动升级为已确认 Bug</b><p>{{ candidateDetail.error_summary || "请结合源代码、独立复现与框架语义进行人工审核。" }}</p></div>
+        <template v-else-if="sourceKind === 'candidate' && candidateClusterDetail">
+          <section class="bug-replay-view__panel bug-replay-view__case-head bug-replay-view__cluster-head">
+            <div class="bug-replay-view__case-title">
+              <div>
+                <small>{{ candidateClusterDetail.cluster_id }} · {{ candidateClusterDetail.lib }}</small>
+                <h2>{{ candidateClusterDetail.api }} 候选问题簇</h2>
+                <code>{{ candidateClusterDetail.bug_pattern }}</code>
+              </div>
+              <div class="bug-replay-view__tags">
+                <span>同类程序 {{ candidateClusterDetail.member_count }}</span>
+                <span>已过滤 {{ candidateClusterDetail.excluded_count }}</span>
+              </div>
+            </div>
+            <div class="bug-replay-view__cluster-pipeline">
+              <article class="done"><small>01 聚类</small><b>完成</b></article>
+              <article class="done"><small>02 复现</small><b>{{ candidateClusterDetail.confidence === "high" ? "高置信" : "待确认" }}</b></article>
+              <article class="current"><small>03 最小化</small><b>人工处理</b></article>
+              <article><small>04 收录</small><b>未确认</b></article>
+            </div>
           </section>
-          <section class="bug-replay-view__panel bug-replay-view__code-panel"><header><b>候选源程序</b><span>{{ candidateDetail.source_path }}</span></header><div class="bug-replay-view__candidate-code"><pre>{{ candidateDetail.source_code || "源文件当前不可用" }}</pre></div></section>
+
+          <section class="bug-replay-view__panel bug-replay-view__candidate-reason">
+            <article><small>聚类依据</small><b>同一 API + 同一异常模式</b><p>{{ candidateClusterDetail.bug_pattern }}</p></article>
+            <article><small>代表选择</small><b>优先推荐、代码短、日志清晰</b><p>当前代表程序 {{ candidateClusterDetail.representative.source_name }}，评分 {{ candidateClusterDetail.representative.score }}。</p></article>
+            <article><small>确认条件</small><b>repro.py 独立验证通过</b><p>候选不会自动升级为已确认 Bug，需要人工裁剪最小复现并重新运行。</p></article>
+          </section>
+
+          <section class="bug-replay-view__candidate-workbench">
+            <section class="bug-replay-view__panel bug-replay-view__code-panel">
+              <header><b>候选代表源码</b><span>{{ candidateClusterDetail.representative.source_path }}</span></header>
+              <div class="bug-replay-view__candidate-code"><pre>{{ candidateClusterDetail.representative_source_code || "源文件当前不可用" }}</pre></div>
+            </section>
+
+            <section class="bug-replay-view__panel bug-replay-view__code-panel">
+              <header><b>人工整理 repro.py</b><span>草稿 · 保存后运行验证</span></header>
+              <div class="bug-replay-view__candidate-code"><pre>{{ candidateClusterDetail.minimization_draft || candidateClusterDetail.representative_source_code || "等待人工整理最小复现代码" }}</pre></div>
+            </section>
+
+            <section class="bug-replay-view__panel bug-replay-view__review-card">
+              <header><b>审核与收录</b><span>状态流转，不物理删除</span></header>
+              <div>
+                <article class="bug-replay-view__candidate-note">
+                  <b>当前状态：{{ clusterStatusLabel(candidateClusterDetail.cluster_status) }}</b>
+                  <p>系统已完成候选聚类；确认前需要人工判断、整理 repro.py，并运行验证。</p>
+                </article>
+                <label>Bug 标题</label><p>{{ candidateClusterDetail.api }} · {{ candidateClusterDetail.bug_pattern }}</p>
+                <label>问题类型</label><p>{{ candidateClusterDetail.category }} / {{ candidateClusterDetail.confidence }} confidence</p>
+                <label>人工判断说明</label><p>{{ candidateClusterDetail.representative.error_summary || "等待人工补充判断依据。" }}</p>
+                <div class="bug-replay-view__review-actions">
+                  <button type="button" @click="updateClusterReview('rejected', '人工忽略候选')">忽略候选</button>
+                  <button type="button" @click="updateClusterReview('needs_review', '人工标记为待分析')">标记待分析</button>
+                  <button type="button" @click="updateClusterReview('reproduced', '人工标记为可复现')">标记可复现</button>
+                  <button type="button" class="bug-replay-view__primary" disabled title="需要先保存最小复现代码并生成标准归档">收录为确认 Bug</button>
+                </div>
+              </div>
+            </section>
+          </section>
+          <p v-if="actionError" class="bug-replay-view__action-error">{{ actionError }}</p>
         </template>
       </main>
     </div>
@@ -349,5 +453,10 @@ onBeforeUnmount(clearPoll);
 .bug-replay-view__reason>header{display:flex;align-items:center;gap:.55rem;margin-bottom:.72rem}.bug-replay-view__reason>header>span{width:1.8rem;height:1.8rem;display:grid;place-items:center;border-radius:6px;background:var(--tg-red-bg);color:var(--tg-red-text);font:800 .45rem/1 ui-monospace,monospace}.bug-replay-view__reason header b{font-size:.72rem}.bug-replay-view__reason header small{display:block;margin-top:.15rem;color:var(--tg-text-muted);font-size:.48rem}.bug-replay-view__reason header em{margin-left:auto;padding:.3rem .42rem;border-radius:4px;background:var(--tg-amber-bg);color:var(--tg-amber-text);font-size:.5rem;font-style:normal;font-weight:730}.bug-replay-view__behavior{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}.bug-replay-view__behavior article{min-height:6rem;padding:.72rem .78rem;border:1px solid var(--tg-border);border-top:3px solid var(--tg-action);border-radius:6px;background:var(--tg-surface-soft)}.bug-replay-view__behavior article.observed{border-top-color:var(--tg-red-text)}.bug-replay-view__behavior small{display:block;margin-bottom:.38rem;color:var(--tg-text-muted);font-size:.48rem;font-weight:760;text-transform:uppercase}.bug-replay-view__behavior b{display:block;margin-bottom:.32rem;font-size:.66rem}.bug-replay-view__behavior p{margin:0;color:#5e687a;font-size:.55rem;line-height:1.55}
 .bug-replay-view__code-panel{overflow:hidden}.bug-replay-view__code-panel>header{display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;border-bottom:1px solid #293750;background:var(--tg-navy);color:#fff}.bug-replay-view__code-panel>header b{font-size:.61rem}.bug-replay-view__code-panel>header span{color:#a9b6d0;font-size:.48rem}.bug-replay-view__code-grid{display:grid;grid-template-columns:1fr 1fr;background:#111a2d}.bug-replay-view__code-grid>div:first-child{border-right:1px solid #2c3952}.bug-replay-view__code-grid small{display:block;padding:.5rem .8rem;border-bottom:1px solid #293750;color:#8291ac;font:.45rem/1 ui-monospace,monospace}.bug-replay-view__code-grid pre,.bug-replay-view__candidate-code pre{height:13.6rem;margin:0;padding:.68rem .8rem;overflow:auto;color:#dce6f7;font:.53rem/1.52 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word}.bug-replay-view__candidate-code{background:#111a2d}
 .bug-replay-view__actions{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(17.5rem,.65fr);gap:1px;overflow:hidden;background:var(--tg-border)}.bug-replay-view__actions>div{padding:.85rem 1rem;background:#fff}.bug-replay-view__actions>div>b,.bug-replay-view__environment>b{font-size:.62rem}.bug-replay-view__profiles{display:flex;gap:.42rem;margin:.55rem 0}.bug-replay-view__profiles button{flex:1;padding:.5rem .55rem;border:1px solid var(--tg-border);border-radius:5px;background:#fff;text-align:left}.bug-replay-view__profiles button.active{border-color:var(--tg-action);background:var(--tg-action-soft)}.bug-replay-view__profiles b{display:block;font-size:.55rem}.bug-replay-view__profiles small{display:block;margin-top:.18rem;color:var(--tg-text-muted);font-size:.43rem}.bug-replay-view__primary,.bug-replay-view__report-actions button,.bug-replay-view__report-actions a{height:2.1rem;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--tg-border);border-radius:5px;background:#fff;color:var(--tg-text-strong);padding:0 .68rem;font-size:.55rem;font-weight:720;text-decoration:none}.bug-replay-view__primary{border-color:var(--tg-action);background:var(--tg-action);color:#fff}.bug-replay-view__report-state{margin:.55rem 0;padding:.55rem;border:1px solid #cde7dd;border-radius:5px;background:var(--tg-green-bg);color:#58736a;font-size:.5rem}.bug-replay-view__report-actions{display:flex;gap:.4rem}.bug-replay-view__environment{padding:.8rem 1rem}.bug-replay-view__environment dl{display:grid;grid-template-columns:repeat(4,1fr);gap:.42rem;margin:.55rem 0 0}.bug-replay-view__environment dl>div{padding:.5rem;border:1px solid var(--tg-border);border-radius:4px;background:var(--tg-surface-soft)}.bug-replay-view__environment dt{color:var(--tg-text-muted);font-size:.45rem}.bug-replay-view__environment dd{margin:.2rem 0 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.52rem;font-weight:720}.bug-replay-view__report{overflow:hidden}.bug-replay-view__report header{display:flex;justify-content:space-between;padding:.7rem .8rem;border-bottom:1px solid var(--tg-border)}.bug-replay-view__report pre{max-height:22rem;margin:0;padding:1rem;overflow:auto;white-space:pre-wrap;font:.6rem/1.6 ui-monospace,monospace}.bug-replay-view__candidate-note{margin-top:.8rem;padding:.7rem;border:1px solid var(--tg-border);border-left:4px solid var(--tg-amber-text);border-radius:5px;background:var(--tg-amber-bg)}.bug-replay-view__candidate-note b{font-size:.65rem}.bug-replay-view__candidate-note p{margin:.25rem 0 0;color:var(--tg-text-muted);font-size:.55rem}
-@media(max-width:900px){.bug-replay-view__layout{grid-template-columns:13.5rem minmax(0,1fr)}.bug-replay-view__actions{grid-template-columns:1fr 15rem}}@media(max-width:720px){.bug-replay-view__count{display:none}.bug-replay-view__layout{grid-template-columns:1fr}.bug-replay-view__master{position:static}.bug-replay-view__list{max-height:14rem}.bug-replay-view__behavior,.bug-replay-view__code-grid,.bug-replay-view__actions{grid-template-columns:1fr}.bug-replay-view__code-grid>div:first-child{border-right:0;border-bottom:1px solid #2c3952}.bug-replay-view__environment dl{grid-template-columns:1fr 1fr}}
+.bug-replay-view__cluster-badge{width:max-content;padding:.24rem .36rem;border-radius:4px;background:var(--tg-amber-bg);color:var(--tg-amber-text);font-size:.46rem;font-style:normal;font-weight:780}.bug-replay-view__cluster-badge--promoted,.bug-replay-view__cluster-badge--reproduced{background:var(--tg-green-bg);color:var(--tg-green-text)}.bug-replay-view__cluster-badge--rejected{background:var(--tg-red-bg);color:var(--tg-red-text)}
+.bug-replay-view__cluster-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(18rem,.58fr);gap:.9rem;align-items:start}.bug-replay-view__cluster-pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:.35rem}.bug-replay-view__cluster-pipeline article{min-height:3.6rem;padding:.55rem;border:1px solid var(--tg-border);border-radius:6px;background:var(--tg-surface-soft)}.bug-replay-view__cluster-pipeline article.done{border-color:#c9e8d9;background:var(--tg-green-bg)}.bug-replay-view__cluster-pipeline article.current{border-color:#f1d49e;background:var(--tg-amber-bg)}.bug-replay-view__cluster-pipeline small{display:block;color:var(--tg-text-muted);font:.45rem/1 ui-monospace,monospace}.bug-replay-view__cluster-pipeline b{display:block;margin-top:.38rem;font-size:.58rem}
+.bug-replay-view__candidate-reason{padding:.85rem 1rem;display:grid;grid-template-columns:1.1fr 1fr 1fr;gap:.58rem}.bug-replay-view__candidate-reason article{min-height:5.2rem;padding:.68rem .72rem;border:1px solid var(--tg-border);border-top:3px solid var(--tg-action);border-radius:6px;background:var(--tg-surface-soft)}.bug-replay-view__candidate-reason article:nth-child(2){border-top-color:var(--tg-amber-text)}.bug-replay-view__candidate-reason article:nth-child(3){border-top-color:var(--tg-green)}.bug-replay-view__candidate-reason small{display:block;margin-bottom:.34rem;color:var(--tg-text-muted);font:.46rem/1 ui-monospace,monospace;text-transform:uppercase}.bug-replay-view__candidate-reason b{display:block;margin-bottom:.26rem;font-size:.64rem}.bug-replay-view__candidate-reason p{margin:0;color:#5e687a;font-size:.53rem;line-height:1.5}
+.bug-replay-view__candidate-workbench{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(17rem,.62fr);gap:.75rem;align-items:stretch}.bug-replay-view__candidate-workbench>.bug-replay-view__panel{min-width:0}.bug-replay-view__review-card{overflow:hidden;display:grid;grid-template-rows:auto minmax(0,1fr)}.bug-replay-view__review-card>header{display:flex;align-items:center;justify-content:space-between;padding:.65rem .85rem;border-bottom:1px solid #293750;background:var(--tg-navy);color:#fff}.bug-replay-view__review-card>header b{font-size:.61rem}.bug-replay-view__review-card>header span{color:#a9b6d0;font-size:.48rem}.bug-replay-view__review-card>div{display:grid;gap:.55rem;align-content:start;padding:.78rem;overflow:auto}.bug-replay-view__review-card label{color:var(--tg-text-muted);font-size:.48rem;font-weight:780}.bug-replay-view__review-card p{margin:0;padding:.5rem .55rem;border:1px solid var(--tg-border);border-radius:5px;background:#fff;color:#4f5c70;font-size:.52rem;line-height:1.45}.bug-replay-view__review-actions{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}.bug-replay-view__review-actions button{height:2rem;border:1px solid var(--tg-border);border-radius:5px;background:#fff;color:var(--tg-text-strong);font-size:.52rem;font-weight:730}.bug-replay-view__review-actions .bug-replay-view__primary{border-color:var(--tg-action);background:var(--tg-action);color:#fff}
+@media(max-width:900px){.bug-replay-view__layout{grid-template-columns:13.5rem minmax(0,1fr)}.bug-replay-view__actions{grid-template-columns:1fr 15rem}.bug-replay-view__cluster-head,.bug-replay-view__candidate-workbench{grid-template-columns:1fr}.bug-replay-view__candidate-reason{grid-template-columns:1fr}}
+@media(max-width:720px){.bug-replay-view__count{display:none}.bug-replay-view__layout{grid-template-columns:1fr}.bug-replay-view__master{position:static}.bug-replay-view__list{max-height:14rem}.bug-replay-view__behavior,.bug-replay-view__code-grid,.bug-replay-view__actions,.bug-replay-view__cluster-pipeline{grid-template-columns:1fr}.bug-replay-view__code-grid>div:first-child{border-right:0;border-bottom:1px solid #2c3952}.bug-replay-view__environment dl{grid-template-columns:1fr 1fr}}
 </style>

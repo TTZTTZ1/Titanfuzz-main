@@ -111,6 +111,7 @@ onBeforeUnmount(() => {
   min-width: 0;
   overflow: hidden;
   box-shadow: var(--tg-shadow);
+  height: 100%;
 }
 
 .live-log__header {

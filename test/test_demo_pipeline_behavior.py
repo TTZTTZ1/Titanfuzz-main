@@ -1,3 +1,4 @@
+import json
 import sys
 import tempfile
 from pathlib import Path
@@ -97,10 +98,35 @@ def test_publish_results_replaces_only_selected_api_files():
         assert (canonical_valid / "torch.mean_1.py").read_text(encoding="utf-8") == "keep"
 
 
+def test_finish_collects_review_candidates_without_gpu_or_models():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        run = demo.DemoRun(make_args(out="demo_runs/api_jobs/job"), root)
+        source = run.results_root / "valid" / "torch.add_1.py"
+        source.parent.mkdir(parents=True)
+        source.write_text("import torch\nresult = torch.add(torch.ones(1), 1)\n", encoding="utf-8")
+        (run.results_root / "trace.txt").write_text(
+            "Results/torch 1\n"
+            "TitanFuzzTestcase 0 torch.add torch.add_1 ComparisonFail 420 output mismatch\n",
+            encoding="utf-8",
+        )
+
+        run.finish("success")
+
+        collection = json.loads((run.out / "candidate_collection.json").read_text(encoding="utf-8"))
+        status = json.loads(run.status_path.read_text(encoding="utf-8"))
+        index = json.loads((root / "demo_runs" / "candidates" / "index.json").read_text(encoding="utf-8"))
+        assert collection["registered"] == 1
+        assert collection["candidate_ids"] == ["CAND-0001"]
+        assert status["candidate_collection"]["registered"] == 1
+        assert index[0]["api"] == "torch.add"
+
+
 if __name__ == "__main__":
     test_normal_mode_uses_formal_single_api_budget()
     test_status_records_actual_mutation_model()
     test_status_records_effective_run_parameters()
     test_failed_stage_marks_later_execution_stages_skipped()
     test_publish_results_replaces_only_selected_api_files()
+    test_finish_collects_review_candidates_without_gpu_or_models()
     print("ok")

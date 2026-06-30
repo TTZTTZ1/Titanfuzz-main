@@ -319,4 +319,21 @@ describe("OverviewView", () => {
     expect(text).not.toContain("论文");
     expect(text).not.toMatch(/\b(High|Medium|Low)\b/);
   });
+
+  it("renders every confirmed evidence row inside the scrollable evidence list", () => {
+    const wrapper = mount(ConfirmedEvidenceList, {
+      props: {
+        bugs: [
+          { display_id: "PT-001", api: "torch.arange", bug_type: "dtype mismatch", status: "confirmed" },
+          { display_id: "PT-002", api: "torch.is_nonzero", bug_type: "internal assert", status: "confirmed" },
+          { display_id: "TF-001", api: "tf.raw_ops.Abs", bug_type: "backend mismatch", status: "confirmed" },
+          { display_id: "TF-002", api: "tf.image.resize", bug_type: "numeric mismatch", status: "confirmed" },
+        ],
+      },
+    });
+
+    expect(wrapper.find(".confirmed-evidence-list__rows").attributes("tabindex")).toBe("0");
+    expect(wrapper.findAll(".confirmed-evidence-list__row")).toHaveLength(4);
+    expect(wrapper.text()).toContain("TF-002");
+  });
 });

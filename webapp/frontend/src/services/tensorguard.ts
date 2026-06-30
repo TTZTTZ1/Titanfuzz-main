@@ -3,6 +3,9 @@ import type {
   ApiJobPayload,
   ApiListItem,
   ApiRunStartInput,
+  CandidateClusterDetail,
+  CandidateClusterSummary,
+  CandidateClusterUpdateInput,
   CandidateCreateInput,
   CandidateDetail,
   CandidateRecord,
@@ -26,6 +29,9 @@ export const endpoints = {
   apiDetail: "/api/api-detail",
   runApi: "/api/run-api",
   apiJob: (id: string) => `/api/api-jobs/${encodeURIComponent(id)}`,
+  candidateClusters: "/api/candidate-clusters",
+  candidateCluster: (id: string) => `/api/candidate-clusters/${encodeURIComponent(id)}`,
+  candidateClusterStatus: (id: string) => `/api/candidate-clusters/${encodeURIComponent(id)}/status`,
   candidates: "/api/candidates",
   candidate: (id: string) => `/api/candidates/${encodeURIComponent(id)}`,
   candidateStatus: (id: string) => `/api/candidates/${encodeURIComponent(id)}/status`,
@@ -82,6 +88,18 @@ export function getApiJob(id: string): Promise<ApiJobPayload> {
 
 export function getCandidates(): Promise<CandidateRecord[]> {
   return get(endpoints.candidates);
+}
+
+export function getCandidateClusters(): Promise<CandidateClusterSummary[]> {
+  return get(endpoints.candidateClusters);
+}
+
+export function getCandidateCluster(id: string): Promise<CandidateClusterDetail> {
+  return get(endpoints.candidateCluster(id));
+}
+
+export function updateCandidateClusterStatus(id: string, input: CandidateClusterUpdateInput): Promise<CandidateClusterDetail> {
+  return post(endpoints.candidateClusterStatus(id), input);
 }
 
 export function createCandidate(input: CandidateCreateInput): Promise<CandidateRecord> {

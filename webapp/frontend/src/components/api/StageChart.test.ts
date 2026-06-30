@@ -139,6 +139,8 @@ describe("StageChart", () => {
     await flushPromises();
 
     expect(wrapper.text()).toContain("暂无");
+    expect(wrapper.find(".stage-chart__empty-rail").exists()).toBe(true);
+    expect(wrapper.findAll(".stage-chart__empty-dot")).toHaveLength(3);
     expect(echartsInit).not.toHaveBeenCalled();
   });
 });

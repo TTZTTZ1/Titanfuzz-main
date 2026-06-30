@@ -144,6 +144,7 @@ describe("ApiRunView", () => {
 
     expect(wrapper.get(".api-run-view__page-symbol").text()).toBe("API");
     expect(wrapper.find(".api-run-view__orchestration").exists()).toBe(true);
+    expect(wrapper.find(".api-run-view__control-card--device").exists()).toBe(true);
     expect(wrapper.find(".api-run-view__chart-layout").exists()).toBe(true);
     expect(wrapper.find(".api-run-view__bottom-grid").exists()).toBe(true);
   });
@@ -160,7 +161,8 @@ describe("ApiRunView", () => {
 
     expect(wrapper.text()).toContain("单 API 安全检测");
     expect(wrapper.text()).toContain("请选择一个 API");
-    expect(wrapper.get('button[type="button"][disabled]').text()).toBe("运行");
+    expect(wrapper.get('button[type="button"][disabled]').text()).toContain("运行");
+    expect(wrapper.text()).toContain("GPU 0");
   });
 
   it("shows loading and error states clearly", async () => {
@@ -177,7 +179,7 @@ describe("ApiRunView", () => {
     });
 
     expect(wrapper.text()).toContain("正在读取 API 详情");
-    expect(wrapper.get('button[type="button"][disabled]').text()).toBe("运行");
+    expect(wrapper.get('button[type="button"][disabled]').text()).toContain("运行");
 
     detailLoading.value = false;
     detailError.value = "API 详情加载失败";
@@ -314,7 +316,7 @@ describe("ApiRunView", () => {
 
     expect(wrapper.text()).toContain("torch.add");
     expect(wrapper.text()).toContain("9");
-    expect(wrapper.text()).toContain("success");
-    expect(wrapper.get(".api-run-view__run").text()).toBe("运行");
+    expect(wrapper.text()).toContain("任务完成");
+    expect(wrapper.get(".api-run-view__run").text()).toContain("运行");
   });
 });

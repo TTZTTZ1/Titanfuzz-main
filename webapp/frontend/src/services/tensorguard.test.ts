@@ -5,6 +5,8 @@ import type {
   ApiJobParameters,
   ApiListItem,
   ApiRunStartInput,
+  CandidateClusterDetail,
+  CandidateClusterSummary,
   EnvironmentPayload,
   PromptManifestEntry,
 } from "../types/tensorguard";
@@ -17,6 +19,8 @@ import {
   getApiJob,
   getApis,
   getCandidate,
+  getCandidateCluster,
+  getCandidateClusters,
   getCandidates,
   getConfirmedBug,
   getConfirmedBugs,
@@ -26,6 +30,7 @@ import {
   getReproReport,
   reproduceConfirmedBug,
   startApiRun,
+  updateCandidateClusterStatus,
   updateCandidateStatus,
 } from "./tensorguard";
 
@@ -38,6 +43,9 @@ type Equal<Left, Right> =
 type Assert<Condition extends true> = Condition;
 type ManifestEntryContract = Assert<Equal<ApiListItem["manifest_entry"], PromptManifestEntry>>;
 type ApiRunInputKeys = Assert<Equal<keyof ApiRunStartInput, "lib" | "api" | "mode">>;
+type CandidateClusterRepresentativeContract = Assert<
+  Equal<CandidateClusterSummary["representative"], CandidateClusterDetail["representative"]>
+>;
 
 const backendEnvironmentFixture = {
   collected_at: "2026-06-28T17:00:00+08:00",
@@ -218,6 +226,34 @@ describe("TensorGuard API service", () => {
     ]);
     expect(JSON.parse(String((fetchMock.mock.calls[1][1] as RequestInit).body))).toEqual(createInput);
     expect(JSON.parse(String((fetchMock.mock.calls[3][1] as RequestInit).body))).toEqual(updateInput);
+  });
+
+  it("wraps candidate cluster collection and detail routes", async () => {
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({})));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await getCandidateClusters();
+    await getCandidateCluster("torch.add/device assert");
+
+    expect(fetchMock.mock.calls.map(([path, init]) => [path, (init as RequestInit).method])).toEqual([
+      ["/api/candidate-clusters", "GET"],
+      ["/api/candidate-clusters/torch.add%2Fdevice%20assert", "GET"],
+    ]);
+  });
+
+  it("wraps candidate cluster status updates", async () => {
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({})));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await updateCandidateClusterStatus("cluster/one", { status: "reproduced", note: "stable" });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/candidate-clusters/cluster%2Fone/status",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ status: "reproduced", note: "stable" }),
+      }),
+    );
   });
 
   it("wraps confirmed bug list, detail, and reproduce routes", async () => {

@@ -51,6 +51,7 @@ function widthFor(value: number) { return total.value > 0 ? `${(value / total.va
 <style scoped>
 .result-composition {
   display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
   gap: 0.65rem;
   border: 1px solid var(--tg-border);
   border-radius: var(--tg-radius);
@@ -58,6 +59,7 @@ function widthFor(value: number) { return total.value > 0 ? `${(value / total.va
   padding: 0.85rem;
   box-shadow: var(--tg-shadow);
   min-width: 0;
+  height: 100%;
 }
 
 .result-composition__header { display: flex; align-items: center; gap: 0.55rem; }
@@ -108,9 +110,12 @@ function widthFor(value: number) { return total.value > 0 ? `${(value / total.va
   margin: 0;
   border: 1px dashed var(--tg-border);
   border-radius: var(--tg-radius-sm);
-  background: var(--tg-surface-muted);
+  background: linear-gradient(135deg, #f8fbff, #eef6ff);
   color: var(--tg-text-muted);
   padding: 1rem;
+  min-height: 4.8rem;
+  display: grid;
+  align-items: center;
 }
 
 @media (max-width: 720px) {

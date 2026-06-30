@@ -265,6 +265,49 @@ export interface CandidateDetail extends CandidateRecord {
   source_code: string;
 }
 
+export type CandidateClusterStatus = "pending_review" | "reproduced" | "needs_review" | "needs_minimize" | "rejected" | "promoted";
+export type CandidateClusterConfidence = "high" | "medium" | "low";
+
+export interface CandidateClusterMember {
+  candidate_id: string;
+  source_path: string;
+  source_name: string;
+  error_summary: string;
+  score: number;
+  status: CandidateStatus;
+}
+
+export interface ExcludedCandidate {
+  candidate_id: string;
+  source_path: string;
+  source_name: string;
+  reason: string;
+  error_summary: string;
+}
+
+export interface CandidateClusterSummary {
+  cluster_id: string;
+  lib: Library;
+  api: string;
+  job_id: string;
+  category: CandidateCategory;
+  bug_pattern: string;
+  cluster_status: CandidateClusterStatus;
+  confidence: CandidateClusterConfidence;
+  member_count: number;
+  excluded_count: number;
+  representative: CandidateClusterMember;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CandidateClusterDetail extends CandidateClusterSummary {
+  members: CandidateClusterMember[];
+  excluded: ExcludedCandidate[];
+  representative_source_code: string;
+  minimization_draft: string;
+}
+
 export interface CandidateCreateInput {
   job_id: string;
   lib: Library;
@@ -275,6 +318,11 @@ export interface CandidateCreateInput {
 }
 
 export interface CandidateUpdateInput {
+  status: CandidateUpdateStatus;
+  note?: string;
+}
+
+export interface CandidateClusterUpdateInput {
   status: CandidateUpdateStatus;
   note?: string;
 }

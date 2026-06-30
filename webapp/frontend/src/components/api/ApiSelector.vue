@@ -240,7 +240,7 @@ watch(
 
 .api-selector__toolbar {
   display: grid;
-  grid-template-columns: minmax(12rem, 0.7fr) minmax(18rem, 1.7fr);
+  grid-template-columns: minmax(11rem, 0.82fr) minmax(16rem, 1.18fr);
   gap: 0.65rem;
   align-items: end;
 }
@@ -320,7 +320,7 @@ watch(
   z-index: 20;
   top: calc(100% + 0.35rem);
   right: 0;
-  width: min(36rem, 72%);
+  width: min(32rem, 100%);
   max-height: 17rem;
   overflow: auto;
   list-style: none;
@@ -378,7 +378,7 @@ watch(
   z-index: 20;
   top: calc(100% + 0.35rem);
   right: 0;
-  width: min(36rem, 72%);
+  width: min(32rem, 100%);
   border: 1px solid var(--tg-border);
   border-radius: 7px;
   background: #fff;

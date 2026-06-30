@@ -181,7 +181,7 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(21.25rem, 0.75fr);
   gap: 0.875rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 @media (max-width: 720px) { .overview-view__lower-grid { grid-template-columns: 1fr; } }

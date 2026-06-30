@@ -33,8 +33,8 @@ function framework(api: string): "PT" | "TF" {
       <template #error="{ error: text }"><p class="confirmed-evidence-list__state">{{ text }}</p></template>
       <template #empty><p class="confirmed-evidence-list__state">后端暂未返回已确认证据</p></template>
 
-      <div class="confirmed-evidence-list__rows" role="list">
-        <a v-for="bug in (bugs ?? []).slice(0, 3)" :key="bug.display_id" class="confirmed-evidence-list__row" href="#bug-replay" role="listitem">
+      <div class="confirmed-evidence-list__rows" role="list" tabindex="0" aria-label="已确认证据列表，可滚动查看更多">
+        <a v-for="bug in (bugs ?? [])" :key="bug.display_id" class="confirmed-evidence-list__row" href="#bug-replay" role="listitem">
           <span class="confirmed-evidence-list__framework" :class="{ 'confirmed-evidence-list__framework--tf': framework(bug.api) === 'TF' }">{{ framework(bug.api) }}</span>
           <span class="confirmed-evidence-list__copy">
             <b>{{ bug.display_id }} · {{ bug.api }}</b>
@@ -48,7 +48,7 @@ function framework(api: string): "PT" | "TF" {
 </template>
 
 <style scoped>
-.confirmed-evidence-list { padding: 1.1rem 1.25rem; background: #fff; border: 1px solid var(--tg-border); border-radius: var(--tg-radius); box-shadow: var(--tg-shadow); }
+.confirmed-evidence-list { display: grid; grid-template-rows: auto minmax(0, 1fr); height: 100%; min-height: 12.25rem; padding: 1.1rem 1.25rem; background: #fff; border: 1px solid var(--tg-border); border-radius: var(--tg-radius); box-shadow: var(--tg-shadow); }
 .confirmed-evidence-list__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.7rem; }
 .confirmed-evidence-list__ident { display: flex; align-items: center; gap: 0.65rem; }
 .confirmed-evidence-list__icon { width: 1.9rem; height: 1.9rem; display: grid; place-items: center; border-radius: 6px; background: #e9f7f2; color: #126c52; box-shadow: inset 0 0 0 1px #cce9de; font-weight: 800; }
@@ -56,7 +56,11 @@ function framework(api: string): "PT" | "TF" {
 .confirmed-evidence-list__ident p { margin: 0.28rem 0 0; color: var(--tg-text-muted); font-size: 0.625rem; }
 .confirmed-evidence-list__all { height: 2rem; display: inline-flex; align-items: center; padding: 0 0.7rem; border: 1px solid var(--tg-border); border-radius: 6px; background: #fff; color: var(--tg-text-strong); font-size: 0.62rem; font-weight: 720; }
 .confirmed-evidence-list__state { margin: 0; }
-.confirmed-evidence-list__rows { display: grid; }
+.confirmed-evidence-list__rows { display: grid; align-content: start; max-height: 10.8rem; min-height: 0; overflow-y: auto; padding-right: 0.25rem; margin-right: -0.25rem; scrollbar-gutter: stable; }
+.confirmed-evidence-list__rows:focus-visible { outline: 2px solid var(--tg-action); outline-offset: 3px; border-radius: 6px; }
+.confirmed-evidence-list__rows::-webkit-scrollbar { width: 0.44rem; }
+.confirmed-evidence-list__rows::-webkit-scrollbar-track { background: #f0f4fb; border-radius: 999px; }
+.confirmed-evidence-list__rows::-webkit-scrollbar-thumb { background: #b7c7df; border-radius: 999px; }
 .confirmed-evidence-list__row { display: grid; grid-template-columns: 2rem minmax(0, 1fr) auto; align-items: center; gap: 0.7rem; padding: 0.6rem 0; border-bottom: 1px solid var(--tg-border); }
 .confirmed-evidence-list__row:last-child { border-bottom: 0; }
 .confirmed-evidence-list__framework { width: 2rem; height: 1.55rem; display: grid; place-items: center; border-radius: 4px; background: #245dcc; color: #fff; box-shadow: 0 4px 9px rgba(36,93,204,.18); font: 790 0.5rem/1 ui-monospace, monospace; }
