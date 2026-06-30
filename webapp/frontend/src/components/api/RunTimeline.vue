@@ -238,6 +238,11 @@ function handleTabKeydown(event: KeyboardEvent, index: number) {
   color: var(--tg-action-strong);
 }
 
+.run-timeline__rail-item--success .run-timeline__rail-label,
+.run-timeline__rail-item--success .run-timeline__rail-status {
+  color: var(--tg-green-text);
+}
+
 .run-timeline__rail-status {
   color: var(--tg-text-soft);
   font-size: 0.49rem;

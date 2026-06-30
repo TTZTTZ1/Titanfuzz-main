@@ -55,28 +55,7 @@ function buildTimelineStages(job: ApiJobPayload | null): Record<TimelineStageKey
     };
   }
 
-  const stages = job.status.stages;
-  const promptCheck: ApiStageStatus =
-    job.status.stage === "launch" || job.status.stage === "init"
-      ? "running"
-      : job.status.status === "failed"
-        ? "failed"
-        : "success";
-
-  return {
-    prompt_check: promptCheck,
-    qwen_seed: stages.qwen_seed,
-    ev_generation: stages.ev_generation,
-    driver: stages.driver,
-    summary:
-      job.status.stage === "summary" || job.status.status === "success"
-        ? "success"
-        : job.status.status === "failed"
-          ? "failed"
-          : stages.driver === "running" || stages.ev_generation === "running" || stages.qwen_seed === "running"
-            ? "running"
-            : stages.summary,
-  };
+  return { ...job.status.stages };
 }
 
 export function useApiRun() {

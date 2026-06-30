@@ -130,6 +130,8 @@ const Harness = defineComponent({
       <span data-testid="job-id">{{ selectedJob?.job_id ?? "" }}</span>
       <span data-testid="current-job-id">{{ currentJobId ?? "" }}</span>
       <span data-testid="job-status">{{ selectedJob?.status.status ?? "" }}</span>
+      <span data-testid="prompt-stage">{{ stageStates.prompt_check }}</span>
+      <span data-testid="summary-stage">{{ stageStates.summary }}</span>
       <span data-testid="mode">{{ mode }}</span>
       <span data-testid="can-run">{{ canRun }}</span>
       <button type="button" data-testid="select-alpha" @click="selectApi(alpha)">alpha</button>
@@ -157,6 +159,43 @@ beforeEach(() => {
 });
 
 describe("useApiRun", () => {
+  it("keeps completed prompt checks successful while summary stays pending during Qwen", async () => {
+    getApiDetail.mockResolvedValue({
+      ...detailItem("torch.add", "torch", "job-running", 1),
+      latest_job: {
+        job_id: "job-running",
+        out: "demo_runs/job-running",
+        status: "running",
+        stage: "qwen_seed",
+        updated_at: "2026-06-28T17:00:00",
+        summary_status: null,
+        mutation_model: "facebook/incoder-1B",
+        error: null,
+      },
+    });
+    getApiJob.mockResolvedValue({
+      ...jobPayload("job-running", "torch.add", "torch", "running"),
+      status: {
+        ...jobPayload("job-running", "torch.add", "torch", "running").status,
+        stage: "qwen_seed",
+        stages: {
+          prompt_check: "success",
+          qwen_seed: "running",
+          ev_generation: "pending",
+          driver: "pending",
+          summary: "pending",
+        },
+      },
+    });
+
+    const wrapper = mount(Harness);
+    await wrapper.get('[data-testid="select-alpha"]').trigger("click");
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="prompt-stage"]').text()).toBe("success");
+    expect(wrapper.get('[data-testid="summary-stage"]').text()).toBe("pending");
+  });
+
   it("ignores stale selection responses and hydrates the latest job after selection", async () => {
     const alpha = deferred<ApiDetailPayload>();
     const beta = deferred<ApiDetailPayload>();
