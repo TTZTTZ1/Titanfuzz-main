@@ -138,14 +138,41 @@ describe("BugReplayView", () => {
     const wrapper = mount(BugReplayView);
     await flushPromises();
 
+    const counters = wrapper.findAll(".bug-replay-view__count-item");
+    expect(counters).toHaveLength(3);
+    expect(counters.map((item) => item.classes())).toEqual([
+      expect.arrayContaining(["bug-replay-view__count-item--confirmed"]),
+      expect.arrayContaining(["bug-replay-view__count-item--candidate"]),
+      expect.arrayContaining(["bug-replay-view__count-item--minimize"]),
+    ]);
+    expect(counters.map((item) => item.get("b").text())).toEqual(["1", "1", "1"]);
+
     expect(wrapper.get(".bug-replay-view__page-symbol").text()).toBe("!");
     expect(wrapper.findAll(".bug-replay-view__layout")).toHaveLength(1);
+    expect(wrapper.get(".bug-replay-view__master").classes()).toContain("bug-replay-view__master--page-flow");
+    expect(wrapper.findAll(".bug-replay-view__master-frame")).toHaveLength(1);
+    expect(wrapper.get(".bug-replay-view__list").classes()).toContain("bug-replay-view__list--contained");
     expect(wrapper.text()).toContain("PT-004");
     expect(wrapper.text()).toContain("torch.sparse.mm");
     expect(wrapper.text()).toContain("Reject invalid sparse indices");
     expect(wrapper.text()).toContain("SIGABRT");
     expect(wrapper.text()).not.toContain("PAPER");
     expect(wrapper.text()).not.toContain("严重性");
+  });
+
+  it("separates reproduction evidence and orders the compact confirmed tools", async () => {
+    const wrapper = mount(BugReplayView);
+    await flushPromises();
+
+    const evidencePanes = wrapper.findAll(".bug-replay-view__evidence-pane");
+    expect(evidencePanes).toHaveLength(2);
+    expect(evidencePanes.map((pane) => pane.get("small").text())).toEqual(["repro.py", "CURRENT RUN OUTPUT"]);
+
+    const toolPanels = wrapper.findAll(".bug-replay-view__confirmed-tool");
+    expect(toolPanels.map((panel) => panel.attributes("data-tool"))).toEqual(["environment", "execution", "report"]);
+
+    expect(wrapper.find(".bug-replay-view__tag--confirmed").exists()).toBe(true);
+    expect(wrapper.find(".bug-replay-view__tag--minimized").exists()).toBe(true);
   });
 
   it("filters the evidence list without discarding the selected detail", async () => {
@@ -230,6 +257,20 @@ describe("BugReplayView", () => {
     expect(services.generateReproReport).not.toHaveBeenCalled();
   });
 
+  it("keeps candidate review visible when no candidate clusters exist", async () => {
+    services.getCandidateClusters.mockResolvedValueOnce([]);
+    const wrapper = mount(BugReplayView);
+    await flushPromises();
+
+    const candidateTab = wrapper.findAll(".bug-replay-view__source-tabs button").find((button) => button.text() === "候选审核");
+    await candidateTab?.trigger("click");
+    await flushPromises();
+
+    expect(wrapper.find(".bug-replay-view__master-frame").exists()).toBe(true);
+    expect(wrapper.text()).toContain("暂无候选簇");
+    expect(wrapper.get(".bug-replay-view__candidate-empty").text()).toContain("暂无可审核的候选簇");
+  });
+
   it("renders searchable candidate clusters instead of raw candidate files", async () => {
     const wrapper = mount(BugReplayView);
     await flushPromises();
@@ -246,6 +287,12 @@ describe("BugReplayView", () => {
     expect(wrapper.text()).toContain("已过滤 5");
     expect(wrapper.text()).toContain("聚类依据");
     expect(wrapper.text()).toContain("人工整理 repro.py");
+    expect(wrapper.findAll(".bug-replay-view__file-head")).toHaveLength(2);
+    expect(wrapper.findAll(".bug-replay-view__file-head .bug-replay-view__file-icon").map((item) => item.text())).toEqual(["SRC", "PY"]);
+    expect(wrapper.get('[data-testid="candidate-source-path"]').text()).toBe(candidateCluster.representative.source_path);
+    expect(wrapper.find(".bug-replay-view__review-footer").exists()).toBe(true);
+    expect(wrapper.findAll(".bug-replay-view__candidate-reason > article")).toHaveLength(3);
+    expect(wrapper.findAll(".bug-replay-view__candidate-workbench > section")).toHaveLength(3);
 
     await wrapper.get('input[type="search"]').setValue("device assert");
     expect(wrapper.text()).toContain("torch.quantile");

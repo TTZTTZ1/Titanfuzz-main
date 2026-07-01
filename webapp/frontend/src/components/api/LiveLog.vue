@@ -15,7 +15,9 @@ const props = withDefaults(
 
 const headingId = `live-log-${Math.random().toString(36).slice(2, 10)}`;
 const bodyRef = ref<HTMLDivElement | null>(null);
-const autoScroll = ref(true);
+const followTail = ref(true);
+const manualStageSelection = ref(false);
+const selectedStageKey = ref<ApiRunStageKey>(props.stageKey);
 const stageLabelByKey = Object.fromEntries(stageDefinitions.map((definition) => [definition.key, definition.label]));
 const stageLogFileByKey: Record<ApiRunStageKey, string> = {
   qwen_seed: "01_qwen_seed.log",
@@ -23,9 +25,18 @@ const stageLogFileByKey: Record<ApiRunStageKey, string> = {
   driver: "03_driver.log",
 };
 
-const stageLabel = computed(() => stageLabelByKey[props.stageKey] || props.stageKey);
-const currentLog = computed(() => props.logs[stageLogFileByKey[props.stageKey]] ?? props.logs[props.stageKey] ?? "");
+function logForStage(key: ApiRunStageKey): string {
+  return props.logs[stageLogFileByKey[key]] ?? props.logs[key] ?? "";
+}
+
+const logStages = stageDefinitions.map((definition) => ({ key: definition.key, label: definition.label }));
+const stageLabel = computed(() => stageLabelByKey[selectedStageKey.value] || selectedStageKey.value);
+const currentLog = computed(() => logForStage(selectedStageKey.value));
 const hasLog = computed(() => currentLog.value.trim().length > 0);
+
+function hasStageLog(key: ApiRunStageKey): boolean {
+  return logForStage(key).trim().length > 0;
+}
 
 function isAtBottom() {
   const body = bodyRef.value;
@@ -46,22 +57,22 @@ function scrollToBottom() {
 }
 
 function handleScroll() {
-  autoScroll.value = isAtBottom();
+  followTail.value = isAtBottom();
 }
 
-function toggleAutoScroll() {
-  autoScroll.value = !autoScroll.value;
-  if (autoScroll.value) {
-    scrollToBottom();
-  }
+async function selectStage(key: ApiRunStageKey) {
+  if (!hasStageLog(key)) return;
+  selectedStageKey.value = key;
+  manualStageSelection.value = true;
+  followTail.value = true;
+  await nextTick();
+  scrollToBottom();
 }
 
 watch(
   currentLog,
   async () => {
-    if (!autoScroll.value) {
-      return;
-    }
+    if (!followTail.value) return;
 
     await nextTick();
     scrollToBottom();
@@ -69,30 +80,63 @@ watch(
   { flush: "post" },
 );
 
+watch(
+  () => props.stageKey,
+  (nextStage) => {
+    if (!manualStageSelection.value || !hasStageLog(selectedStageKey.value)) {
+      selectedStageKey.value = nextStage;
+      manualStageSelection.value = false;
+      followTail.value = true;
+    }
+  },
+);
+
+watch(
+  () => props.logs,
+  () => {
+    if (!hasStageLog(selectedStageKey.value) && hasStageLog(props.stageKey)) {
+      selectedStageKey.value = props.stageKey;
+      manualStageSelection.value = false;
+      followTail.value = true;
+    }
+  },
+  { deep: true },
+);
+
 onMounted(() => {
-  if (autoScroll.value) {
-    scrollToBottom();
-  }
+  scrollToBottom();
 });
 
 onBeforeUnmount(() => {
-  autoScroll.value = false;
+  followTail.value = false;
 });
 </script>
 
 <template>
   <section class="live-log" :aria-labelledby="headingId">
     <header class="live-log__header">
-      <h2 :id="headingId" class="live-log__title">实时日志 · {{ stageLabel }}</h2>
-      <button
-        type="button"
-        class="live-log__toggle"
-        data-testid="auto-scroll-toggle"
-        :aria-pressed="autoScroll"
-        @click="toggleAutoScroll"
-      >
-        {{ autoScroll ? "自动跟随" : "已暂停" }}
-      </button>
+      <div class="live-log__heading">
+        <h2 :id="headingId" class="live-log__title">实时日志</h2>
+        <small>{{ stageLabel }}</small>
+      </div>
+      <div class="live-log__stages" role="tablist" aria-label="选择日志阶段">
+        <button
+          v-for="stage in logStages"
+          :key="stage.key"
+          type="button"
+          role="tab"
+          data-testid="log-stage-tab"
+          class="live-log__stage"
+          :class="{
+            'live-log__stage--active': selectedStageKey === stage.key,
+            'live-log__stage--complete': hasStageLog(stage.key) && stageKey !== stage.key,
+            'live-log__stage--live': stageKey === stage.key,
+          }"
+          :aria-selected="selectedStageKey === stage.key"
+          :disabled="!hasStageLog(stage.key)"
+          @click="selectStage(stage.key)"
+        >{{ stage.label }}</button>
+      </div>
     </header>
 
     <div
@@ -110,6 +154,10 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .live-log {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: 100%;
+  max-width: 100%;
   border: 1px solid var(--tg-border);
   border-radius: var(--tg-radius);
   background: #111a2d;
@@ -117,18 +165,23 @@ onBeforeUnmount(() => {
   overflow: hidden;
   box-shadow: var(--tg-shadow);
   height: 100%;
+  contain: inline-size;
 }
 
 .live-log__header {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  min-height: 2.25rem;
-  padding: 0 0.85rem;
+  min-height: 3rem;
+  padding: 0.4rem 0.7rem;
   border-bottom: 1px solid #293750;
   background: var(--tg-navy);
 }
+
+.live-log__heading { display: grid; gap: 0.12rem; }
+.live-log__heading small { color: #8fa0bd; font-size: 0.44rem; }
 
 .live-log__title {
   margin: 0;
@@ -136,30 +189,30 @@ onBeforeUnmount(() => {
   color: #fff;
 }
 
-.live-log__toggle {
-  border: 0;
-  background: transparent;
-  color: #9cabca;
-  padding: 0.3rem;
-  font-size: 0.5rem;
-}
-
-.live-log__toggle[aria-pressed="true"] {
-  color: #c8d5ed;
-}
+.live-log__stages { min-width: 0; display: flex; justify-content: flex-end; gap: 0.25rem; }
+.live-log__stage { height: 1.75rem; border: 1px solid #34435e; border-radius: 5px; background: #1d2a43; color: #9cabc4; padding: 0 0.55rem; font-size: 0.47rem; white-space: nowrap; }
+.live-log__stage--active { border-color: #739cea; background: #274678; color: #fff; }
+.live-log__stage--complete::before { content: ""; display: inline-block; width: 0.3rem; height: 0.3rem; margin-right: 0.3rem; border-radius: 50%; background: #54c59a; }
+.live-log__stage--live:not(.live-log__stage--active) { color: #c9d8f2; }
+.live-log__stage:disabled { opacity: 0.38; cursor: not-allowed; }
 
 .live-log__body {
-  height: 8rem;
+  width: 100%;
+  min-width: 0;
+  min-height: 8rem;
   overflow: auto;
+  scrollbar-gutter: stable;
   background: #111a2d;
   color: #eef4ff;
   padding: 0.65rem 0.85rem;
 }
 
 .live-log__text {
+  width: max-content;
+  min-width: 100%;
+  max-width: none;
   margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
+  white-space: pre;
   font-family:
     SFMono-Regular,
     ui-monospace,
@@ -173,7 +226,7 @@ onBeforeUnmount(() => {
 
 .live-log__empty {
   margin: 0;
-  height: 8rem;
+  min-height: 8rem;
   display: grid;
   place-items: center;
   background: #111a2d;

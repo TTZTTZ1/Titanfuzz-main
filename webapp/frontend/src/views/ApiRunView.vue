@@ -151,7 +151,11 @@ function handleLibraryChange() {
         </div>
       </div>
       <aside class="api-run-view__log-column">
-        <LiveLog :stage-key="liveStageKey" :logs="logs" />
+        <LiveLog
+          :key="selectedJob?.job_id ?? `${selectedApi?.lib ?? 'none'}:${selectedApi?.api ?? 'none'}`"
+          :stage-key="liveStageKey"
+          :logs="logs"
+        />
       </aside>
     </section>
 
