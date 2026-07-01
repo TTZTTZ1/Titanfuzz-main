@@ -104,10 +104,26 @@ describe("StageChart", () => {
     expect(echartsInit).toHaveBeenCalledTimes(1);
     expect(setOption).toHaveBeenCalledTimes(2);
     expect(setOption.mock.calls[1][0].series.map((series: { name: string }) => series.name)).toEqual([
-      "有效",
+      "有效程序",
       "异常",
       "崩溃",
       "超时",
+    ]);
+    expect(setOption.mock.calls[1][0].series.map((series: { lineStyle: { color: string } }) => series.lineStyle.color)).toEqual([
+      "#178263",
+      "#d29a43",
+      "#c65362",
+      "#63738f",
+    ]);
+
+    const stats = wrapper.findAll(".stage-chart__stat");
+    expect(stats).toHaveLength(4);
+    expect(stats.map((stat) => stat.text())).toEqual(["有效程序7", "异常2", "崩溃1", "超时0"]);
+    expect(stats.map((stat) => stat.attributes("style"))).toEqual([
+      "--series-color: #178263;",
+      "--series-color: #d29a43;",
+      "--series-color: #c65362;",
+      "--series-color: #63738f;",
     ]);
 
     wrapper.unmount();

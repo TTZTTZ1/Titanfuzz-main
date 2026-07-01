@@ -5,6 +5,7 @@ export type ChartPoint = [number, number | null];
 
 export interface ChartSeries {
   name: string;
+  color: string;
   data: ChartPoint[];
 }
 
@@ -32,8 +33,9 @@ export function stageSeries(metrics: ApiJobMetric[], selectedStage: ApiRunStageK
     return [];
   }
 
-  const series = definition.metricKeys.map(([name, key]) => ({
+  const series = definition.metricKeys.map(([name, key, color]) => ({
     name,
+    color,
     data: selectedMetrics.map((metric) => [metric.elapsed_seconds, metricValue(metric, key)] as ChartPoint),
   }));
 
@@ -43,11 +45,13 @@ export function stageSeries(metrics: ApiJobMetric[], selectedStage: ApiRunStageK
 export function gpuSeries(metrics: ApiJobMetric[]): ChartSeries[] {
   const utilization: ChartSeries = {
     name: "GPU 利用率",
+    color: "#2563eb",
     data: metrics.map((metric) => [metric.elapsed_seconds, metric.gpu?.utilization_percent ?? null]),
   };
 
   const memory: ChartSeries = {
     name: "GPU 显存",
+    color: "#168aa4",
     data: metrics.map((metric) => [metric.elapsed_seconds, metric.gpu?.memory_used_mib ?? null]),
   };
 

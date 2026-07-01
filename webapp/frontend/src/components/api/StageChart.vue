@@ -47,6 +47,7 @@ const summaryText = computed(() => {
 const latestSeriesValues = computed(() =>
   selectedSeries.value.map((series) => ({
     name: series.name,
+    color: series.color,
     value: series.data.at(-1)?.[1] ?? 0,
   })),
 );
@@ -54,7 +55,7 @@ const latestSeriesValues = computed(() =>
 function buildOption() {
   return {
     animation: false,
-    color: ["#2563eb", "#178263", "#d29a43", "#c65362"],
+    color: selectedSeries.value.map((series) => series.color),
     grid: { left: 16, right: 18, top: 20, bottom: 20, containLabel: true },
     legend: { show: false },
     tooltip: {
@@ -103,8 +104,9 @@ function buildOption() {
       data: series.data,
       showSymbol: false,
       smooth: 0.2,
-      lineStyle: { width: 2.5 },
-      areaStyle: { opacity: 0.08 },
+      lineStyle: { width: 2.5, color: series.color },
+      itemStyle: { color: series.color },
+      areaStyle: { opacity: 0.08, color: series.color },
       emphasis: { focus: "series" },
     })),
   };
@@ -155,8 +157,13 @@ onBeforeUnmount(() => {
         <h2 :id="headingId" class="stage-chart__title">{{ titleText }}</h2>
       </div>
       <div class="stage-chart__stats">
-        <div v-for="item in latestSeriesValues.slice(0, 2)" :key="item.name" class="stage-chart__stat">
-          <span>{{ item.name }}</span><b>{{ item.value }}</b>
+        <div
+          v-for="item in latestSeriesValues"
+          :key="item.name"
+          class="stage-chart__stat"
+          :style="{ '--series-color': item.color }"
+        >
+          <i aria-hidden="true" /><span>{{ item.name }}</span><b>{{ item.value }}</b>
         </div>
         <p class="stage-chart__summary">{{ summaryText }}</p>
       </div>
@@ -224,34 +231,45 @@ onBeforeUnmount(() => {
 .stage-chart__stats {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 0.45rem;
 }
 
 .stage-chart__stat {
-  min-width: 5.2rem;
-  padding: 0.38rem 0.48rem;
+  min-width: 4.35rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.32rem;
+  padding: 0.34rem 0.42rem;
   border: 1px solid #d9e2f0;
   border-radius: 5px;
   background: #f8faff;
 }
 
+.stage-chart__stat i {
+  width: 0.82rem;
+  height: 0.16rem;
+  border-radius: 999px;
+  background: var(--series-color);
+}
+
 .stage-chart__stat span {
-  display: block;
   color: var(--tg-text-muted);
   font-size: 0.48rem;
 }
 
 .stage-chart__stat b {
-  display: block;
-  margin-top: 0.16rem;
   color: var(--tg-text-strong);
-  font-size: 0.85rem;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .stage-chart__canvas {
   width: 100%;
-  height: 13rem;
-  min-height: 13rem;
+  height: 11.5rem;
+  min-height: 11.5rem;
   border: 1px solid #dce4f0;
   border-radius: 5px;
   background: #fbfdff;

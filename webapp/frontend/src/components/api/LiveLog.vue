@@ -200,7 +200,8 @@ onBeforeUnmount(() => {
   width: 100%;
   min-width: 0;
   min-height: 8rem;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   scrollbar-gutter: stable;
   background: #111a2d;
   color: #eef4ff;
@@ -208,11 +209,13 @@ onBeforeUnmount(() => {
 }
 
 .live-log__text {
-  width: max-content;
-  min-width: 100%;
-  max-width: none;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   margin: 0;
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   font-family:
     SFMono-Regular,
     ui-monospace,

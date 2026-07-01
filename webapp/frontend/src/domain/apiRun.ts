@@ -9,23 +9,30 @@ import type {
 } from "../types/tensorguard";
 
 export const stageDefinitions = [
-  { key: "qwen_seed", label: "Qwen 种子", metricKeys: [["候选", "qwen_raw"], ["有效种子", "qwen_valid"]] },
+  {
+    key: "qwen_seed",
+    label: "种子生成",
+    metricKeys: [
+      ["生成候选", "qwen_raw", "#2563eb"],
+      ["有效种子", "qwen_valid", "#178263"],
+    ],
+  },
   {
     key: "ev_generation",
-    label: "InCoder 变异",
+    label: "演化变异",
     metricKeys: [
-      ["有效", "valid"],
-      ["异常", "exception"],
-      ["崩溃", "crash"],
-      ["超时", "hangs"],
+      ["有效程序", "valid", "#178263"],
+      ["异常", "exception", "#d29a43"],
+      ["崩溃", "crash", "#c65362"],
+      ["超时", "hangs", "#63738f"],
     ],
   },
   {
     key: "driver",
     label: "差异检测",
     metricKeys: [
-      ["已检测程序", "tested_cases"],
-      ["差异 Catch", "trace_hits"],
+      ["已检测程序", "tested_cases", "#2563eb"],
+      ["差异 Catch", "trace_hits", "#c65362"],
     ],
   },
 ] as const;

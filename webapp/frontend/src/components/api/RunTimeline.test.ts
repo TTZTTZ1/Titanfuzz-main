@@ -94,7 +94,7 @@ describe("RunTimeline", () => {
     await wrapper.get('[role="tab"][aria-selected="true"]').trigger("keydown", { key: "ArrowLeft" });
     await flushPromises();
 
-    expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toContain("Qwen 种子");
+    expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toContain("种子生成");
 
     await activeTab().trigger("keydown", { key: "End" });
     await flushPromises();
@@ -104,7 +104,7 @@ describe("RunTimeline", () => {
     await wrapper.get('[role="tab"][aria-selected="true"]').trigger("keydown", { key: "Home" });
     await flushPromises();
 
-    expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toContain("Qwen 种子");
+    expect(wrapper.get('[role="tab"][aria-selected="true"]').text()).toContain("种子生成");
   });
 
   it("allows switching back to the currently running stage", async () => {

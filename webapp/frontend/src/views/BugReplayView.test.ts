@@ -293,6 +293,8 @@ describe("BugReplayView", () => {
     expect(wrapper.find(".bug-replay-view__review-footer").exists()).toBe(true);
     expect(wrapper.findAll(".bug-replay-view__candidate-reason > article")).toHaveLength(3);
     expect(wrapper.findAll(".bug-replay-view__candidate-workbench > section")).toHaveLength(3);
+    expect(wrapper.findAll(".bug-replay-view__candidate-file--wide")).toHaveLength(2);
+    expect(wrapper.find(".bug-replay-view__review-card--full").exists()).toBe(true);
 
     await wrapper.get('input[type="search"]').setValue("device assert");
     expect(wrapper.text()).toContain("torch.quantile");

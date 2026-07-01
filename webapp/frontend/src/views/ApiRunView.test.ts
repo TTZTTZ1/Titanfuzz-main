@@ -145,6 +145,7 @@ describe("ApiRunView", () => {
     expect(wrapper.get(".api-run-view__page-symbol").text()).toBe("API");
     expect(wrapper.find(".api-run-view__orchestration").exists()).toBe(true);
     expect(wrapper.find(".api-run-view__control-card--device").exists()).toBe(true);
+    expect(wrapper.findAll(".api-run-view__control")).toHaveLength(4);
     expect(wrapper.find(".api-run-view__dashboard").exists()).toBe(true);
     expect(wrapper.find(".api-run-view__primary").exists()).toBe(true);
     expect(wrapper.find(".api-run-view__telemetry-strip").exists()).toBe(true);

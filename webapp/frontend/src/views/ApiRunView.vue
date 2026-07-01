@@ -106,22 +106,22 @@ function handleLibraryChange() {
       <ApiSelector :selected="selectedApi" @select="selectApi" @library-change="handleLibraryChange" />
 
       <div class="api-run-view__run-controls" aria-label="运行控制">
-        <div class="api-run-view__control-card api-run-view__control-card--mode">
+        <div class="api-run-view__control api-run-view__control-card api-run-view__control-card--mode">
           <span class="api-run-view__control-label">运行模式</span>
           <span class="api-run-view__segmented" role="group" aria-label="运行模式">
             <button type="button" :aria-pressed="mode === 'demo'" @click="setMode('demo')">演示</button>
             <button type="button" :aria-pressed="mode === 'normal'" @click="setMode('normal')">完整</button>
           </span>
         </div>
-        <div class="api-run-view__control-card api-run-view__control-card--device">
+        <div class="api-run-view__control api-run-view__control-card api-run-view__control-card--device">
           <span class="api-run-view__control-label">计算设备</span>
           <b>{{ selectedDeviceLabel }}</b>
         </div>
-        <div class="api-run-view__control-card api-run-view__control-card--candidate">
+        <div class="api-run-view__control api-run-view__control-card api-run-view__control-card--candidate">
           <span class="api-run-view__control-label">候选状态</span>
           <b :class="`api-run-view__candidate-state api-run-view__candidate-state--${candidateState.tone}`">{{ candidateState.label }}</b>
         </div>
-        <button type="button" class="api-run-view__run" :disabled="!canRun" @click="startRun">
+        <button type="button" class="api-run-view__control api-run-view__run" :disabled="!canRun" @click="startRun">
           <span>{{ running || runLoading ? "任务运行中" : "运行" }}</span>
           <small>{{ runButtonHint }}</small>
         </button>
@@ -191,32 +191,35 @@ function handleLibraryChange() {
 .api-run-view__run-state--active i { background: #d18b2b; box-shadow: 0 0 0 3px #f8dfb7; }
 .api-run-view__panel { background: #fff; border: 1px solid var(--tg-border); border-radius: var(--tg-radius); box-shadow: var(--tg-shadow); }
 .api-run-view__orchestration { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(27rem, 1fr); justify-content: space-between; align-items: end; gap: 0.75rem; padding: 0.85rem 1rem; }
-.api-run-view__run-controls { display: grid; grid-template-columns: repeat(4,minmax(6.2rem,1fr)); align-items: end; gap: 0.5rem; }
-.api-run-view__control-card { display: grid; gap: 0.3rem; min-width: 0; }
+.api-run-view__run-controls { display: grid; grid-template-columns: repeat(4,minmax(6.2rem,1fr)); align-items: stretch; gap: 0.5rem; }
+.api-run-view__control { height: 3.45rem; min-width: 0; box-sizing: border-box; }
+.api-run-view__control-card { display: grid; grid-template-rows:auto minmax(0,1fr); align-items:center; gap: 0.22rem; padding:0.42rem 0.52rem; border:1px solid #d6deeb; border-radius:6px; background:#fff; }
 .api-run-view__control-label { color: var(--tg-text-muted); font-size: 0.5rem; font-weight: 720; }
-.api-run-view__control-card--device { min-height: 2.2rem; justify-content: center; align-content: center; padding: 0.35rem 0.5rem; border: 1px solid #d6deeb; border-radius: 5px; background: #fff; }
+.api-run-view__control-card--device { justify-content: stretch; }
 .api-run-view__control-card--device b { color: var(--tg-text-strong); font: 780 0.62rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
-.api-run-view__control-card--candidate{min-height:2.2rem;justify-content:center;align-content:center;padding:.35rem .5rem;border:1px solid #d6deeb;border-radius:5px;background:#fff}.api-run-view__candidate-state{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tg-text-muted);font-size:.52rem}.api-run-view__candidate-state--running{color:var(--tg-action-strong)}.api-run-view__candidate-state--success{color:var(--tg-green-text)}.api-run-view__candidate-state--error{color:var(--tg-red-text)}
-.api-run-view__segmented { height: 2.2rem; display: flex; padding: 3px; border: 1px solid #d6deeb; border-radius: 5px; background: #f5f7fb; }
+.api-run-view__control-card--candidate{justify-content:stretch}.api-run-view__candidate-state{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tg-text-muted);font-size:.52rem}.api-run-view__candidate-state--running{color:var(--tg-action-strong)}.api-run-view__candidate-state--success{color:var(--tg-green-text)}.api-run-view__candidate-state--error{color:var(--tg-red-text)}
+.api-run-view__segmented { height: 100%; display: flex; padding: 2px; border: 0; border-radius: 4px; background: #f5f7fb; }
 .api-run-view__segmented button { min-width: 3.3rem; border: 0; border-radius: 3px; background: transparent; color: var(--tg-text-muted); font-size: 0.65rem; }
 .api-run-view__segmented button[aria-pressed="true"] { background: #fff; color: var(--tg-action-strong); box-shadow: 0 2px 8px rgba(36,58,98,.08); }
-.api-run-view__run { height: 2.2rem; display: grid; align-content: center; gap: 0.1rem; border: 1px solid var(--tg-action); border-radius: 5px; background: var(--tg-action); color: #fff; padding: 0 0.75rem; text-align: left; box-shadow: 0 6px 14px rgba(37,99,235,.16); }
+.api-run-view__run { display: grid; align-content: center; gap: 0.12rem; border: 1px solid var(--tg-action); border-radius: 6px; background: var(--tg-action); color: #fff; padding: 0 0.75rem; text-align: left; box-shadow: 0 6px 14px rgba(37,99,235,.16); }
 .api-run-view__run span { font-size: 0.64rem; font-weight: 760; }
 .api-run-view__run small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,.78); font-size: 0.46rem; }
 .api-run-view__run:disabled { border-color: var(--tg-border); background: #eef1f6; color: #99a3b4; box-shadow: none; }
 .api-run-view__run:disabled small { color: #a3adbd; }
-.api-run-view__dashboard { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(21rem, 0.8fr); gap: 0.75rem; align-items: stretch; }
-.api-run-view__primary { display: grid; grid-template-rows: auto minmax(10.5rem, auto); gap: 0.75rem; min-width: 0; }
-.api-run-view__telemetry-strip { display: grid; grid-template-columns: minmax(9rem, 0.78fr) minmax(12rem, 0.9fr) minmax(15rem, 1.32fr); gap: 0.75rem; align-items: stretch; min-width: 0; }
+.api-run-view__dashboard { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(22rem, 0.95fr); gap: 0.75rem; align-items: stretch; }
+.api-run-view__primary { display: grid; grid-template-rows: auto minmax(9.5rem, auto); gap: 0.65rem; min-width: 0; }
+.api-run-view__telemetry-strip { display: grid; grid-template-columns: minmax(8rem, 0.72fr) minmax(11rem, 0.9fr) minmax(13rem, 1.18fr); gap: 0.6rem; align-items: stretch; min-width: 0; }
 .api-run-view__log-column { min-width: 0; }
-.api-run-view__log-column :deep(.live-log__body), .api-run-view__log-column :deep(.live-log__empty) { height: 100%; min-height: 25rem; }
+.api-run-view__log-column :deep(.live-log__body), .api-run-view__log-column :deep(.live-log__empty) { height: 100%; min-height: 23rem; }
 .api-run-view__telemetry-strip :deep(.gpu-chart__body) { height: calc(100% - 2.25rem); grid-template-columns: 1fr; }
 .api-run-view__telemetry-strip :deep(.gpu-chart__body article) { padding: 0.7rem 0.75rem; }
 .api-run-view__telemetry-strip :deep(.gpu-chart__body b) { margin-top: 0.25rem; font-size: 0.9rem; }
 .api-run-view__telemetry-strip :deep(.gpu-chart__track) { margin-top: 0.42rem; }
-.api-run-view__telemetry-strip :deep(.run-snapshot), .api-run-view__telemetry-strip :deep(.result-composition) { padding: 0.7rem; gap: 0.5rem; }
-.api-run-view__telemetry-strip :deep(.run-snapshot__item) { padding: 0.45rem; }
+.api-run-view__telemetry-strip :deep(.run-snapshot), .api-run-view__telemetry-strip :deep(.result-composition) { padding: 0.6rem; gap: 0.42rem; }
+.api-run-view__telemetry-strip :deep(.run-snapshot__item) { padding: 0.38rem 0.42rem; }
 .api-run-view__telemetry-strip :deep(.run-snapshot__models span) { padding: 0.3rem 0.4rem; grid-template-columns: 3.6rem minmax(0, 1fr); }
+.api-run-view__telemetry-strip :deep(.result-composition__grid) { gap:0.24rem 0.52rem; }
+.api-run-view__telemetry-strip :deep(.result-composition__bar) { height:0.55rem; }
 .api-run-view__sync { min-height: 1.8rem; display: grid; align-items: center; color: var(--tg-text-muted); font-size: 0.62rem; }
 .api-run-view__sync p { margin: 0; }
 .api-run-view__sync-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }

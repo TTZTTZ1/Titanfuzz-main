@@ -27,6 +27,7 @@ describe("LiveLog", () => {
 
     const stageTabs = wrapper.findAll('[data-testid="log-stage-tab"]');
     expect(stageTabs).toHaveLength(3);
+    expect(stageTabs.map((tab) => tab.text())).toEqual(["种子生成", "演化变异", "差异检测"]);
     expect(stageTabs[0].classes()).toContain("live-log__stage--active");
     expect(stageTabs[0].attributes("disabled")).toBeUndefined();
     expect(stageTabs[1].attributes("disabled")).toBeUndefined();
