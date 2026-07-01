@@ -63,9 +63,30 @@ def test_environment_payload_uses_live_collector():
         assert server.environment_payload(force=True) == expected
 
 
+def test_normalize_terminal_output_keeps_only_latest_carriage_return_frame():
+    text = (
+        "Loading weights: 0%|0/339\r"
+        "Loading weights: 48%|162/339\r"
+        "Loading weights: 100%|339/339\n"
+        "[qwen_seed] model loaded\n"
+    )
+
+    assert server.normalize_terminal_output(text) == (
+        "Loading weights: 100%|339/339\n"
+        "[qwen_seed] model loaded\n"
+    )
+
+
+def test_normalize_terminal_output_removes_ansi_without_dropping_normal_lines():
+    text = "before\n\x1b[32mready\x1b[0m\nafter\n"
+    assert server.normalize_terminal_output(text) == "before\nready\nafter\n"
+
+
 if __name__ == "__main__":
     test_parse_nvidia_smi_inventory()
     test_parse_gpu_sample()
     test_inventory_failure_returns_warning_not_fake_gpu()
     test_environment_payload_uses_live_collector()
+    test_normalize_terminal_output_keeps_only_latest_carriage_return_frame()
+    test_normalize_terminal_output_removes_ansi_without_dropping_normal_lines()
     print("ok")

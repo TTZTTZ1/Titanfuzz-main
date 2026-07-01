@@ -21,6 +21,7 @@ import {
   getCandidate,
   getCandidateCluster,
   getCandidateClusters,
+  getCandidateValidationJob,
   getCandidates,
   getConfirmedBug,
   getConfirmedBugs,
@@ -29,7 +30,10 @@ import {
   getReproJob,
   getReproReport,
   reproduceConfirmedBug,
+  resetCandidateClusterDraft,
+  saveCandidateClusterDraft,
   startApiRun,
+  startCandidateValidation,
   updateCandidateClusterStatus,
   updateCandidateStatus,
 } from "./tensorguard";
@@ -254,6 +258,25 @@ describe("TensorGuard API service", () => {
         body: JSON.stringify({ status: "reproduced", note: "stable" }),
       }),
     );
+  });
+
+  it("wraps candidate draft and CPU/GPU validation routes", async () => {
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({})));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await saveCandidateClusterDraft("cluster/one", "print('draft')\n");
+    await resetCandidateClusterDraft("cluster/one");
+    await startCandidateValidation("cluster/one", "print('run')\n", 45);
+    await getCandidateValidationJob("run/one");
+
+    expect(fetchMock.mock.calls.map(([path, init]) => [path, (init as RequestInit).method])).toEqual([
+      ["/api/candidate-clusters/cluster%2Fone/draft", "POST"],
+      ["/api/candidate-clusters/cluster%2Fone/draft/reset", "POST"],
+      ["/api/candidate-clusters/cluster%2Fone/validate", "POST"],
+      ["/api/candidate-validation-jobs/run%2Fone", "GET"],
+    ]);
+    expect(JSON.parse(String((fetchMock.mock.calls[0][1] as RequestInit).body))).toEqual({ source: "print('draft')\n" });
+    expect(JSON.parse(String((fetchMock.mock.calls[2][1] as RequestInit).body))).toEqual({ source: "print('run')\n", timeout: 45 });
   });
 
   it("wraps confirmed bug list, detail, and reproduce routes", async () => {

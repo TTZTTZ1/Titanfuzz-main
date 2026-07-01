@@ -24,6 +24,7 @@ describe("LiveLog", () => {
     expect(wrapper.text()).not.toContain("driver log");
     expect(wrapper.find("strong").exists()).toBe(false);
     expect(wrapper.find('[data-testid="auto-scroll-toggle"]').exists()).toBe(false);
+    expect(wrapper.get(".live-log").classes()).toContain("live-log--fixed-viewport");
 
     const stageTabs = wrapper.findAll('[data-testid="log-stage-tab"]');
     expect(stageTabs).toHaveLength(3);

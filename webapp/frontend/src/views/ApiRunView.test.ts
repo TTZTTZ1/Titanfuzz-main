@@ -150,6 +150,7 @@ describe("ApiRunView", () => {
     expect(wrapper.find(".api-run-view__primary").exists()).toBe(true);
     expect(wrapper.find(".api-run-view__telemetry-strip").exists()).toBe(true);
     expect(wrapper.find(".api-run-view__log-column").exists()).toBe(true);
+    expect(wrapper.get(".api-run-view__log-column").classes()).toContain("api-run-view__log-column--fixed");
     expect(wrapper.find(".api-run-view__primary > .stage-chart").exists()).toBe(true);
     expect(wrapper.find(".api-run-view__telemetry-strip > .gpu-chart").exists()).toBe(true);
     expect(wrapper.find(".api-run-view__log-column > .live-log").exists()).toBe(true);

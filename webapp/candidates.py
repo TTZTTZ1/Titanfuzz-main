@@ -42,6 +42,7 @@ NOISE_PATTERNS = (
     ("undefined_framework", "name 'tf' is not defined"),
 )
 CATEGORY_PRIORITY = {"crash": 100, "hangs": 90, "exception": 70, "valid": 55, "flaky": 45, "notarget": 25}
+MAX_DRAFT_BYTES = 200_000
 
 
 def now() -> str:
@@ -170,6 +171,22 @@ class CandidateStore:
         self.index_path = index_path or self.repo_root / "demo_runs" / "candidates" / "index.json"
         self._lock = threading.Lock()
 
+    def _cluster_workspace(self, cluster_id: str) -> Path:
+        digest = hashlib.sha256(cluster_id.encode("utf-8")).hexdigest()[:20]
+        return self.index_path.parent / "workspaces" / digest
+
+    def _write_workspace_file(self, path: Path, content: str) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(path.suffix + ".tmp")
+        tmp.write_text(content, encoding="utf-8")
+        os.replace(tmp, path)
+
+    def _write_workspace_metadata(self, workspace: Path, payload: dict) -> None:
+        self._write_workspace_file(
+            workspace / "metadata.json",
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        )
+
     def _read(self) -> list[dict]:
         if not self.index_path.is_file():
             return []
@@ -263,9 +280,62 @@ class CandidateStore:
                 and f"/{summary['category']}/" in str(item.get("source_path", ""))
             ]
             summary["representative_source_code"] = source.read_text(encoding="utf-8", errors="replace") if source.is_file() else ""
-            summary["minimization_draft"] = summary["representative_source_code"]
+            workspace = self._cluster_workspace(cluster_id)
+            draft_path = workspace / "repro.py"
+            draft_saved = draft_path.is_file()
+            draft = draft_path.read_text(encoding="utf-8", errors="replace") if draft_saved else summary["representative_source_code"]
+            summary["minimization_draft"] = draft
+            summary["draft_saved"] = draft_saved
+            summary["draft_modified"] = draft != summary["representative_source_code"]
+            summary["draft_sha256"] = hashlib.sha256(draft.encode("utf-8")).hexdigest() if draft else ""
             return summary
         return None
+
+    def save_cluster_draft(self, cluster_id: str, source: str) -> dict:
+        cluster = self.get_cluster(cluster_id)
+        if cluster is None:
+            raise KeyError(cluster_id)
+        if not isinstance(source, str):
+            raise ValueError("candidate draft must be text")
+        encoded = source.encode("utf-8")
+        if not source.strip():
+            raise ValueError("candidate draft cannot be empty")
+        if len(encoded) > MAX_DRAFT_BYTES:
+            raise ValueError(f"candidate draft exceeds {MAX_DRAFT_BYTES} bytes")
+        workspace = self._cluster_workspace(cluster_id)
+        with self._lock:
+            self._write_workspace_file(workspace / "repro.py", source)
+            self._write_workspace_metadata(
+                workspace,
+                {
+                    "cluster_id": cluster_id,
+                    "draft_sha256": hashlib.sha256(encoded).hexdigest(),
+                    "updated_at": now(),
+                },
+            )
+        updated = self.get_cluster(cluster_id)
+        if updated is None:
+            raise KeyError(cluster_id)
+        return updated
+
+    def reset_cluster_draft(self, cluster_id: str) -> dict:
+        cluster = self.get_cluster(cluster_id)
+        if cluster is None:
+            raise KeyError(cluster_id)
+        return self.save_cluster_draft(cluster_id, cluster["representative_source_code"])
+
+    def cluster_draft_path(self, cluster_id: str) -> Path:
+        cluster = self.get_cluster(cluster_id)
+        if cluster is None:
+            raise KeyError(cluster_id)
+        if not cluster["draft_saved"]:
+            self.save_cluster_draft(cluster_id, cluster["minimization_draft"])
+        return self._cluster_workspace(cluster_id) / "repro.py"
+
+    def cluster_workspace_path(self, cluster_id: str) -> Path:
+        if self.get_cluster(cluster_id) is None:
+            raise KeyError(cluster_id)
+        return self._cluster_workspace(cluster_id)
 
     def _validated_source(
         self,

@@ -5,17 +5,22 @@ import {
   generateReproReport,
   getCandidateCluster,
   getCandidateClusters,
+  getCandidateValidationJob,
   getConfirmedBug,
   getConfirmedBugs,
   getEnvironment,
   getReproJob,
   getReproReport,
   reproduceConfirmedBug,
+  resetCandidateClusterDraft,
+  saveCandidateClusterDraft,
+  startCandidateValidation,
   updateCandidateClusterStatus,
 } from "../services/tensorguard";
 import type {
   CandidateClusterDetail,
   CandidateClusterSummary,
+  CandidateValidationJobPayload,
   ConfirmedBugDetail,
   ConfirmedBugSummary,
   ExecutionMode,
@@ -34,6 +39,10 @@ const selectedConfirmedId = ref<string | null>(null);
 const selectedCandidateClusterId = ref<string | null>(null);
 const detail = ref<ConfirmedBugDetail | null>(null);
 const candidateClusterDetail = ref<CandidateClusterDetail | null>(null);
+const candidateDraft = ref("");
+const candidateValidation = ref<CandidateValidationJobPayload | null>(null);
+const candidateDraftSaving = ref(false);
+const candidateValidationRunning = ref(false);
 const loading = ref(true);
 const detailLoading = ref(false);
 const error = ref<string | null>(null);
@@ -46,6 +55,7 @@ const reportOpen = ref(false);
 const reportLoading = ref(false);
 const runtimeEnvironment = ref<Partial<EnvironmentPayload> | null>(null);
 let pollTimer: ReturnType<typeof setTimeout> | null = null;
+let candidatePollTimer: ReturnType<typeof setTimeout> | null = null;
 let selectionRevision = 0;
 
 function describeError(value: unknown, fallback: string) {
@@ -96,6 +106,11 @@ const candidateClusterStats = computed(() => {
   return { total, needsMinimize };
 });
 
+const candidateDraftDirty = computed(() => candidateDraft.value !== (candidateClusterDetail.value?.minimization_draft ?? ""));
+const candidateValidationFinished = computed(() => candidateValidation.value?.status === "finished");
+const candidateCpuOutput = computed(() => candidateValidation.value?.logs?.cpu || "尚未运行 CPU 验证。");
+const candidateGpuOutput = computed(() => candidateValidation.value?.logs?.gpu0 || "尚未运行 GPU 0 验证。");
+
 const activeExecution = computed<ReproExecution | null>(() => {
   const modes = job.value?.status.modes;
   return modes?.["gpu:0"] ?? modes?.cpu ?? null;
@@ -134,6 +149,33 @@ const environmentRows = computed(() => {
 function clearPoll() {
   if (pollTimer !== null) clearTimeout(pollTimer);
   pollTimer = null;
+}
+
+function clearCandidatePoll() {
+  if (candidatePollTimer !== null) clearTimeout(candidatePollTimer);
+  candidatePollTimer = null;
+}
+
+function applyCandidateCluster(payload: CandidateClusterDetail) {
+  candidateClusterDetail.value = payload;
+  candidateDraft.value = payload.minimization_draft;
+  candidateValidation.value = payload.latest_validation ?? null;
+  candidateValidationRunning.value = ["pending", "running"].includes(candidateValidation.value?.status ?? "");
+}
+
+async function pollCandidateValidation(runId: string) {
+  clearCandidatePoll();
+  try {
+    const payload = await getCandidateValidationJob(runId);
+    candidateValidation.value = payload;
+    candidateValidationRunning.value = ["pending", "running"].includes(payload.status);
+    if (candidateValidationRunning.value) {
+      candidatePollTimer = setTimeout(() => void pollCandidateValidation(runId), 1000);
+    }
+  } catch (cause) {
+    actionError.value = describeError(cause, "候选验证状态读取失败");
+    candidateValidationRunning.value = false;
+  }
 }
 
 async function pollJob(jobId: string) {
@@ -187,9 +229,14 @@ async function selectCandidateCluster(item: CandidateClusterSummary) {
   selectedCandidateClusterId.value = item.cluster_id;
   detailLoading.value = true;
   actionError.value = null;
+  clearCandidatePoll();
   try {
     const payload = await getCandidateCluster(item.cluster_id);
-    if (revision === selectionRevision) candidateClusterDetail.value = payload;
+    if (revision !== selectionRevision) return;
+    applyCandidateCluster(payload);
+    if (payload.latest_validation_job_id && ["pending", "running"].includes(payload.latest_validation?.status ?? "")) {
+      candidatePollTimer = setTimeout(() => void pollCandidateValidation(payload.latest_validation_job_id as string), 1000);
+    }
   } catch (cause) {
     if (revision === selectionRevision) actionError.value = describeError(cause, "候选簇详情加载失败");
   } finally {
@@ -200,7 +247,48 @@ async function selectCandidateCluster(item: CandidateClusterSummary) {
 async function refreshCandidateCluster(clusterId: string) {
   const [clusterList, payload] = await Promise.all([getCandidateClusters(), getCandidateCluster(clusterId)]);
   candidateClusters.value = clusterList;
-  candidateClusterDetail.value = payload;
+  applyCandidateCluster(payload);
+}
+
+async function saveCandidateDraft() {
+  if (!candidateClusterDetail.value || !candidateDraft.value.trim()) return;
+  candidateDraftSaving.value = true;
+  actionError.value = null;
+  try {
+    const payload = await saveCandidateClusterDraft(candidateClusterDetail.value.cluster_id, candidateDraft.value);
+    applyCandidateCluster(payload);
+  } catch (cause) {
+    actionError.value = describeError(cause, "最小复现草稿保存失败");
+  } finally {
+    candidateDraftSaving.value = false;
+  }
+}
+
+async function resetCandidateDraft() {
+  if (!candidateClusterDetail.value) return;
+  candidateDraftSaving.value = true;
+  actionError.value = null;
+  try {
+    const payload = await resetCandidateClusterDraft(candidateClusterDetail.value.cluster_id);
+    applyCandidateCluster(payload);
+  } catch (cause) {
+    actionError.value = describeError(cause, "恢复候选源码失败");
+  } finally {
+    candidateDraftSaving.value = false;
+  }
+}
+
+async function validateCandidateDraft() {
+  if (!candidateClusterDetail.value || !candidateDraft.value.trim()) return;
+  actionError.value = null;
+  candidateValidationRunning.value = true;
+  try {
+    const started = await startCandidateValidation(candidateClusterDetail.value.cluster_id, candidateDraft.value, 60);
+    await pollCandidateValidation(started.run_id);
+  } catch (cause) {
+    actionError.value = describeError(cause, "CPU/GPU 候选验证启动失败");
+    candidateValidationRunning.value = false;
+  }
 }
 
 async function updateClusterReview(status: "pending_review" | "reproduced" | "needs_review" | "rejected", note: string) {
@@ -275,7 +363,10 @@ async function load() {
 }
 
 onMounted(() => void load());
-onBeforeUnmount(clearPoll);
+onBeforeUnmount(() => {
+  clearPoll();
+  clearCandidatePoll();
+});
 </script>
 
 <template>
@@ -432,9 +523,43 @@ onBeforeUnmount(clearPoll);
             <section class="bug-replay-view__panel bug-replay-view__code-panel bug-replay-view__candidate-file bug-replay-view__candidate-file--wide">
               <header class="bug-replay-view__file-head">
                 <span class="bug-replay-view__file-icon">PY</span>
-                <div><b>人工整理 repro.py</b><span>最小复现草稿 · 当前为只读预览</span></div>
+                <div>
+                  <b>人工整理 repro.py</b>
+                  <span>{{ candidateDraftDirty ? "存在未保存修改" : candidateClusterDetail.draft_saved ? "草稿已持久化" : "由候选源码初始化" }}</span>
+                </div>
               </header>
-              <div class="bug-replay-view__candidate-code"><pre>{{ candidateClusterDetail.minimization_draft || candidateClusterDetail.representative_source_code || "等待人工整理最小复现代码" }}</pre></div>
+              <textarea
+                v-model="candidateDraft"
+                data-testid="candidate-draft-editor"
+                class="bug-replay-view__candidate-editor"
+                aria-label="人工最小复现代码"
+                spellcheck="false"
+              />
+              <footer class="bug-replay-view__draft-actions">
+                <span>每次删除一处无关语句，再运行 CPU + GPU 验证；不能复现就撤销本次删除。</span>
+                <div>
+                  <button data-testid="reset-candidate-draft" type="button" :disabled="candidateDraftSaving || candidateValidationRunning" @click="resetCandidateDraft">恢复原始代码</button>
+                  <button data-testid="save-candidate-draft" type="button" :disabled="candidateDraftSaving || !candidateDraftDirty" @click="saveCandidateDraft">{{ candidateDraftSaving ? "保存中" : "保存草稿" }}</button>
+                  <button data-testid="validate-candidate-draft" type="button" class="bug-replay-view__primary" :disabled="candidateValidationRunning || !candidateDraft.trim()" @click="validateCandidateDraft">{{ candidateValidationRunning ? "验证运行中" : "CPU + GPU 验证" }}</button>
+                </div>
+              </footer>
+            </section>
+
+            <section class="bug-replay-view__panel bug-replay-view__candidate-validation">
+              <header>
+                <div><b>当前草稿验证结果</b><span>CPU 与 GPU 0 使用两个独立子进程</span></div>
+                <strong :class="{ done: candidateValidationFinished }">{{ candidateValidationRunning ? "运行中" : candidateValidationFinished ? "验证完成" : "尚未验证" }}</strong>
+              </header>
+              <div class="bug-replay-view__validation-grid">
+                <article>
+                  <div><b>CPU</b><span>CUDA_VISIBLE_DEVICES=""</span></div>
+                  <pre data-testid="candidate-cpu-output">{{ candidateCpuOutput }}</pre>
+                </article>
+                <article>
+                  <div><b>GPU 0</b><span>CUDA_VISIBLE_DEVICES="0"</span></div>
+                  <pre data-testid="candidate-gpu-output">{{ candidateGpuOutput }}</pre>
+                </article>
+              </div>
             </section>
 
             <section class="bug-replay-view__panel bug-replay-view__review-card bug-replay-view__review-card--full">
@@ -456,7 +581,7 @@ onBeforeUnmount(clearPoll);
                   <button type="button" @click="updateClusterReview('rejected', '人工忽略候选')">忽略候选</button>
                   <button type="button" @click="updateClusterReview('needs_review', '人工标记为待分析')">标记待分析</button>
                   <button type="button" @click="updateClusterReview('reproduced', '人工标记为可复现')">标记可复现</button>
-                  <button type="button" class="bug-replay-view__primary" disabled title="需要先保存最小复现代码并生成标准归档">收录为确认 Bug</button>
+                  <button type="button" class="bug-replay-view__primary" :disabled="!candidateValidationFinished" :title="candidateValidationFinished ? '验证证据已具备，仍需人工判断是否为框架 Bug' : '需要先完成 CPU + GPU 独立验证'" @click="updateClusterReview('needs_review', '最小复现验证完成，提交人工收录判断')">提交人工收录</button>
                 </div>
               </footer>
             </section>
@@ -484,10 +609,12 @@ onBeforeUnmount(clearPoll);
 .bug-replay-view__cluster-badge{width:max-content;padding:.24rem .36rem;border-radius:4px;background:var(--tg-amber-bg);color:var(--tg-amber-text);font-size:.46rem;font-style:normal;font-weight:780}.bug-replay-view__cluster-badge--promoted,.bug-replay-view__cluster-badge--reproduced{background:var(--tg-green-bg);color:var(--tg-green-text)}.bug-replay-view__cluster-badge--rejected{background:var(--tg-red-bg);color:var(--tg-red-text)}
 .bug-replay-view__cluster-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(18rem,.58fr);gap:.9rem;align-items:start}.bug-replay-view__cluster-pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:.35rem}.bug-replay-view__cluster-pipeline article{min-height:3.6rem;padding:.55rem;border:1px solid var(--tg-border);border-radius:6px;background:var(--tg-surface-soft)}.bug-replay-view__cluster-pipeline article.done{border-color:#c9e8d9;background:var(--tg-green-bg)}.bug-replay-view__cluster-pipeline article.current{border-color:#f1d49e;background:var(--tg-amber-bg)}.bug-replay-view__cluster-pipeline small{display:block;color:var(--tg-text-muted);font:.45rem/1 ui-monospace,monospace}.bug-replay-view__cluster-pipeline b{display:block;margin-top:.38rem;font-size:.58rem}
 .bug-replay-view__candidate-reason{padding:.85rem 1rem;display:grid;grid-template-columns:var(--candidate-columns);gap:.75rem}.bug-replay-view__candidate-reason article{min-width:0;min-height:5.2rem;padding:.68rem .72rem;border:1px solid var(--tg-border);border-top:3px solid var(--tg-action);border-radius:6px;background:var(--tg-surface-soft)}.bug-replay-view__candidate-reason article:nth-child(2){border-top-color:var(--tg-amber-text)}.bug-replay-view__candidate-reason article:nth-child(3){border-top-color:var(--tg-green)}.bug-replay-view__candidate-reason small{display:block;margin-bottom:.34rem;color:var(--tg-text-muted);font:.46rem/1 ui-monospace,monospace;text-transform:uppercase}.bug-replay-view__candidate-reason b{display:block;margin-bottom:.26rem;font-size:.64rem}.bug-replay-view__candidate-reason p{margin:0;overflow-wrap:anywhere;color:#5e687a;font-size:.53rem;line-height:1.5}
-.bug-replay-view__candidate-workbench{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;align-items:stretch}.bug-replay-view__candidate-workbench>.bug-replay-view__panel{min-width:0}.bug-replay-view__candidate-file{height:18rem;display:grid;grid-template-rows:auto minmax(0,1fr)}.bug-replay-view__review-card--full{grid-column:1/-1;height:auto}
+.bug-replay-view__candidate-workbench{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;align-items:stretch}.bug-replay-view__candidate-workbench>.bug-replay-view__panel{min-width:0}.bug-replay-view__candidate-file{height:20rem;display:grid;grid-template-rows:auto minmax(0,1fr)}.bug-replay-view__candidate-file:has(.bug-replay-view__candidate-editor){grid-template-rows:auto minmax(0,1fr) auto}.bug-replay-view__review-card--full{grid-column:1/-1;height:auto}
 .bug-replay-view__code-panel>.bug-replay-view__file-head,.bug-replay-view__review-head{display:grid;grid-template-columns:1.9rem minmax(0,1fr);align-items:start;justify-content:initial;gap:.55rem;padding:.7rem .75rem;border-bottom:1px solid var(--tg-border);background:#fff;color:var(--tg-text-strong)}.bug-replay-view__file-head>div,.bug-replay-view__review-head>div{min-width:0}.bug-replay-view__file-head b,.bug-replay-view__review-head b{display:block;color:var(--tg-text-strong);font-size:.61rem}.bug-replay-view__file-head div>span,.bug-replay-view__review-head div>span{display:block;max-width:none;margin-top:.22rem;overflow-wrap:anywhere;word-break:break-word;white-space:normal;color:var(--tg-text-muted);font:.43rem/1.45 ui-monospace,monospace;text-align:left}.bug-replay-view__file-head>.bug-replay-view__file-icon,.bug-replay-view__review-head>.bug-replay-view__file-icon{width:1.8rem;height:1.8rem;display:grid;place-items:center;border:1px solid #c9dcff;border-radius:6px;background:var(--tg-action-soft);color:var(--tg-action-strong);font:800 .42rem/1 ui-monospace,monospace}
 .bug-replay-view__candidate-code{min-width:0;min-height:0;overflow:auto;scrollbar-gutter:stable;background:#111a2d}.bug-replay-view__candidate-file .bug-replay-view__candidate-code pre{width:max-content;min-width:100%;height:auto;min-height:100%;overflow:visible;white-space:pre;word-break:normal}
+.bug-replay-view__candidate-editor{width:100%;min-width:0;min-height:0;resize:none;border:0;outline:0;padding:.72rem .8rem;overflow:auto;scrollbar-gutter:stable;background:#111a2d;color:#eef4ff;font:500 .52rem/1.65 SFMono-Regular,ui-monospace,Menlo,Consolas,monospace;tab-size:4;white-space:pre}.bug-replay-view__candidate-editor:focus{box-shadow:inset 0 0 0 2px #4f7fe8}.bug-replay-view__draft-actions{display:grid;gap:.48rem;padding:.55rem .65rem;border-top:1px solid #293750;background:#17223a}.bug-replay-view__draft-actions>span{color:#aab8cf;font-size:.45rem;line-height:1.45}.bug-replay-view__draft-actions>div{display:flex;justify-content:flex-end;gap:.36rem;flex-wrap:wrap}.bug-replay-view__draft-actions button{height:1.8rem;padding:0 .58rem;border:1px solid #44536c;border-radius:5px;background:#22304a;color:#dbe5f5;font-size:.48rem;font-weight:730}.bug-replay-view__draft-actions .bug-replay-view__primary{border-color:var(--tg-action);background:var(--tg-action);color:#fff}.bug-replay-view__draft-actions button:disabled{opacity:.48;cursor:not-allowed}
+.bug-replay-view__candidate-validation{grid-column:1/-1;overflow:hidden}.bug-replay-view__candidate-validation>header{display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.65rem .75rem;border-bottom:1px solid var(--tg-border);background:#fff}.bug-replay-view__candidate-validation>header div{display:grid;gap:.15rem}.bug-replay-view__candidate-validation>header b{font-size:.62rem}.bug-replay-view__candidate-validation>header span{color:var(--tg-text-muted);font-size:.46rem}.bug-replay-view__candidate-validation>header strong{padding:.25rem .42rem;border-radius:4px;background:var(--tg-surface-soft);color:var(--tg-text-muted);font-size:.48rem}.bug-replay-view__candidate-validation>header strong.done{background:var(--tg-green-bg);color:var(--tg-green-text)}.bug-replay-view__validation-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--tg-border)}.bug-replay-view__validation-grid article{min-width:0;background:#111a2d}.bug-replay-view__validation-grid article>div{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.48rem .65rem;border-bottom:1px solid #293750;color:#fff}.bug-replay-view__validation-grid article>div b{font-size:.54rem}.bug-replay-view__validation-grid article>div span{color:#8fa0bd;font:.43rem/1 ui-monospace,monospace}.bug-replay-view__validation-grid pre{height:9rem;margin:0;padding:.65rem .72rem;overflow:auto;white-space:pre;scrollbar-gutter:stable;color:#dfe8f8;font:500 .48rem/1.55 SFMono-Regular,ui-monospace,Menlo,Consolas,monospace}
 .bug-replay-view__review-card{overflow:hidden;display:grid;grid-template-rows:auto minmax(0,1fr) auto}.bug-replay-view__review-body{min-height:0;display:grid;grid-template-columns:1.15fr repeat(3,minmax(0,1fr));gap:.6rem;align-content:start;padding:.75rem;overflow:auto;scrollbar-gutter:stable}.bug-replay-view__review-card .bug-replay-view__candidate-note{margin:0}.bug-replay-view__review-field{display:grid;gap:.28rem}.bug-replay-view__review-card label{color:var(--tg-text-muted);font-size:.48rem;font-weight:780}.bug-replay-view__review-card p{margin:0;padding:.5rem .55rem;overflow-wrap:anywhere;border:1px solid var(--tg-border);border-radius:5px;background:#fff;color:#4f5c70;font-size:.52rem;line-height:1.45}.bug-replay-view__review-footer{padding:.65rem .75rem;border-top:1px solid var(--tg-border);background:#fafcff}.bug-replay-view__review-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.4rem}.bug-replay-view__review-actions button{height:2rem;border:1px solid var(--tg-border);border-radius:5px;background:#fff;color:var(--tg-text-strong);font-size:.52rem;font-weight:730}.bug-replay-view__review-actions button:first-child{border-color:#ebc6cd;color:var(--tg-red-text)}.bug-replay-view__review-actions .bug-replay-view__primary{border-color:var(--tg-action);background:var(--tg-action);color:#fff}.bug-replay-view__review-actions button:disabled{cursor:not-allowed;opacity:.56}
-@media(max-width:900px){.bug-replay-view__layout{grid-template-columns:13.5rem minmax(0,1fr)}.bug-replay-view__cluster-head,.bug-replay-view__candidate-workbench{grid-template-columns:1fr}.bug-replay-view__candidate-reason{grid-template-columns:1fr}.bug-replay-view__candidate-file{height:20rem}.bug-replay-view__review-card--full{grid-column:auto}.bug-replay-view__review-body{grid-template-columns:1fr 1fr}.bug-replay-view__review-actions{grid-template-columns:1fr 1fr}.bug-replay-view__confirmed-tool{padding:.65rem}.bug-replay-view__confirmed-tool--environment dl{grid-template-columns:1fr}.bug-replay-view__profiles{grid-template-columns:1fr}.bug-replay-view__tool-head small{display:none}}
+@media(max-width:900px){.bug-replay-view__layout{grid-template-columns:13.5rem minmax(0,1fr)}.bug-replay-view__cluster-head,.bug-replay-view__candidate-workbench{grid-template-columns:1fr}.bug-replay-view__candidate-reason{grid-template-columns:1fr}.bug-replay-view__candidate-file{height:20rem}.bug-replay-view__review-card--full,.bug-replay-view__candidate-validation{grid-column:auto}.bug-replay-view__validation-grid{grid-template-columns:1fr}.bug-replay-view__review-body{grid-template-columns:1fr 1fr}.bug-replay-view__review-actions{grid-template-columns:1fr 1fr}.bug-replay-view__confirmed-tool{padding:.65rem}.bug-replay-view__confirmed-tool--environment dl{grid-template-columns:1fr}.bug-replay-view__profiles{grid-template-columns:1fr}.bug-replay-view__tool-head small{display:none}}
 @media(max-width:720px){.bug-replay-view__count{display:none}.bug-replay-view__layout{grid-template-columns:1fr}.bug-replay-view__master{overflow:visible}.bug-replay-view__master--page-flow{position:static}.bug-replay-view__master-frame{position:static}.bug-replay-view__list--contained{max-height:14rem}.bug-replay-view__behavior,.bug-replay-view__evidence-workbench,.bug-replay-view__confirmed-tools,.bug-replay-view__cluster-pipeline{grid-template-columns:1fr}.bug-replay-view__confirmed-tool--environment{grid-column:auto}.bug-replay-view__evidence-pane{height:13rem}.bug-replay-view__environment dl{grid-template-columns:1fr 1fr}}
 </style>

@@ -150,7 +150,7 @@ function handleLibraryChange() {
           <ResultComposition :counts="summaryCounts" />
         </div>
       </div>
-      <aside class="api-run-view__log-column">
+      <aside class="api-run-view__log-column api-run-view__log-column--fixed">
         <LiveLog
           :key="selectedJob?.job_id ?? `${selectedApi?.lib ?? 'none'}:${selectedApi?.api ?? 'none'}`"
           :stage-key="liveStageKey"
@@ -206,11 +206,12 @@ function handleLibraryChange() {
 .api-run-view__run small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: rgba(255,255,255,.78); font-size: 0.46rem; }
 .api-run-view__run:disabled { border-color: var(--tg-border); background: #eef1f6; color: #99a3b4; box-shadow: none; }
 .api-run-view__run:disabled small { color: #a3adbd; }
-.api-run-view__dashboard { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(22rem, 0.95fr); gap: 0.75rem; align-items: stretch; }
+.api-run-view__dashboard { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(22rem, 0.95fr); gap: 0.75rem; align-items: start; }
 .api-run-view__primary { display: grid; grid-template-rows: auto minmax(9.5rem, auto); gap: 0.65rem; min-width: 0; }
 .api-run-view__telemetry-strip { display: grid; grid-template-columns: minmax(8rem, 0.72fr) minmax(11rem, 0.9fr) minmax(13rem, 1.18fr); gap: 0.6rem; align-items: stretch; min-width: 0; }
 .api-run-view__log-column { min-width: 0; }
-.api-run-view__log-column :deep(.live-log__body), .api-run-view__log-column :deep(.live-log__empty) { height: 100%; min-height: 23rem; }
+.api-run-view__log-column--fixed { height: 24rem; min-height: 24rem; max-height: 24rem; }
+.api-run-view__log-column :deep(.live-log__body), .api-run-view__log-column :deep(.live-log__empty) { min-height: 0; }
 .api-run-view__telemetry-strip :deep(.gpu-chart__body) { height: calc(100% - 2.25rem); grid-template-columns: 1fr; }
 .api-run-view__telemetry-strip :deep(.gpu-chart__body article) { padding: 0.7rem 0.75rem; }
 .api-run-view__telemetry-strip :deep(.gpu-chart__body b) { margin-top: 0.25rem; font-size: 0.9rem; }
@@ -225,7 +226,7 @@ function handleLibraryChange() {
 .api-run-view__sync-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
 .api-run-view__sync-error { color: var(--tg-red-text); }
 .api-run-view__retry { height: 1.8rem; border: 1px solid var(--tg-border); border-radius: 5px; background: #fff; color: var(--tg-action); padding: 0 0.65rem; font-size: 0.6rem; }
-@media (max-width: 1100px) { .api-run-view__dashboard { grid-template-columns: 1fr; } .api-run-view__log-column :deep(.live-log__body), .api-run-view__log-column :deep(.live-log__empty) { min-height: 14rem; } }
+@media (max-width: 1100px) { .api-run-view__dashboard { grid-template-columns: 1fr; } .api-run-view__log-column--fixed { height: 18rem; min-height: 18rem; max-height: 18rem; } }
 @media (max-width: 900px) { .api-run-view__orchestration { grid-template-columns: 1fr; } .api-run-view__run-controls { justify-self: end; width: min(24rem, 100%); } .api-run-view__telemetry-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 720px) { .api-run-view__page-head { align-items: flex-start; } .api-run-view__status-stack { display: none; } .api-run-view__run-controls { grid-template-columns: 1fr; justify-self: stretch; width: 100%; } .api-run-view__telemetry-strip { grid-template-columns: 1fr; } }
 </style>

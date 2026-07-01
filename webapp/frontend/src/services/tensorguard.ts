@@ -6,6 +6,8 @@ import type {
   CandidateClusterDetail,
   CandidateClusterSummary,
   CandidateClusterUpdateInput,
+  CandidateValidationJobPayload,
+  CandidateValidationStartPayload,
   CandidateCreateInput,
   CandidateDetail,
   CandidateRecord,
@@ -32,6 +34,10 @@ export const endpoints = {
   candidateClusters: "/api/candidate-clusters",
   candidateCluster: (id: string) => `/api/candidate-clusters/${encodeURIComponent(id)}`,
   candidateClusterStatus: (id: string) => `/api/candidate-clusters/${encodeURIComponent(id)}/status`,
+  candidateClusterDraft: (id: string) => `/api/candidate-clusters/${encodeURIComponent(id)}/draft`,
+  candidateClusterDraftReset: (id: string) => `/api/candidate-clusters/${encodeURIComponent(id)}/draft/reset`,
+  candidateClusterValidate: (id: string) => `/api/candidate-clusters/${encodeURIComponent(id)}/validate`,
+  candidateValidationJob: (id: string) => `/api/candidate-validation-jobs/${encodeURIComponent(id)}`,
   candidates: "/api/candidates",
   candidate: (id: string) => `/api/candidates/${encodeURIComponent(id)}`,
   candidateStatus: (id: string) => `/api/candidates/${encodeURIComponent(id)}/status`,
@@ -100,6 +106,22 @@ export function getCandidateCluster(id: string): Promise<CandidateClusterDetail>
 
 export function updateCandidateClusterStatus(id: string, input: CandidateClusterUpdateInput): Promise<CandidateClusterDetail> {
   return post(endpoints.candidateClusterStatus(id), input);
+}
+
+export function saveCandidateClusterDraft(id: string, source: string): Promise<CandidateClusterDetail> {
+  return post(endpoints.candidateClusterDraft(id), { source });
+}
+
+export function resetCandidateClusterDraft(id: string): Promise<CandidateClusterDetail> {
+  return post(endpoints.candidateClusterDraftReset(id));
+}
+
+export function startCandidateValidation(id: string, source: string, timeout = 60): Promise<CandidateValidationStartPayload> {
+  return post(endpoints.candidateClusterValidate(id), { source, timeout });
+}
+
+export function getCandidateValidationJob(id: string): Promise<CandidateValidationJobPayload> {
+  return get(endpoints.candidateValidationJob(id));
 }
 
 export function createCandidate(input: CandidateCreateInput): Promise<CandidateRecord> {

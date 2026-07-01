@@ -322,6 +322,44 @@ export interface CandidateClusterDetail extends CandidateClusterSummary {
   excluded: ExcludedCandidate[];
   representative_source_code: string;
   minimization_draft: string;
+  draft_saved: boolean;
+  draft_modified: boolean;
+  draft_sha256: string;
+  latest_validation_job_id: string | null;
+  latest_validation: CandidateValidationJobPayload | null;
+}
+
+export type CandidateValidationMode = "cpu" | "gpu0";
+
+export interface CandidateValidationExecution {
+  status: ReproExecutionStatus;
+  returncode: number | null;
+  timed_out: boolean;
+  log: string;
+  started_at: string | null;
+  finished_at: string | null;
+  execution_profile?: ExecutionProfile;
+  actual_device?: string;
+  elapsed_seconds?: number;
+  evidence?: ExecutionEvidence;
+  error?: string;
+}
+
+export interface CandidateValidationJobPayload {
+  run_id: string;
+  cluster_id: string;
+  status: "pending" | "running" | "finished" | "failed";
+  timeout_seconds: number;
+  started_at: string;
+  updated_at: string;
+  modes: Partial<Record<CandidateValidationMode, CandidateValidationExecution>>;
+  logs: Partial<Record<CandidateValidationMode, string>>;
+  error?: string;
+}
+
+export interface CandidateValidationStartPayload {
+  run_id: string;
+  cluster_id: string;
 }
 
 export interface CandidateCreateInput {

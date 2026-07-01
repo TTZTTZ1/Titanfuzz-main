@@ -8,6 +8,7 @@ import datetime as dt
 import json
 import mimetypes
 import os
+import re
 import subprocess
 import sys
 import threading
@@ -32,6 +33,11 @@ try:
     from webapp.candidates import CandidateStore, recommend_candidate
 except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
     from candidates import CandidateStore, recommend_candidate
+
+try:
+    from webapp.candidate_validation import execute_candidate_validation
+except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
+    from candidate_validation import execute_candidate_validation
 
 try:
     from webapp.confirmed_bugs import load_confirmed_records
@@ -254,11 +260,35 @@ def trace_hit_count(path: Path) -> int:
     return total
 
 
+ANSI_ESCAPE_RE = re.compile(r"\x1b(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+
+
+def normalize_terminal_output(text: str) -> str:
+    """Render captured terminal control sequences as readable plain text."""
+    text = ANSI_ESCAPE_RE.sub("", text).replace("\r\n", "\n")
+    rendered: list[str] = []
+    current: list[str] = []
+    for char in text:
+        if char == "\r":
+            current.clear()
+        elif char == "\n":
+            rendered.append("".join(current) + "\n")
+            current.clear()
+        elif char == "\b":
+            if current:
+                current.pop()
+        else:
+            current.append(char)
+    if current:
+        rendered.append("".join(current))
+    return "".join(rendered)
+
+
 def tail(path: Path, max_chars: int = 8000) -> str:
     if not path.is_file():
         return ""
     data = path.read_bytes()
-    return data[-max_chars:].decode("utf-8", errors="replace")
+    return normalize_terminal_output(data[-max_chars:].decode("utf-8", errors="replace"))
 
 
 def latest_summaries(root: Path, limit: int = 6) -> list[dict]:
@@ -572,6 +602,9 @@ def candidate_cluster_payload(cluster_id: str) -> tuple[int, dict]:
     cluster = CANDIDATE_STORE.get_cluster(cluster_id)
     if cluster is None:
         return 404, {"error": "candidate cluster not found"}
+    latest = latest_candidate_validation(cluster_id)
+    cluster["latest_validation_job_id"] = latest.get("run_id") if latest else None
+    cluster["latest_validation"] = latest
     return 200, cluster
 
 
@@ -621,6 +654,116 @@ def update_candidate_cluster(cluster_id: str, payload: dict) -> tuple[int, dict]
     except ValueError as exc:
         return 400, {"error": str(exc)}
     return 200, cluster
+
+
+def save_candidate_cluster_draft(cluster_id: str, payload: dict) -> tuple[int, dict]:
+    try:
+        CANDIDATE_STORE.save_cluster_draft(cluster_id, payload.get("source"))
+    except KeyError:
+        return 404, {"error": "candidate cluster not found"}
+    except ValueError as exc:
+        return 400, {"error": str(exc)}
+    return candidate_cluster_payload(cluster_id)
+
+
+def reset_candidate_cluster_draft(cluster_id: str) -> tuple[int, dict]:
+    try:
+        CANDIDATE_STORE.reset_cluster_draft(cluster_id)
+    except KeyError:
+        return 404, {"error": "candidate cluster not found"}
+    except ValueError as exc:
+        return 400, {"error": str(exc)}
+    return candidate_cluster_payload(cluster_id)
+
+
+def candidate_validation_root(cluster_id: str) -> Path:
+    return CANDIDATE_STORE.cluster_workspace_path(cluster_id) / "runs"
+
+
+def latest_candidate_validation(cluster_id: str) -> Optional[dict]:
+    try:
+        root = candidate_validation_root(cluster_id)
+    except KeyError:
+        return None
+    status_paths = sorted(
+        root.glob("*/status.json") if root.is_dir() else [],
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    if not status_paths:
+        return None
+    status_path = status_paths[0]
+    payload = read_json(status_path, {})
+    payload["logs"] = {
+        mode: tail(status_path.parent / f"{mode}.log", max_chars=12_000)
+        for mode in ("cpu", "gpu0")
+    }
+    return payload
+
+
+def start_candidate_validation(cluster_id: str, payload: dict) -> tuple[int, dict]:
+    try:
+        if "source" in payload:
+            CANDIDATE_STORE.save_cluster_draft(cluster_id, payload.get("source"))
+        draft = CANDIDATE_STORE.cluster_draft_path(cluster_id)
+        runs_root = candidate_validation_root(cluster_id)
+    except KeyError:
+        return 404, {"error": "candidate cluster not found"}
+    except ValueError as exc:
+        return 400, {"error": str(exc)}
+
+    try:
+        timeout = max(1, min(int(payload.get("timeout", 60) or 60), 300))
+    except (TypeError, ValueError):
+        return 400, {"error": "timeout must be an integer between 1 and 300"}
+    ts = time.strftime("%Y%m%d_%H%M%S")
+    run_id, out = unique_job_directory(runs_root, f"candidate_{safe_name(cluster_id)}_{ts}")
+    (out / "repro.py").write_text(draft.read_text(encoding="utf-8", errors="replace"), encoding="utf-8")
+    status = {
+        "run_id": run_id,
+        "cluster_id": cluster_id,
+        "status": "pending",
+        "timeout_seconds": timeout,
+        "started_at": now(),
+        "updated_at": now(),
+        "modes": {},
+    }
+    write_json(out / "status.json", status)
+
+    def _worker() -> None:
+        try:
+            execute_candidate_validation(out, status)
+        except Exception as exc:
+            failed = read_json(out / "status.json", status)
+            failed["status"] = "failed"
+            failed["error"] = str(exc)
+            failed["updated_at"] = now()
+            write_json(out / "status.json", failed)
+
+    threading.Thread(target=_worker, daemon=True).start()
+    return 202, {"run_id": run_id, "cluster_id": cluster_id}
+
+
+def find_candidate_validation_job(run_id: str) -> Optional[Path]:
+    root = CANDIDATE_STORE.index_path.parent / "workspaces"
+    if not root.is_dir():
+        return None
+    for status_path in root.glob("*/runs/*/status.json"):
+        if read_json(status_path, {}).get("run_id") == run_id:
+            return status_path.parent
+    return None
+
+
+def candidate_validation_job_payload(run_id: str) -> tuple[int, dict]:
+    out = find_candidate_validation_job(run_id)
+    if out is None:
+        return 404, {"error": "candidate validation job not found"}
+    status = read_json(out / "status.json", {})
+    status["logs"] = {
+        mode: tail(out / f"{mode}.log", max_chars=12_000)
+        for mode in ("cpu", "gpu0")
+    }
+    return 200, status
 
 
 def load_paper_bugs() -> list[dict]:
@@ -1115,6 +1258,10 @@ class Handler(BaseHTTPRequestHandler):
             status, payload = candidate_cluster_payload(unquote(path.rsplit("/", 1)[-1]))
             send_json(self, payload, status=status)
             return
+        if path.startswith("/api/candidate-validation-jobs/"):
+            status, payload = candidate_validation_job_payload(unquote(path.rsplit("/", 1)[-1]))
+            send_json(self, payload, status=status)
+            return
         if path.startswith("/api/candidates/"):
             status, payload = candidate_payload(unquote(path.rsplit("/", 1)[-1]))
             send_json(self, payload, status=status)
@@ -1161,6 +1308,21 @@ class Handler(BaseHTTPRequestHandler):
         if parsed.path.startswith("/api/candidate-clusters/") and parsed.path.endswith("/status"):
             cluster_id = unquote(parsed.path.split("/")[-2])
             status, response = update_candidate_cluster(cluster_id, payload)
+            send_json(self, response, status=status)
+            return
+        if parsed.path.startswith("/api/candidate-clusters/") and parsed.path.endswith("/draft/reset"):
+            cluster_id = unquote(parsed.path.split("/")[-3])
+            status, response = reset_candidate_cluster_draft(cluster_id)
+            send_json(self, response, status=status)
+            return
+        if parsed.path.startswith("/api/candidate-clusters/") and parsed.path.endswith("/draft"):
+            cluster_id = unquote(parsed.path.split("/")[-2])
+            status, response = save_candidate_cluster_draft(cluster_id, payload)
+            send_json(self, response, status=status)
+            return
+        if parsed.path.startswith("/api/candidate-clusters/") and parsed.path.endswith("/validate"):
+            cluster_id = unquote(parsed.path.split("/")[-2])
+            status, response = start_candidate_validation(cluster_id, payload)
             send_json(self, response, status=status)
             return
         if parsed.path.startswith("/api/candidates/") and parsed.path.endswith("/status"):

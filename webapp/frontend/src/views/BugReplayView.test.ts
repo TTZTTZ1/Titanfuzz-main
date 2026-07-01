@@ -10,6 +10,10 @@ const services = vi.hoisted(() => ({
   getEnvironment: vi.fn(),
   getCandidate: vi.fn(),
   getCandidateCluster: vi.fn(),
+  getCandidateValidationJob: vi.fn(),
+  saveCandidateClusterDraft: vi.fn(),
+  resetCandidateClusterDraft: vi.fn(),
+  startCandidateValidation: vi.fn(),
   updateCandidateClusterStatus: vi.fn(),
   reproduceConfirmedBug: vi.fn(),
   getReproJob: vi.fn(),
@@ -87,6 +91,11 @@ const candidateClusterDetail = {
   ],
   representative_source_code: "import torch\nq = torch.tensor([1.0, 2.5])\ntorch.quantile(torch.ones(4), q)",
   minimization_draft: "import torch\n# TODO: minimize candidate\n",
+  draft_saved: false,
+  draft_modified: true,
+  draft_sha256: "a".repeat(64),
+  latest_validation_job_id: null,
+  latest_validation: null,
 };
 
 describe("BugReplayView", () => {
@@ -120,6 +129,31 @@ describe("BugReplayView", () => {
       latest_repro_job_id: null,
     });
     services.getCandidateCluster.mockResolvedValue(candidateClusterDetail);
+    services.saveCandidateClusterDraft.mockResolvedValue({
+      ...candidateClusterDetail,
+      minimization_draft: "print('saved draft')\n",
+      draft_saved: true,
+    });
+    services.resetCandidateClusterDraft.mockResolvedValue({
+      ...candidateClusterDetail,
+      minimization_draft: candidateClusterDetail.representative_source_code,
+      draft_saved: true,
+      draft_modified: false,
+    });
+    services.startCandidateValidation.mockResolvedValue({ run_id: "candidate-run-1", cluster_id: candidateCluster.cluster_id });
+    services.getCandidateValidationJob.mockResolvedValue({
+      run_id: "candidate-run-1",
+      cluster_id: candidateCluster.cluster_id,
+      status: "finished",
+      timeout_seconds: 60,
+      started_at: "2026-07-01T18:00:00+08:00",
+      updated_at: "2026-07-01T18:00:01+08:00",
+      modes: {
+        cpu: { status: "finished", returncode: 0, timed_out: false, log: "cpu.log", started_at: null, finished_at: null },
+        gpu0: { status: "finished", returncode: 1, timed_out: false, log: "gpu0.log", started_at: null, finished_at: null },
+      },
+      logs: { cpu: "CPU output", gpu0: "GPU output" },
+    });
     services.updateCandidateClusterStatus.mockResolvedValue({ ...candidateCluster, cluster_status: "needs_minimize" });
   });
 
@@ -292,7 +326,7 @@ describe("BugReplayView", () => {
     expect(wrapper.get('[data-testid="candidate-source-path"]').text()).toBe(candidateCluster.representative.source_path);
     expect(wrapper.find(".bug-replay-view__review-footer").exists()).toBe(true);
     expect(wrapper.findAll(".bug-replay-view__candidate-reason > article")).toHaveLength(3);
-    expect(wrapper.findAll(".bug-replay-view__candidate-workbench > section")).toHaveLength(3);
+    expect(wrapper.findAll(".bug-replay-view__candidate-workbench > section")).toHaveLength(4);
     expect(wrapper.findAll(".bug-replay-view__candidate-file--wide")).toHaveLength(2);
     expect(wrapper.find(".bug-replay-view__review-card--full").exists()).toBe(true);
 
@@ -320,5 +354,33 @@ describe("BugReplayView", () => {
       note: "人工标记为可复现",
     });
     expect(services.getCandidateClusters).toHaveBeenCalledTimes(2);
+  });
+
+  it("edits, saves, resets, and validates a minimized candidate draft", async () => {
+    const wrapper = mount(BugReplayView);
+    await flushPromises();
+
+    const candidateTab = wrapper.findAll(".bug-replay-view__source-tabs button").find((button) => button.text() === "候选审核");
+    await candidateTab?.trigger("click");
+    await flushPromises();
+
+    const editor = wrapper.get('[data-testid="candidate-draft-editor"]');
+    expect((editor.element as HTMLTextAreaElement).value).toContain("TODO: minimize candidate");
+    await editor.setValue("print('saved draft')\n");
+    await wrapper.get('[data-testid="save-candidate-draft"]').trigger("click");
+    await flushPromises();
+    expect(services.saveCandidateClusterDraft).toHaveBeenCalledWith(candidateCluster.cluster_id, "print('saved draft')\n");
+
+    await wrapper.get('[data-testid="reset-candidate-draft"]').trigger("click");
+    await flushPromises();
+    expect(services.resetCandidateClusterDraft).toHaveBeenCalledWith(candidateCluster.cluster_id);
+
+    await editor.setValue("print('validate')\n");
+    await wrapper.get('[data-testid="validate-candidate-draft"]').trigger("click");
+    await flushPromises();
+    expect(services.startCandidateValidation).toHaveBeenCalledWith(candidateCluster.cluster_id, "print('validate')\n", 60);
+    expect(services.getCandidateValidationJob).toHaveBeenCalledWith("candidate-run-1");
+    expect(wrapper.get('[data-testid="candidate-cpu-output"]').text()).toContain("CPU output");
+    expect(wrapper.get('[data-testid="candidate-gpu-output"]').text()).toContain("GPU output");
   });
 });

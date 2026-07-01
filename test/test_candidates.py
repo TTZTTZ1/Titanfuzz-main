@@ -210,6 +210,60 @@ def test_server_updates_candidate_cluster_review_status():
         assert {member["status"] for member in updated["members"]} == {"rejected"}
 
 
+def test_candidate_minimization_draft_persists_and_resets_without_touching_source():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        original = '"""INTERNAL ASSERT FAILED"""\nimport torch\nresult = torch.add(torch.ones(1), 1)\n'
+        source = create_source(root, category="exception", body=original)
+        store = CandidateStore(root)
+        store.add(job_id="job1", lib="torch", api="torch.add", category="exception", source_path=source)
+        cluster_id = store.list_clusters()[0]["cluster_id"]
+
+        initial = store.get_cluster(cluster_id)
+        assert initial["minimization_draft"] == original
+        assert initial["draft_saved"] is False
+
+        edited = "import torch\nprint(torch.add(torch.ones(1), 1))\n"
+        saved = store.save_cluster_draft(cluster_id, edited)
+        assert saved["minimization_draft"] == edited
+        assert saved["draft_saved"] is True
+        assert saved["draft_modified"] is True
+        assert source.read_text(encoding="utf-8") == original
+
+        reloaded = CandidateStore(root).get_cluster(cluster_id)
+        assert reloaded["minimization_draft"] == edited
+
+        reset = store.reset_cluster_draft(cluster_id)
+        assert reset["minimization_draft"] == original
+        assert reset["draft_saved"] is True
+        assert reset["draft_modified"] is False
+
+        try:
+            store.save_cluster_draft("../../outside", "print('unsafe')\n")
+        except KeyError:
+            pass
+        else:
+            raise AssertionError("unknown traversal-like cluster id must be rejected")
+
+
+def test_server_saves_and_resets_candidate_draft():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        source = create_source(root, category="exception")
+        store = CandidateStore(root)
+        store.add(job_id="job1", lib="torch", api="torch.add", category="exception", source_path=source)
+        cluster_id = store.list_clusters()[0]["cluster_id"]
+
+        with patch.object(server, "CANDIDATE_STORE", store):
+            code, saved = server.save_candidate_cluster_draft(cluster_id, {"source": "print('saved')\n"})
+            assert code == 200
+            assert saved["minimization_draft"] == "print('saved')\n"
+            code, reset = server.reset_candidate_cluster_draft(cluster_id)
+
+        assert code == 200
+        assert reset["draft_modified"] is False
+
+
 if __name__ == "__main__":
     test_candidate_references_exact_job_source_and_deduplicates_hash()
     test_recommendation_excludes_notarget_and_plain_exception()
@@ -218,4 +272,6 @@ if __name__ == "__main__":
     test_collect_job_results_registers_trace_and_crash_candidates_idempotently()
     test_server_exposes_candidate_cluster_detail()
     test_server_updates_candidate_cluster_review_status()
+    test_candidate_minimization_draft_persists_and_resets_without_touching_source()
+    test_server_saves_and_resets_candidate_draft()
     print("ok")

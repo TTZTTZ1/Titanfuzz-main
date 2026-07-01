@@ -113,7 +113,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="live-log" :aria-labelledby="headingId">
+  <section class="live-log live-log--fixed-viewport" :aria-labelledby="headingId">
     <header class="live-log__header">
       <div class="live-log__heading">
         <h2 :id="headingId" class="live-log__title">实时日志</h2>
@@ -168,6 +168,8 @@ onBeforeUnmount(() => {
   contain: inline-size;
 }
 
+.live-log--fixed-viewport { height: 100%; min-height: 0; }
+
 .live-log__header {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -199,7 +201,7 @@ onBeforeUnmount(() => {
 .live-log__body {
   width: 100%;
   min-width: 0;
-  min-height: 8rem;
+  min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-gutter: stable;
