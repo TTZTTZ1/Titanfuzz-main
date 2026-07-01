@@ -349,6 +349,7 @@ export interface CandidateValidationJobPayload {
   run_id: string;
   cluster_id: string;
   status: "pending" | "running" | "finished" | "failed";
+  source_sha256: string;
   timeout_seconds: number;
   started_at: string;
   updated_at: string;
@@ -360,6 +361,7 @@ export interface CandidateValidationJobPayload {
 export interface CandidateValidationStartPayload {
   run_id: string;
   cluster_id: string;
+  source_sha256: string;
 }
 
 export interface CandidateCreateInput {
@@ -410,12 +412,20 @@ export interface ConfirmedBugMeta {
   minimized: boolean;
   files: ConfirmedBugFiles;
   tags: string[];
+  dynamic?: boolean;
+  candidate_cluster_id?: string;
+  validation_run_id?: string;
 }
 
 export interface ConfirmedBugSummary extends ConfirmedBugMeta {
   path: string;
   meta_path: string;
   display_id: string;
+  deletable?: boolean;
+}
+
+export interface DeleteRecordPayload {
+  deleted: string;
 }
 
 export interface ConfirmedBugDetail {

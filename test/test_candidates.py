@@ -264,6 +264,30 @@ def test_server_saves_and_resets_candidate_draft():
         assert reset["draft_modified"] is False
 
 
+def test_delete_candidate_cluster_requires_exact_id_and_preserves_result_source():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        source = create_source(root, category="exception")
+        store = CandidateStore(root)
+        store.add(job_id="job1", lib="torch", api="torch.add", category="exception", source_path=source)
+        cluster_id = store.list_clusters()[0]["cluster_id"]
+        store.save_cluster_draft(cluster_id, "print('draft')\n")
+        workspace = store.cluster_workspace_path(cluster_id)
+
+        try:
+            store.delete_cluster(cluster_id, confirmation_id="wrong-id")
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("wrong confirmation id must not delete candidate cluster")
+        assert store.get_cluster(cluster_id) is not None
+
+        store.delete_cluster(cluster_id, confirmation_id=cluster_id)
+        assert store.get_cluster(cluster_id) is None
+        assert source.is_file()
+        assert not workspace.exists()
+
+
 if __name__ == "__main__":
     test_candidate_references_exact_job_source_and_deduplicates_hash()
     test_recommendation_excludes_notarget_and_plain_exception()
@@ -274,4 +298,5 @@ if __name__ == "__main__":
     test_server_updates_candidate_cluster_review_status()
     test_candidate_minimization_draft_persists_and_resets_without_touching_source()
     test_server_saves_and_resets_candidate_draft()
+    test_delete_candidate_cluster_requires_exact_id_and_preserves_result_source()
     print("ok")

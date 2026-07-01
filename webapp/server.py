@@ -40,9 +40,9 @@ except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
     from candidate_validation import execute_candidate_validation
 
 try:
-    from webapp.confirmed_bugs import load_confirmed_records
+    from webapp.confirmed_bugs import DynamicConfirmedBugStore, load_confirmed_records
 except ModuleNotFoundError:  # Support direct execution as webapp/server.py.
-    from confirmed_bugs import load_confirmed_records
+    from confirmed_bugs import DynamicConfirmedBugStore, load_confirmed_records
 
 try:
     from webapp.repro_evidence import classify_execution, execution_profile_for_mode, extract_actual_device, sha256_file, write_report_once
@@ -60,6 +60,7 @@ DEMO_ROOT = REPO_ROOT / "demo_runs"
 API_JOB_ROOT = DEMO_ROOT / "api_jobs"
 REPRO_JOB_ROOT = DEMO_ROOT / "repro_jobs"
 CANDIDATE_STORE = CandidateStore(REPO_ROOT)
+DYNAMIC_CONFIRMED_STORE = DynamicConfirmedBugStore(REPO_ROOT)
 
 API_LIST_PATHS = {
     "torch": REPO_ROOT / "data" / "torch_apis.txt",
@@ -676,6 +677,60 @@ def reset_candidate_cluster_draft(cluster_id: str) -> tuple[int, dict]:
     return candidate_cluster_payload(cluster_id)
 
 
+def delete_candidate_cluster(cluster_id: str, payload: dict) -> tuple[int, dict]:
+    try:
+        CANDIDATE_STORE.delete_cluster(cluster_id, confirmation_id=str(payload.get("confirmation_id", "")))
+    except KeyError:
+        return 404, {"error": "candidate cluster not found"}
+    except ValueError as exc:
+        return 400, {"error": str(exc)}
+    return 200, {"deleted": cluster_id}
+
+
+def confirm_candidate_cluster(cluster_id: str, _payload: dict) -> tuple[int, dict]:
+    cluster = CANDIDATE_STORE.get_cluster(cluster_id)
+    if cluster is None:
+        return 404, {"error": "candidate cluster not found"}
+    if not cluster.get("draft_saved"):
+        return 409, {"error": "save repro.py before confirming the Bug"}
+    validation = latest_candidate_validation(cluster_id)
+    if not validation or validation.get("status") != "finished":
+        return 409, {"error": "finish CPU/GPU validation before confirming the Bug"}
+    draft_path = CANDIDATE_STORE.cluster_draft_path(cluster_id)
+    if validation.get("source_sha256") != sha256_file(draft_path):
+        return 409, {"error": "saved repro changed after validation; run CPU/GPU validation again"}
+    validation_dir = find_candidate_validation_job(str(validation.get("run_id", "")))
+    if validation_dir is None:
+        return 409, {"error": "candidate validation evidence is unavailable"}
+    try:
+        record = DYNAMIC_CONFIRMED_STORE.archive_candidate(
+            cluster=cluster,
+            repro_path=draft_path,
+            validation_dir=validation_dir,
+            environment=environment_payload(force=True),
+        )
+        CANDIDATE_STORE.update_cluster_status(cluster_id, "promoted", f"confirmed as {record['id']}")
+    except ValueError as exc:
+        return 409, {"error": str(exc)}
+    status, detail = paper_bug_detail(str(record["id"]))
+    return (201 if status == 200 else status), detail
+
+
+def delete_confirmed_bug(bug_id: str, payload: dict) -> tuple[int, dict]:
+    record = next((item for item in load_paper_bugs() if item.get("id") == bug_id), None)
+    if record is None:
+        return 404, {"error": "confirmed Bug not found"}
+    if not record.get("dynamic"):
+        return 403, {"error": "curated baseline Bugs are read-only"}
+    try:
+        DYNAMIC_CONFIRMED_STORE.delete(bug_id, confirmation_id=str(payload.get("confirmation_id", "")))
+    except KeyError:
+        return 404, {"error": "confirmed Bug not found"}
+    except ValueError as exc:
+        return 400, {"error": str(exc)}
+    return 200, {"deleted": bug_id}
+
+
 def candidate_validation_root(cluster_id: str) -> Path:
     return CANDIDATE_STORE.cluster_workspace_path(cluster_id) / "runs"
 
@@ -723,6 +778,7 @@ def start_candidate_validation(cluster_id: str, payload: dict) -> tuple[int, dic
         "run_id": run_id,
         "cluster_id": cluster_id,
         "status": "pending",
+        "source_sha256": sha256_file(out / "repro.py"),
         "timeout_seconds": timeout,
         "started_at": now(),
         "updated_at": now(),
@@ -741,7 +797,11 @@ def start_candidate_validation(cluster_id: str, payload: dict) -> tuple[int, dic
             write_json(out / "status.json", failed)
 
     threading.Thread(target=_worker, daemon=True).start()
-    return 202, {"run_id": run_id, "cluster_id": cluster_id}
+    return 202, {
+        "run_id": run_id,
+        "cluster_id": cluster_id,
+        "source_sha256": status["source_sha256"],
+    }
 
 
 def find_candidate_validation_job(run_id: str) -> Optional[Path]:
@@ -767,12 +827,16 @@ def candidate_validation_job_payload(run_id: str) -> tuple[int, dict]:
 
 
 def load_paper_bugs() -> list[dict]:
-    items = load_confirmed_records(PAPER_BUG_INDEX, REPO_ROOT)
+    items = [
+        *load_confirmed_records(PAPER_BUG_INDEX, REPO_ROOT),
+        *DYNAMIC_CONFIRMED_STORE.list(),
+    ]
     out = []
     for item in items:
         item = dict(item)
         item["meta_path"] = item.get("path", "")
         item["display_id"] = display_bug_id(str(item.get("id", "")))
+        item["deletable"] = bool(item.get("dynamic"))
         out.append(item)
     return out
 
@@ -1305,6 +1369,16 @@ class Handler(BaseHTTPRequestHandler):
             status, response = create_candidate(payload)
             send_json(self, response, status=status)
             return
+        if parsed.path.startswith("/api/candidate-clusters/") and parsed.path.endswith("/confirm"):
+            cluster_id = unquote(parsed.path.split("/")[-2])
+            status, response = confirm_candidate_cluster(cluster_id, payload)
+            send_json(self, response, status=status)
+            return
+        if parsed.path.startswith("/api/candidate-clusters/") and parsed.path.endswith("/delete"):
+            cluster_id = unquote(parsed.path.split("/")[-2])
+            status, response = delete_candidate_cluster(cluster_id, payload)
+            send_json(self, response, status=status)
+            return
         if parsed.path.startswith("/api/candidate-clusters/") and parsed.path.endswith("/status"):
             cluster_id = unquote(parsed.path.split("/")[-2])
             status, response = update_candidate_cluster(cluster_id, payload)
@@ -1333,6 +1407,11 @@ class Handler(BaseHTTPRequestHandler):
         if (parsed.path.startswith("/api/confirmed-bugs/") or parsed.path.startswith("/api/paper-bugs/")) and parsed.path.endswith("/reproduce"):
             bug_id = unquote(parsed.path.split("/")[-2])
             status, response = start_repro_job(bug_id, payload)
+            send_json(self, response, status=status)
+            return
+        if parsed.path.startswith("/api/confirmed-bugs/") and parsed.path.endswith("/delete"):
+            bug_id = unquote(parsed.path.split("/")[-2])
+            status, response = delete_confirmed_bug(bug_id, payload)
             send_json(self, response, status=status)
             return
         if parsed.path.startswith("/api/repro-jobs/") and parsed.path.endswith("/report"):

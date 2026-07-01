@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import threading
 from datetime import datetime
 from pathlib import Path
@@ -261,7 +262,8 @@ class CandidateStore:
     def list_clusters(self) -> list[dict]:
         groups, excluded = self._cluster_groups()
         clusters = [self._cluster_summary(key, records, excluded) for key, records in groups.items()]
-        return sorted(clusters, key=lambda item: (item.get("confidence") != "high", item.get("updated_at", "")), reverse=True)
+        visible = [item for item in clusters if item.get("cluster_status") != "promoted"]
+        return sorted(visible, key=lambda item: (item.get("confidence") != "high", item.get("updated_at", "")), reverse=True)
 
     def get_cluster(self, cluster_id: str) -> Optional[dict]:
         groups, excluded = self._cluster_groups()
@@ -336,6 +338,20 @@ class CandidateStore:
         if self.get_cluster(cluster_id) is None:
             raise KeyError(cluster_id)
         return self._cluster_workspace(cluster_id)
+
+    def delete_cluster(self, cluster_id: str, *, confirmation_id: str) -> None:
+        if confirmation_id != cluster_id:
+            raise ValueError("confirmation id does not match candidate cluster ID")
+        cluster = self.get_cluster(cluster_id)
+        if cluster is None:
+            raise KeyError(cluster_id)
+        member_ids = {member.get("candidate_id") for member in cluster.get("members", [])}
+        workspace = self._cluster_workspace(cluster_id)
+        with self._lock:
+            records = self._read()
+            self._write([record for record in records if record.get("id") not in member_ids])
+        if workspace.is_dir():
+            shutil.rmtree(workspace)
 
     def _validated_source(
         self,

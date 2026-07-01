@@ -14,6 +14,9 @@ import type {
 import { ApiError, request } from "./http";
 import {
   createCandidate,
+  confirmCandidateCluster,
+  deleteCandidateCluster,
+  deleteConfirmedBug,
   generateReproReport,
   getApiDetail,
   getApiJob,
@@ -277,6 +280,23 @@ describe("TensorGuard API service", () => {
     ]);
     expect(JSON.parse(String((fetchMock.mock.calls[0][1] as RequestInit).body))).toEqual({ source: "print('draft')\n" });
     expect(JSON.parse(String((fetchMock.mock.calls[2][1] as RequestInit).body))).toEqual({ source: "print('run')\n", timeout: 45 });
+  });
+
+  it("wraps candidate confirmation and ID-protected deletion routes", async () => {
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse({})));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await confirmCandidateCluster("cluster/one");
+    await deleteCandidateCluster("cluster/one", "cluster/one");
+    await deleteConfirmedBug("BUG-0001", "BUG-0001");
+
+    expect(fetchMock.mock.calls.map(([path, init]) => [path, (init as RequestInit).method])).toEqual([
+      ["/api/candidate-clusters/cluster%2Fone/confirm", "POST"],
+      ["/api/candidate-clusters/cluster%2Fone/delete", "POST"],
+      ["/api/confirmed-bugs/BUG-0001/delete", "POST"],
+    ]);
+    expect(JSON.parse(String((fetchMock.mock.calls[1][1] as RequestInit).body))).toEqual({ confirmation_id: "cluster/one" });
+    expect(JSON.parse(String((fetchMock.mock.calls[2][1] as RequestInit).body))).toEqual({ confirmation_id: "BUG-0001" });
   });
 
   it("wraps confirmed bug list, detail, and reproduce routes", async () => {

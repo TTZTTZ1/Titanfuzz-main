@@ -14,6 +14,9 @@ const services = vi.hoisted(() => ({
   saveCandidateClusterDraft: vi.fn(),
   resetCandidateClusterDraft: vi.fn(),
   startCandidateValidation: vi.fn(),
+  confirmCandidateCluster: vi.fn(),
+  deleteCandidateCluster: vi.fn(),
+  deleteConfirmedBug: vi.fn(),
   updateCandidateClusterStatus: vi.fn(),
   reproduceConfirmedBug: vi.fn(),
   getReproJob: vi.fn(),
@@ -44,6 +47,28 @@ const summary = {
   tags: ["sparse"],
   path: "reports/confirmed/PT-004",
   meta_path: "reports/confirmed/PT-004/meta.json",
+};
+
+const dynamicSummary = {
+  ...summary,
+  id: "BUG-0001",
+  display_id: "BUG-0001",
+  title: "torch.quantile confirmed candidate",
+  api: "torch.quantile",
+  dynamic: true,
+  deletable: true,
+};
+
+const dynamicDetail = {
+  index: dynamicSummary,
+  meta: dynamicSummary,
+  display_id: "BUG-0001",
+  bug_dir: "demo_runs/confirmed_bugs/BUG-0001",
+  repro_path: "demo_runs/confirmed_bugs/BUG-0001/repro.py",
+  report_path: "demo_runs/confirmed_bugs/BUG-0001/report.md",
+  repro_code: "print('confirmed')\n",
+  report_markdown: "",
+  latest_repro_job_id: null,
 };
 
 const candidateCluster = {
@@ -140,11 +165,16 @@ describe("BugReplayView", () => {
       draft_saved: true,
       draft_modified: false,
     });
-    services.startCandidateValidation.mockResolvedValue({ run_id: "candidate-run-1", cluster_id: candidateCluster.cluster_id });
+    services.startCandidateValidation.mockResolvedValue({
+      run_id: "candidate-run-1",
+      cluster_id: candidateCluster.cluster_id,
+      source_sha256: "validated-hash",
+    });
     services.getCandidateValidationJob.mockResolvedValue({
       run_id: "candidate-run-1",
       cluster_id: candidateCluster.cluster_id,
       status: "finished",
+      source_sha256: "validated-hash",
       timeout_seconds: 60,
       started_at: "2026-07-01T18:00:00+08:00",
       updated_at: "2026-07-01T18:00:01+08:00",
@@ -154,6 +184,9 @@ describe("BugReplayView", () => {
       },
       logs: { cpu: "CPU output", gpu0: "GPU output" },
     });
+    services.confirmCandidateCluster.mockResolvedValue(dynamicDetail);
+    services.deleteCandidateCluster.mockResolvedValue({ deleted: candidateCluster.cluster_id });
+    services.deleteConfirmedBug.mockResolvedValue({ deleted: "BUG-0001" });
     services.updateCandidateClusterStatus.mockResolvedValue({ ...candidateCluster, cluster_status: "needs_minimize" });
   });
 
@@ -336,7 +369,7 @@ describe("BugReplayView", () => {
     expect(wrapper.text()).toContain("暂无候选簇");
   });
 
-  it("updates candidate cluster review state from the review actions", async () => {
+  it("removes ambiguous review actions and requires the cluster ID to delete", async () => {
     const wrapper = mount(BugReplayView);
     await flushPromises();
 
@@ -344,16 +377,15 @@ describe("BugReplayView", () => {
     await candidateTab?.trigger("click");
     await flushPromises();
 
-    const reproducedButton = wrapper.findAll("button").find((button) => button.text() === "标记可复现");
-    expect(reproducedButton).toBeDefined();
-    await reproducedButton?.trigger("click");
+    expect(wrapper.text()).not.toContain("标记待分析");
+    expect(wrapper.text()).not.toContain("标记可复现");
+    await wrapper.get('[data-testid="delete-candidate"]').trigger("click");
+    const input = wrapper.get('[data-testid="delete-id-input"]');
+    await input.setValue(candidateCluster.cluster_id);
+    await wrapper.get('[data-testid="confirm-delete"]').trigger("click");
     await flushPromises();
 
-    expect(services.updateCandidateClusterStatus).toHaveBeenCalledWith(candidateCluster.cluster_id, {
-      status: "reproduced",
-      note: "人工标记为可复现",
-    });
-    expect(services.getCandidateClusters).toHaveBeenCalledTimes(2);
+    expect(services.deleteCandidateCluster).toHaveBeenCalledWith(candidateCluster.cluster_id, candidateCluster.cluster_id);
   });
 
   it("edits, saves, resets, and validates a minimized candidate draft", async () => {
@@ -382,5 +414,62 @@ describe("BugReplayView", () => {
     expect(services.getCandidateValidationJob).toHaveBeenCalledWith("candidate-run-1");
     expect(wrapper.get('[data-testid="candidate-cpu-output"]').text()).toContain("CPU output");
     expect(wrapper.get('[data-testid="candidate-gpu-output"]').text()).toContain("GPU output");
+    await wrapper.get('[data-testid="confirm-candidate-bug"]').trigger("click");
+    await flushPromises();
+    expect(services.confirmCandidateCluster).toHaveBeenCalledWith(candidateCluster.cluster_id);
+    expect(wrapper.text()).toContain("BUG-0001");
+  });
+
+  it("allows ID-protected deletion only for dynamic confirmed Bugs", async () => {
+    services.getConfirmedBugs.mockResolvedValue([dynamicSummary]);
+    services.getConfirmedBug.mockResolvedValue(dynamicDetail);
+    const wrapper = mount(BugReplayView);
+    await flushPromises();
+
+    await wrapper.get('[data-testid="delete-confirmed-bug"]').trigger("click");
+    await wrapper.get('[data-testid="delete-id-input"]').setValue("BUG-0001");
+    await wrapper.get('[data-testid="confirm-delete"]').trigger("click");
+    await flushPromises();
+
+    expect(services.deleteConfirmedBug).toHaveBeenCalledWith("BUG-0001", "BUG-0001");
+  });
+
+  it("requires another validation after the saved repro changes", async () => {
+    const wrapper = mount(BugReplayView);
+    await flushPromises();
+
+    const candidateTab = wrapper.findAll(".bug-replay-view__source-tabs button").find((button) => button.text() === "候选审核");
+    await candidateTab?.trigger("click");
+    await flushPromises();
+
+    const editor = wrapper.get('[data-testid="candidate-draft-editor"]');
+    await editor.setValue("print('validated')\n");
+    await wrapper.get('[data-testid="validate-candidate-draft"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.get('[data-testid="confirm-candidate-bug"]').attributes("disabled")).toBeUndefined();
+
+    services.saveCandidateClusterDraft.mockResolvedValueOnce({
+      ...candidateClusterDetail,
+      minimization_draft: "print('changed after validation')\n",
+      draft_saved: true,
+      draft_sha256: "changed-hash",
+      latest_validation_job_id: "candidate-run-1",
+      latest_validation: {
+        run_id: "candidate-run-1",
+        cluster_id: candidateCluster.cluster_id,
+        status: "finished",
+        source_sha256: "validated-hash",
+        timeout_seconds: 60,
+        started_at: "2026-07-01T18:00:00+08:00",
+        updated_at: "2026-07-01T18:00:01+08:00",
+        modes: {},
+        logs: {},
+      },
+    });
+    await editor.setValue("print('changed after validation')\n");
+    await wrapper.get('[data-testid="save-candidate-draft"]').trigger("click");
+    await flushPromises();
+
+    expect(wrapper.get('[data-testid="confirm-candidate-bug"]').attributes("disabled")).toBeDefined();
   });
 });

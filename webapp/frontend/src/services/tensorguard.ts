@@ -14,6 +14,7 @@ import type {
   CandidateUpdateInput,
   ConfirmedBugDetail,
   ConfirmedBugSummary,
+  DeleteRecordPayload,
   EnvironmentPayload,
   JobStartPayload,
   Library,
@@ -37,12 +38,15 @@ export const endpoints = {
   candidateClusterDraft: (id: string) => `/api/candidate-clusters/${encodeURIComponent(id)}/draft`,
   candidateClusterDraftReset: (id: string) => `/api/candidate-clusters/${encodeURIComponent(id)}/draft/reset`,
   candidateClusterValidate: (id: string) => `/api/candidate-clusters/${encodeURIComponent(id)}/validate`,
+  candidateClusterConfirm: (id: string) => `/api/candidate-clusters/${encodeURIComponent(id)}/confirm`,
+  candidateClusterDelete: (id: string) => `/api/candidate-clusters/${encodeURIComponent(id)}/delete`,
   candidateValidationJob: (id: string) => `/api/candidate-validation-jobs/${encodeURIComponent(id)}`,
   candidates: "/api/candidates",
   candidate: (id: string) => `/api/candidates/${encodeURIComponent(id)}`,
   candidateStatus: (id: string) => `/api/candidates/${encodeURIComponent(id)}/status`,
   confirmedBugs: "/api/confirmed-bugs",
   confirmedBug: (id: string) => `/api/confirmed-bugs/${encodeURIComponent(id)}`,
+  confirmedBugDelete: (id: string) => `/api/confirmed-bugs/${encodeURIComponent(id)}/delete`,
   reproduce: (id: string) => `/api/confirmed-bugs/${encodeURIComponent(id)}/reproduce`,
   reproJob: (id: string) => `/api/repro-jobs/${encodeURIComponent(id)}`,
   reproReport: (id: string) => `/api/repro-jobs/${encodeURIComponent(id)}/report`,
@@ -122,6 +126,18 @@ export function startCandidateValidation(id: string, source: string, timeout = 6
 
 export function getCandidateValidationJob(id: string): Promise<CandidateValidationJobPayload> {
   return get(endpoints.candidateValidationJob(id));
+}
+
+export function confirmCandidateCluster(id: string): Promise<ConfirmedBugDetail> {
+  return post(endpoints.candidateClusterConfirm(id));
+}
+
+export function deleteCandidateCluster(id: string, confirmationId: string): Promise<DeleteRecordPayload> {
+  return post(endpoints.candidateClusterDelete(id), { confirmation_id: confirmationId });
+}
+
+export function deleteConfirmedBug(id: string, confirmationId: string): Promise<DeleteRecordPayload> {
+  return post(endpoints.confirmedBugDelete(id), { confirmation_id: confirmationId });
 }
 
 export function createCandidate(input: CandidateCreateInput): Promise<CandidateRecord> {
